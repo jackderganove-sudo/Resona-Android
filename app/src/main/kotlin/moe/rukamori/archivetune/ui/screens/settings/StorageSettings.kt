@@ -538,6 +538,10 @@ private fun StorageFolderSection(
                 isEnabled = isSmartTrimmerAvailable,
             )
         }
+
+        item {
+            moe.rukamori.archivetune.resona.ResonaSmartDownloadsPreference()
+        }
     }
 }
 

@@ -146,6 +146,10 @@ class App :
         }
 
         initializeGatekeeper()
+        // Resona: smart downloads worker (only when switched on).
+        applicationScope.launch(Dispatchers.IO) {
+            runCatching { moe.rukamori.archivetune.resona.SmartDownloads.scheduleFromSettings(this@App) }
+        }
         initializeCriticalSync()
         initializeDeferredAsync()
         initializeLauncherEntry()

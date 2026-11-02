@@ -21,4 +21,6 @@
     </plurals>
     <string name="resona_export_csv">Als CSV exportieren</string>
     <string name="resona_export_csv_desc">Titel, Künstler, Album, Dauer und Link jedes Songs</string>
+    <string name="resona_smart_downloads">Smarte Downloads</string>
+    <string name="resona_smart_downloads_desc">Im WLAN deine meistgehörten Songs der letzten 30 Tage und deine Likes heruntergeladen halten (bis zu %d). Eigene Downloads werden nie entfernt.</string>
 </resources>
