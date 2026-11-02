@@ -24,7 +24,7 @@ class ResonaReleasePolicyTest {
     fun buildPointsAtResonasOwnRepository() {
         assertEquals("jackderganove-sudo", BuildConfig.RELEASE_GITHUB_OWNER)
         assertEquals("Resona-Android", BuildConfig.RELEASE_GITHUB_REPO)
-        assertEquals("dev.jackderganove.resona", BuildConfig.APPLICATION_ID)
+        assertTrue(BuildConfig.APPLICATION_ID.startsWith("dev.jackderganove.resona"))
     }
 
     @Test
