@@ -134,7 +134,17 @@ class LyricsHelper
                 providers.map { it.name },
             )
             if (forceRefresh) invalidateCache(request)
-            getOrFetchLyrics(request, providers)
+            val lyrics = getOrFetchLyrics(request, providers)
+            // Resona: slowed / sped-up uploads get the original's timing scaled.
+            if (lyrics == LYRICS_NOT_FOUND) {
+                lyrics
+            } else {
+                runCatching {
+                    moe.rukamori.archivetune.resona.LyricsTempo.adjust(
+                        lyrics, mediaMetadata.title, mediaMetadata.artists.firstOrNull()?.name.orEmpty(), mediaMetadata.duration,
+                    )
+                }.getOrDefault(lyrics)
+            }
         }
 
         private suspend fun getOrFetchLyrics(
