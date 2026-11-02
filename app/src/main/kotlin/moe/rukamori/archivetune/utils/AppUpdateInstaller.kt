@@ -9,6 +9,9 @@ package moe.rukamori.archivetune.utils
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.content.FileProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -23,6 +26,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import moe.rukamori.archivetune.BuildConfig
+import moe.rukamori.archivetune.updates.ResonaReleasePolicy
 import okhttp3.ConnectionPool
 import java.io.File
 import java.io.IOException
@@ -87,6 +91,10 @@ object AppUpdateInstaller {
         if (url.isBlank()) {
             throw IOException("Update download URL is empty")
         }
+        // Resona: only APKs from Resona's own GitHub releases.
+        if (!ResonaReleasePolicy.isOwnDownload(url, BuildConfig.RELEASE_GITHUB_OWNER, BuildConfig.RELEASE_GITHUB_REPO)) {
+            throw IOException("Updates are only downloaded from Resona's own releases")
+        }
 
         val updateDir = File(context.cacheDir, UpdateDirectoryName)
         val downloadedFile = File(updateDir, DownloadFileName)
@@ -129,7 +137,32 @@ object AppUpdateInstaller {
                 ?: throw IOException("No GMS APK found in update artifact")
         }
         check(apkFile.containsApkManifest()) { "Update artifact is not an APK" }
+        verifySameSigner(context, apkFile)
         return apkFile
+    }
+
+    /** Resona: same package and same signing key as the installed app. */
+    @Suppress("DEPRECATION")
+    private fun verifySameSigner(context: Context, apk: File) {
+        val pm = context.packageManager
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) PackageManager.GET_SIGNING_CERTIFICATES else PackageManager.GET_SIGNATURES
+        val archive = pm.getPackageArchiveInfo(apk.absolutePath, flags)
+        if (archive == null) {
+            apk.delete()
+            throw IOException("Update APK cannot be read")
+        }
+        val installed = pm.getPackageInfo(context.packageName, flags)
+        fun signers(info: PackageInfo): Set<String> =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                info.signingInfo?.apkContentsSigners?.map { it.toCharsString() }?.toSet().orEmpty()
+            } else {
+                info.signatures?.map { it.toCharsString() }?.toSet().orEmpty()
+            }
+        val expected = signers(installed)
+        if (archive.packageName != context.packageName || expected.isEmpty() || signers(archive) != expected) {
+            apk.delete()
+            throw IOException("Update APK is not a Resona build signed with Resona's key")
+        }
     }
 
     private suspend fun emitProgress(
@@ -204,8 +237,8 @@ object AppUpdateInstaller {
     }
 
     private const val UpdateDirectoryName = "app_update"
-    private const val DownloadFileName = "archive-tune-update.download"
-    private const val ApkFileName = "archive-tune-update.apk"
+    private const val DownloadFileName = "resona-update.download"
+    private const val ApkFileName = "resona-update.apk"
     private const val ApkMimeType = "application/vnd.android.package-archive"
     private const val STREAM_BUFFER_SIZE = 256 * 1024
     private const val PROGRESS_UPDATE_INTERVAL_MS = 200L

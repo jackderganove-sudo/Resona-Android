@@ -279,7 +279,7 @@
     <string name="aod_customize_entry_desc">Her zaman açık oyantma ekranını kişiselleştir</string>
     <string name="aod_customize_preview">Canlı önizleme</string>
     <string name="aod_customize_mode_enabled">AOD modunu aç</string>
-    <string name="aod_customize_mode_enabled_desc">ArchiveTune\'a her zaman açık oynatma ekranını gösterme izni ver</string>
+    <string name="aod_customize_mode_enabled_desc">Resona\'a her zaman açık oynatma ekranını gösterme izni ver</string>
     <string name="aod_customize_visibility">Görünürlük</string>
     <string name="aod_customize_show_thumbnail">Küçük resmi göster</string>
     <string name="aod_customize_show_artist">Sanatçıyı göster</string>
@@ -288,7 +288,7 @@
     <string name="aod_customize_show_time_labels">Süre etiketlerini göster</string>
     <string name="aod_customize_show_controls">Kontrolleri göster</string>
     <string name="aod_customize_show_exit_button">Çıkış tuşunu göster</string>
-    <string name="music_recognition_background_description">Etkinleştirildiğinde, Hızlı Ayarlar kutucuğu ArchiveTune\'u açmadan bu cihazda oynatılan sesi tanır.</string>
+    <string name="music_recognition_background_description">Etkinleştirildiğinde, Hızlı Ayarlar kutucuğu Resona\'u açmadan bu cihazda oynatılan sesi tanır.</string>
     <string name="history_remote_loading">Uzak geçmiş senkronize ediliyor</string>
     <string name="history_remote_empty_title">Hiç uzak geçmiş mevcut değil</string>
     <string name="history_remote_error_title">Uzak geçmiş yüklenemedi</string>
@@ -394,7 +394,7 @@
     <string name="aod_customize_auto_start_screen_off">Ekran kapalıyken AOD\'i göster</string>
     <string name="aod_customize_auto_start_screen_off_desc">Oynatma sırasında ekran kapandığında AOD ambiyans ekranını otomatik olarak göster</string>
     <string name="aod_customize_screensaver_info_title">Sistem Ekran Koruyucusu (Şarj olurken Her Zaman Açık Ekran)</string>
-    <string name="aod_customize_screensaver_info_desc">Şarj sırasında veya yuvadayken AOD\'yi otomatik olarak etkinleştirmek için Android Ayarları &gt; Ekran &gt; Ekran koruyucu bölümüne gidin ve ArchiveTune\'u seçin.</string>
+    <string name="aod_customize_screensaver_info_desc">Şarj sırasında veya yuvadayken AOD\'yi otomatik olarak etkinleştirmek için Android Ayarları &gt; Ekran &gt; Ekran koruyucu bölümüne gidin ve Resona\'u seçin.</string>
     <string name="playlist_sync_progress_step">%1$d/%2$d Şarkılar</string>
     <string name="playlist_sync_failed">Oynatma listesi senkronizasyonu başarısız oldu: %1$s</string>
     <string name="lyrics_share_layout">Düzen</string>
@@ -460,14 +460,14 @@
     <string name="storage_folder_selected_restart">Depolama konumu kaydedildi. Uygulama 3 saniye içinde yeniden başlayacak.</string>
     <string name="storage_folder_invalid">Geçerli bir klasör seçin.</string>
     <string name="storage_folder_unsupported">Bu klasör, dosya tabanlı medya önbelleği tarafından kullanılamaz.</string>
-    <string name="storage_folder_not_writable">ArchiveTune bu klasöre önbellek dosyaları yazamaz.</string>
+    <string name="storage_folder_not_writable">Resona bu klasöre önbellek dosyaları yazamaz.</string>
     <string name="storage_cache_cleared">Önbellek temizlendi.</string>
     <string name="storage_cache_clear_failed">Önbellek temizlenemedi. SD kart erişimini kontrol edin.</string>
     <string name="storage_clear_song_cache_progress">Şarkı önbelleği temizleniyor...%1$d%%</string>
     <string name="storage_clear_downloads_progress">İndirilenler temizleniyor...%1$d%%</string>
     <string name="storage_clear_image_cache_progress">Resim önbelleği temizleniyor...%1$d%%</string>
     <string name="storage_clear_canvas_cache_progress">Canvas önbelleği temizleniyor...%1$d%%</string>
-    <string name="storage_cache_clear_warning">Önbellek dosyaları temizlenirken ArchiveTune\'u açık tutun.</string>
+    <string name="storage_cache_clear_warning">Önbellek dosyaları temizlenirken Resona\'u açık tutun.</string>
     <string name="storage_size_ratio">%1$s/%2$s</string>
     <string name="canvas_cache">Canvas Önbelleği</string>
     <string name="clear_canvas_cache">Canvas önbellegini temizle</string>

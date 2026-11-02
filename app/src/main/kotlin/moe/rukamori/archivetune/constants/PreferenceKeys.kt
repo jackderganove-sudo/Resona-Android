@@ -935,6 +935,9 @@ val GitHubReleasesJsonKey = stringPreferencesKey("github_releases_json")
 val GitHubReleasesLastCheckedAtKey = longPreferencesKey("github_releases_last_checked_at")
 val GitHubReleasesFingerprintKey = stringPreferencesKey("github_releases_fingerprint")
 
+/** Resona: repository the cached release list belongs to (owner/repo). */
+val GitHubReleasesSourceKey = stringPreferencesKey("github_releases_source")
+
 val TogetherOnlineEndpointCacheKey = stringPreferencesKey("together_online_endpoint_cache")
 val TogetherOnlineEndpointLastCheckedAtKey = longPreferencesKey("together_online_endpoint_last_checked_at")
 

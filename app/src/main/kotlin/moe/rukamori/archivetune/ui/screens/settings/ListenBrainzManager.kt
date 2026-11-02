@@ -104,7 +104,7 @@ object ListenBrainzManager {
                     artistNames,
                 )}\",\"track_name\":\"${escapeJson(
                     song.title,
-                )}\",${releasePart}\"additional_info\":{\"duration_ms\":$durationMs,\"position_ms\":$positionMs,\"submission_client\":\"ArchiveTune\"}}}"
+                )}\",${releasePart}\"additional_info\":{\"duration_ms\":$durationMs,\"position_ms\":$positionMs,\"submission_client\":\"Resona\"}}}"
                 val listensJson = "[$trackMetadata]"
                 val bodyJson = "{\"listen_type\":\"playing_now\",\"payload\":$listensJson}"
                 Timber.tag(logTag).d("submitPlayingNow JSON: %s", bodyJson)
@@ -172,7 +172,7 @@ object ListenBrainzManager {
                     artistNames,
                 )}\",\"track_name\":\"${escapeJson(
                     song.title,
-                )}\",${releasePart}\"additional_info\":{\"duration_ms\":$durationMs,\"start_ms\":$startMs,\"end_ms\":$endMs,\"submission_client\":\"ArchiveTune\"}}}"
+                )}\",${releasePart}\"additional_info\":{\"duration_ms\":$durationMs,\"start_ms\":$startMs,\"end_ms\":$endMs,\"submission_client\":\"Resona\"}}}"
                 val listensJson = "[$trackMetadataSingle]"
                 val bodyJson = "{\"listen_type\":\"single\",\"payload\":$listensJson}"
                 Timber.tag(logTag).d("submitFinished JSON: %s", bodyJson)

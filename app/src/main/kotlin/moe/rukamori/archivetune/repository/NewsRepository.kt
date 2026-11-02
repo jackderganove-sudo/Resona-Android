@@ -44,6 +44,8 @@ class NewsRepository
         @Volatile private var metadataCache: List<NewsItem>? = null
 
         suspend fun fetchNews(): List<NewsItem> {
+            // Resona: ArchiveTune's news feed is not shown in this fork.
+            if (!moe.rukamori.archivetune.updates.ResonaFlags.NEWS_ENABLED) return emptyList()
             val response =
                 client.get(METADATA_URL) {
                     headers {
@@ -59,6 +61,7 @@ class NewsRepository
         }
 
         suspend fun fetchNewsContent(id: String): String {
+            if (!moe.rukamori.archivetune.updates.ResonaFlags.NEWS_ENABLED) return ""
             val response =
                 client.get("$CONTENT_BASE_URL$id") {
                     headers {

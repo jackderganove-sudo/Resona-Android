@@ -225,7 +225,7 @@
     <string name="music_recognition_permission_action">允许</string>
     <string name="music_recognition_settings">听歌识曲设置</string>
     <string name="music_recognition_background_title">后台听歌识曲</string>
-    <string name="music_recognition_background_description">开启后，无需打开 ArchiveTune，即可通过快捷设置磁贴直接识别设备上正在播放的音频</string>
+    <string name="music_recognition_background_description">开启后，无需打开 Resona，即可通过快捷设置磁贴直接识别设备上正在播放的音频</string>
     <string name="music_recognition_background_foss_description">开源版本 (FOSS) 不支持后台识别功能。点击快捷设置磁贴将直接打开识别界面</string>
     <string name="music_recognition_notification_channel_name">听歌识曲</string>
     <string name="music_recognition_notification_channel_description">听歌识曲进度与识别结果通知</string>
@@ -423,14 +423,14 @@
     <string name="storage_folder_selected_restart">存储文件夹已保存，应用将在 3 秒内自动重启</string>
     <string name="storage_folder_invalid">请选择有效的文件夹</string>
     <string name="storage_folder_unsupported">文件系统媒体缓存无法使用该文件夹</string>
-    <string name="storage_folder_not_writable">ArchiveTune 无法在此文件夹中写入缓存文件</string>
+    <string name="storage_folder_not_writable">Resona 无法在此文件夹中写入缓存文件</string>
     <string name="storage_cache_cleared">缓存已清除</string>
     <string name="storage_cache_clear_failed">无法清除缓存，请检查 SD 卡读写权限</string>
     <string name="storage_clear_song_cache_progress">正在清除歌曲缓存…%1$d%%</string>
     <string name="storage_clear_downloads_progress">正在清除下载文件…%1$d%%</string>
     <string name="storage_clear_image_cache_progress">正在清除图片缓存…%1$d%%</string>
     <string name="storage_clear_canvas_cache_progress">正在清除动态封面缓存…%1$d%%</string>
-    <string name="storage_cache_clear_warning">清除缓存文件时请保持 ArchiveTune 处于打开状态</string>
+    <string name="storage_cache_clear_warning">清除缓存文件时请保持 Resona 处于打开状态</string>
     <string name="storage_size_ratio">%1$s / %2$s</string>
     <string name="history_duration_desc">计入有效听歌记录的最低播放时长</string>
     <string name="history_duration_seconds">%1$s秒</string>

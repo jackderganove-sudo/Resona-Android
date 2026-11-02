@@ -390,7 +390,7 @@ class DownloadedArtworkRepository
         private companion object {
             const val INDEX_FILE_NAME = "downloaded_artwork_index.json"
             const val ARTWORK_FILE_SUFFIX = ".artwork"
-            const val ARTWORK_USER_AGENT = "ArchiveTune Android"
+            const val ARTWORK_USER_AGENT = "Resona Android"
             const val NETWORK_TIMEOUT_SECONDS = 30L
             const val MAX_ARTWORK_BYTES = 10L * 1024L * 1024L
             const val COPY_BUFFER_SIZE_BYTES = 32 * 1024

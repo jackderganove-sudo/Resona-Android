@@ -124,7 +124,7 @@ class SponsorBlockRepository
                         parameter("categories", json.encodeToString(categoryValues))
                         parameter("actionTypes", SKIP_ACTION_TYPES_JSON)
                         parameter("service", YOUTUBE_SERVICE)
-                        header(HttpHeaders.UserAgent, "ArchiveTune/${BuildConfig.VERSION_NAME}")
+                        header(HttpHeaders.UserAgent, "Resona/${BuildConfig.VERSION_NAME}")
                     }
 
                 val segments =

@@ -100,7 +100,7 @@ class StandardLyricsTranslationRepository
         private companion object {
             const val TranslationEndpoint = "https://translate.googleapis.com/translate_a/single"
             const val AndroidClientId = "at"
-            const val UserAgent = "ArchiveTune Android"
+            const val UserAgent = "Resona Android"
             const val ConnectTimeoutMillis = 15_000L
             const val RequestTimeoutMillis = 30_000L
         }

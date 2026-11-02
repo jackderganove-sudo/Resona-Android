@@ -17,7 +17,7 @@
     <string name="music_recognition_error">ஏதோ சிக்கல் ஏற்பட்டுள்ளது</string>
     <string name="music_recognition_settings">இசை அறிதல் அமைப்புகள்</string>
     <string name="music_recognition_background_title">பின்னணியில் செயல்படுதல்</string>
-    <string name="music_recognition_background_description">செயல்படுத்தப்படும்போது, ArchiveTune செயலியைத் திறக்காமலேயே இந்த சாதனத்தில் ஒலிக்கும் இசையை Quick Settings Tile அடையாளம் காணும்.</string>
+    <string name="music_recognition_background_description">செயல்படுத்தப்படும்போது, Resona செயலியைத் திறக்காமலேயே இந்த சாதனத்தில் ஒலிக்கும் இசையை Quick Settings Tile அடையாளம் காணும்.</string>
     <string name="music_recognition_background_foss_description">FOSS பதிப்பில் பின்னணி அறிதல் வசதி கிடைக்காது. அதற்குப் பதிலாக, Quick Settings Tile recognition திரையை நேரடியாகத் திறக்கும்.</string>
     <string name="music_recognition_notification_channel_name">இசை அடையாளம் காணல்</string>
     <string name="music_recognition_notification_channel_description">இசை அடையாளம் காணல் நிலையும் முடிவுகளும்</string>

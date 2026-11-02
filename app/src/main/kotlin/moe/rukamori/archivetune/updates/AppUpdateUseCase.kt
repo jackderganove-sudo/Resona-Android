@@ -42,13 +42,17 @@ class AppUpdateUseCase @Inject constructor(
             downloadSizeBytes = release.downloadSizeBytes,
             downloadUrl = Updater.getReleaseDownloadUrl(release),
             isUpdateAvailable = Updater.isUpdateAvailable(version, BuildConfig.VERSION_NAME),
-            isMandatory = Updater.newerStableReleaseCount(releases, BuildConfig.VERSION_NAME) >= 2,
+            // Resona: never forced (ArchiveTune locked the app 2 releases behind).
+            isMandatory = ResonaReleasePolicy.isMandatory(Updater.newerStableReleaseCount(releases, BuildConfig.VERSION_NAME)),
             canInstallInApp = BuildConfig.DISTRIBUTION == "gms",
         )
     }
 
     suspend fun download(release: AppUpdateRelease, onProgress: (AppUpdateInstaller.Progress) -> Unit): File {
         check(release.isUpdateAvailable && release.canInstallInApp) { "Release cannot be installed in app" }
+        check(ResonaReleasePolicy.isOwnDownload(release.downloadUrl, BuildConfig.RELEASE_GITHUB_OWNER, BuildConfig.RELEASE_GITHUB_REPO)) {
+            "Updates are only downloaded from Resona's own releases"
+        }
         return repository.download(release.downloadUrl, onProgress)
     }
 }

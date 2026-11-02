@@ -428,7 +428,7 @@ private fun buildCrashReport(
 
     val header =
         buildString {
-            appendLine("ArchiveTune crash report")
+            appendLine("Resona crash report (based on ArchiveTune)")
             if (timestampText.isNotBlank()) appendLine("Time: $timestampText")
             val appVersionLabel =
                 when {

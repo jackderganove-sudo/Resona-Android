@@ -216,6 +216,8 @@ class BuildOnboardingUiStateUseCase
                     ),
                 )
 
+            // Resona: only Resona's own repository (no ArchiveTune Discord,
+            // Telegram or donation links).
             val communityActions =
                 ImmutableList.of(
                     OnboardingCommunityActionUiModel(
@@ -223,28 +225,7 @@ class BuildOnboardingUiStateUseCase
                         titleResId = R.string.support_development_star,
                         descriptionResId = R.string.onboarding_community_github_desc,
                         iconResId = R.drawable.github,
-                        url = "https://github.com/rukamori/ArchiveTune",
-                    ),
-                    OnboardingCommunityActionUiModel(
-                        id = "discord",
-                        titleResId = R.string.onboarding_community_discord_title,
-                        descriptionResId = R.string.onboarding_community_discord_desc,
-                        iconResId = R.drawable.discord,
-                        url = "https://discord.gg/archivetune",
-                    ),
-                    OnboardingCommunityActionUiModel(
-                        id = "telegram",
-                        titleResId = R.string.onboarding_community_telegram_title,
-                        descriptionResId = R.string.onboarding_community_telegram_desc,
-                        iconResId = R.drawable.telegram,
-                        url = "https://t.me/ArchiveTuneGC",
-                    ),
-                    OnboardingCommunityActionUiModel(
-                        id = "donate",
-                        titleResId = R.string.onboarding_support_development,
-                        descriptionResId = R.string.onboarding_community_donate_desc,
-                        iconResId = R.drawable.coffee,
-                        url = "https://miuka.moe/donate",
+                        url = "https://github.com/jackderganove-sudo/Resona-Android",
                     ),
                 )
         }

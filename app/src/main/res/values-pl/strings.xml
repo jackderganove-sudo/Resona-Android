@@ -58,7 +58,7 @@
     <string name="library_top_mixes_refresh">Odśwież miksy</string>
     <string name="library_top_mixes_configure_ai">Konfiguruj AI</string>
     <string name="library_top_mixes_ai_not_configured_title">Skonfiguruj AI do tworzenia miksów</string>
-    <string name="library_top_mixes_ai_not_configured_desc">Integracja z AI jest wymagana, zanim ArchiveTune będzie mógł utworzyć osobiste miksy.</string>
+    <string name="library_top_mixes_ai_not_configured_desc">Integracja z AI jest wymagana, zanim Resona będzie mógł utworzyć osobiste miksy.</string>
     <string name="library_top_mixes_no_recent_history_title">Brak ostatniego miksu</string>
     <string name="library_top_mixes_no_recent_history">Posłuchaj więcej utworów, a następnie odśwież, aby utworzyć miksy AI na podstawie swojej ostatniej historii.</string>
     <string name="library_top_mixes_no_valid_mixes">Sztuczna inteligencja nie zwróciła żadnych odtwarzalnych miksów z Twojej ostatniej historii.</string>

@@ -17,7 +17,7 @@
     <string name="music_recognition_error">บางอย่างผิดปกติ</string>
     <string name="music_recognition_settings">ตั้งค่าการรับรู้เสียง</string>
     <string name="music_recognition_background_title">กำลังจดจำในเบื้องหลัง</string>
-    <string name="music_recognition_background_description">เมื่อเปิดใช้งานแล้ว ไอคอนการตั้งค่าด่วนจะตรวจจับเสียงที่กำลังเล่นบนอุปกรณ์นี้โดยไม่ต้องเปิด ArchiveTune</string>
+    <string name="music_recognition_background_description">เมื่อเปิดใช้งานแล้ว ไอคอนการตั้งค่าด่วนจะตรวจจับเสียงที่กำลังเล่นบนอุปกรณ์นี้โดยไม่ต้องเปิด Resona</string>
     <string name="music_recognition_background_foss_description">การจดจำพื้นหลังไม่สามารถใช้งานได้ในเวอร์ชันโอเพนซอร์ส ไอคอนการตั้งค่าด่วนจะเปิดหน้าจอการจดจำแทน</string>
     <string name="music_recognition_notification_channel_name">การจดจำเพลง</string>
     <string name="music_recognition_notification_channel_description">ความคืบหน้าและผลลัพธ์ของการจดจำเพลง</string>
@@ -110,7 +110,7 @@
     <string name="aod_customize_entry_desc">ปรับแต่งหน้าจอเล่นเพลงแบบ Always-On</string>
     <string name="aod_customize_preview">ตัวอย่างสด</string>
     <string name="aod_customize_mode_enabled">เปิดใช้งานโหมด AOD</string>
-    <string name="aod_customize_mode_enabled_desc">อนุญาตให้ ArchiveTune แสดงหน้าจอเครื่องเล่น always-on</string>
+    <string name="aod_customize_mode_enabled_desc">อนุญาตให้ Resona แสดงหน้าจอเครื่องเล่น always-on</string>
     <string name="aod_customize_visibility">การมองเห็น</string>
     <string name="aod_customize_show_thumbnail">แสดงภาพขนาดย่อ</string>
     <string name="aod_customize_show_artist">แสดงศิลปิน</string>

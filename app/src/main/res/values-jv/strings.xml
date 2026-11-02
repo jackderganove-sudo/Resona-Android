@@ -58,7 +58,7 @@
     <string name="play">Puter</string>
     <string name="widget_pause">Jeda</string>
     <string name="widget_previous">Sadurunge</string>
-    <string name="widget_tap_to_open">Ketuk untuk membuka ArchiveTune</string>
+    <string name="widget_tap_to_open">Ketuk untuk membuka Resona</string>
     <string name="play_next">Puter sabanjure</string>
     <string name="add_to_queue">Tambahke ke antrean</string>
     <string name="add_to_library">Tambahke ke pustaka</string>
@@ -278,7 +278,7 @@
     <string name="contrast">Kontras</string>
     <string name="brightness">Kecerahan</string>
     <string name="custom_value">Nilai khusus</string>
-    <string name="archivetune_canvas">Kanvas ArchiveTune</string>
+    <string name="archivetune_canvas">Kanvas Resona</string>
     <string name="archivetune_canvas_desc">Menganimasikan sampul album saat diputer</string>
     <string name="show_button1_description">Alihkan visibilitas tombol 1 di Discord Rich Presence</string>
     <string name="show_button2_description">Alihkan visibilitas tombol 2 di Discord Rich Presence</string>
@@ -445,12 +445,12 @@
     <string name="restore_success">Cadangan berhasil dipulihkan</string>
     <string name="restore_failed">Gagal memulihkan cadangan</string>
     <string name="discord_integration">Integrasi Discord</string>
-    <string name="discord_login_description">Hubungkan akun Discord Kowe dengan OAuth agar ArchiveTune dapat mempublikasikan Rich Presence melalui Social SDK resmi Discord.</string>
+    <string name="discord_login_description">Hubungkan akun Discord Kowe dengan OAuth agar Resona dapat mempublikasikan Rich Presence melalui Social SDK resmi Discord.</string>
     <string name="discord_open_authorization">Sambungkan ke Discord</string>
     <string name="discord_waiting_for_authorization">Menunggu otorisasi Discord...</string>
     <string name="discord_authorization_success">Akun Discord terhubung</string>
     <string name="discord_authorization_failed">Otorisasi Discord gagal</string>
-    <string name="discord_account_ready">ArchiveTune siap mempublikasikan Rich Presence untuk sesi mendengarkan Kowe.</string>
+    <string name="discord_account_ready">Resona siap mempublikasikan Rich Presence untuk sesi mendengarkan Kowe.</string>
     <string name="discord_connection_settings">Koneksi</string>
     <string name="discord_activity_content">Isi Aktivitas</string>
     <string name="discord_refresh_success">Presence Discord diperbarui</string>
@@ -603,9 +603,9 @@
     <string name="update_notification_channel_name">Pembaruan Aplikasi</string>
     <string name="update_notification_channel_desc">Pemberitahuan untuk pembaruan aplikasi baru</string>
     <string name="update_notification_title">Pembaruan Tersedia</string>
-    <string name="update_notification_text">ArchiveTune %s kini tersedia</string>
+    <string name="update_notification_text">Resona %s kini tersedia</string>
     <string name="download">Unduh</string>
-    <string name="permissions_title">Izinkan ArchiveTune bekerja dengan optimal</string>
+    <string name="permissions_title">Izinkan Resona bekerja dengan optimal</string>
     <string name="permissions_subtitle">Kami menggunakan beberapa izin untuk memutar dan mengelola musik Kowe dengan andal. Kowe dapat mengubahnya kapan saja di pengaturan sistem.</string>
     <string name="permission_storage_title">Akses penyimpanan</string>
     <string name="permission_storage_desc">Diperlukan untuk membaca file audio lokal dan unduhan Kowe untuk diputer.</string>
@@ -618,7 +618,7 @@
     <string name="playlist_suggestion_source_title">Judul playlist</string>
     <string name="playlist_suggestion_source_content">Konten playlist</string>
     <string name="playlist_suggestion_source_both">Judul dan konten playlist</string>
-    <string name="music_together">ArchiveTune Musik Bersama</string>
+    <string name="music_together">Resona Musik Bersama</string>
     <string name="together_display_name">Nama tampilan</string>
     <string name="together_display_name_placeholder">Nama Kowe</string>
     <string name="together_port">Port sesi</string>
@@ -663,10 +663,10 @@
     <string name="together_error_state">Kesalahan</string>
     <string name="got_it">Mengerti</string>
     <string name="together_dont_show_again">Jangan tampilkan ini lagi</string>
-    <string name="together_welcome_title">Selamat datang di ArchiveTune Musik Bersama</string>
+    <string name="together_welcome_title">Selamat datang di Resona Musik Bersama</string>
     <string name="together_welcome_body">Music Together memungkinkan beberapa perangkat berbagi sesi langsung dengan antrean dan pemutaran yang disinkronkan.</string>
     <string name="together_welcome_host_title">Selenggarakan sesi</string>
-    <string name="together_welcome_host_body">Ketuk Mulai sesi, lalu bagikan tautan sesi. Biarkan ArchiveTune tetap terbuka di latar belakang saat menghosting.</string>
+    <string name="together_welcome_host_body">Ketuk Mulai sesi, lalu bagikan tautan sesi. Biarkan Resona tetap terbuka di latar belakang saat menghosting.</string>
     <string name="together_welcome_join_title">Bergabunglah dari perangkat lain</string>
     <string name="together_welcome_join_body">Buka tautan yang dibagikan, atau masukkan kode dan ketuk Gabung. Antrian dan pemutaran Kowe akan mengikuti host.</string>
     <string name="together_welcome_permissions_title">Idin dan keamanan</string>

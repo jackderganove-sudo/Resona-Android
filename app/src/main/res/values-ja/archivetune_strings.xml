@@ -17,7 +17,7 @@
     <string name="music_recognition_error">何か問題が発生しました</string>
     <string name="music_recognition_settings">音楽認識設定</string>
     <string name="music_recognition_background_title">バックグラウンドでの認識</string>
-    <string name="music_recognition_background_description">有効にすると、クイック設定タイルは、ArchiveTune を開かなくても、このデバイスで再生されているオーディオを認識します。</string>
+    <string name="music_recognition_background_description">有効にすると、クイック設定タイルは、Resona を開かなくても、このデバイスで再生されているオーディオを認識します。</string>
     <string name="music_recognition_background_foss_description">バックグラウンド認識は FOSS バリアントでは利用できません。代わりに、クイック設定タイルにより認識画面が開きます。</string>
     <string name="music_recognition_notification_channel_name">音楽認識</string>
     <string name="music_recognition_notification_channel_description">音楽認識の進捗状況と結果</string>
@@ -115,7 +115,7 @@
     <string name="aod_customize_entry_desc">常時接続プレーヤー画面をカスタマイズする</string>
     <string name="aod_customize_preview">ライブプレビュー</string>
     <string name="aod_customize_mode_enabled">AOD モードを有効にする</string>
-    <string name="aod_customize_mode_enabled_desc">ArchiveTune が常時オンのプレーヤー画面を表示できるようにします</string>
+    <string name="aod_customize_mode_enabled_desc">Resona が常時オンのプレーヤー画面を表示できるようにします</string>
     <string name="aod_customize_visibility">可視性</string>
     <string name="aod_customize_show_thumbnail">サムネイルを表示</string>
     <string name="aod_customize_show_artist">ショーアーティスト</string>
@@ -226,7 +226,7 @@
     <string name="aod_customize_auto_start_screen_off">画面がオフになったときに AOD を表示する</string>
     <string name="aod_customize_auto_start_screen_off_desc">再生中に画面がオフになると、AOD アンビエント画面が自動的に表示されます</string>
     <string name="aod_customize_screensaver_info_title">システム スクリーン セーバー (AOD の充電)</string>
-    <string name="aod_customize_screensaver_info_desc">充電中またはドッキング中に AOD を自動的に有効にするには、Android 設定 &gt; ディスプレイ &gt; スクリーン セーバーに移動し、ArchiveTune を選択します。</string>
+    <string name="aod_customize_screensaver_info_desc">充電中またはドッキング中に AOD を自動的に有効にするには、Android 設定 &gt; ディスプレイ &gt; スクリーン セーバーに移動し、Resona を選択します。</string>
     <string name="retry_button">再試行</string>
     <string name="top_music_videos">人気のミュージック ビデオ</string>
     <string name="trending">トレンド</string>
@@ -402,14 +402,14 @@
     <string name="storage_folder_selected_restart">保存フォルダーが保存されました。アプリは 3 秒後に再起動します。</string>
     <string name="storage_folder_invalid">有効なフォルダーを選択してください。</string>
     <string name="storage_folder_unsupported">このフォルダーは、ファイルベースのメディア キャッシュでは使用できません。</string>
-    <string name="storage_folder_not_writable">ArchiveTune はこのフォルダーにキャッシュ ファイルを書き込むことができません。</string>
+    <string name="storage_folder_not_writable">Resona はこのフォルダーにキャッシュ ファイルを書き込むことができません。</string>
     <string name="storage_cache_cleared">キャッシュがクリアされました。</string>
     <string name="storage_cache_clear_failed">キャッシュをクリアできませんでした。 SDカードへのアクセスを確認してください。</string>
     <string name="storage_clear_song_cache_progress">曲のキャッシュをクリア中...%1$d%%</string>
     <string name="storage_clear_downloads_progress">ダウンロードをクリア中...%1$d%%</string>
     <string name="storage_clear_image_cache_progress">画像キャッシュをクリア中...%1$d%%</string>
     <string name="storage_clear_canvas_cache_progress">キャンバス キャッシュをクリアしています...%1$d%%</string>
-    <string name="storage_cache_clear_warning">キャッシュ ファイルが削除されている間、ArchiveTune を開いたままにしてください。</string>
+    <string name="storage_cache_clear_warning">キャッシュ ファイルが削除されている間、Resona を開いたままにしてください。</string>
     <string name="storage_size_ratio">%1$s / %2$s</string>
     <string name="sensitivity_percentage">%1$d%%</string>
     <string name="clear_song_cache_dialog">  キャッシュされた曲をすべてクリアしてもよろしいですか?</string>

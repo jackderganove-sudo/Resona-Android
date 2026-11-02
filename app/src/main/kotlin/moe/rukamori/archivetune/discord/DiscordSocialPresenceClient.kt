@@ -261,7 +261,7 @@ object DiscordSocialPresenceClient {
 
         val activityJson = JSONObject()
 
-        activityJson.put("name", activity.name ?: "ArchiveTune")
+        activityJson.put("name", activity.name ?: "Resona")
         activityJson.put("type", activity.type.nativeValue)
 
         activity.details?.let { activityJson.put("details", it) }

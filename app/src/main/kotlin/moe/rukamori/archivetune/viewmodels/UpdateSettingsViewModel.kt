@@ -107,7 +107,7 @@ class UpdateSettingsViewModel
                 is UpdateSettingsAction.SetNotificationsEnabled -> setNotificationsEnabled(action.enabled)
                 UpdateSettingsAction.JoinEarlyAccess ->
                     eventChannel.trySend(
-                        UpdateSettingsEvent.OpenUri("https://discord.gg/archivetune-1498315636714115224"),
+                        UpdateSettingsEvent.OpenUri("https://github.com/jackderganove-sudo/Resona-Android/releases"),
                     )
                 UpdateSettingsAction.EarlyAccessLinkFailed -> error.value = R.string.early_access_open_failed
                 UpdateSettingsAction.DismissError -> error.value = null

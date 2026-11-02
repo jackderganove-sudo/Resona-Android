@@ -56,7 +56,7 @@
     <string name="library_top_mixes_refresh">میکس های تازه سازی</string>
     <string name="library_top_mixes_configure_ai">پیکربندی هوش مصنوعی</string>
     <string name="library_top_mixes_ai_not_configured_title">پیکربندی هوش مصنوعی برای ساخت میکس ها</string>
-    <string name="library_top_mixes_ai_not_configured_desc">ادغام هوش مصنوعی قبل از ساخت میکس های برتر شخصی توسط ArchiveTune ضروری است.</string>
+    <string name="library_top_mixes_ai_not_configured_desc">ادغام هوش مصنوعی قبل از ساخت میکس های برتر شخصی توسط Resona ضروری است.</string>
     <string name="library_top_mixes_no_recent_history_title">هنوز میکس شنیداری جدیدی نیست</string>
     <string name="library_top_mixes_no_recent_history">آهنگ های بیشتری گوش دهید، سپس تازه سازی کنید تا میکس های هوش مصنوعی از تاریخچه اخیر خود بسازید.</string>
     <string name="library_top_mixes_no_valid_mixes">هوش مصنوعی هیچ میکس قابل پخشی از تاریخچه اخیر شما برنگرداند.</string>

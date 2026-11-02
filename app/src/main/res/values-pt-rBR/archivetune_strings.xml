@@ -324,14 +324,14 @@
     <string name="storage_folder_selected_restart">Pasta de armazenamento salva. O app será reiniciado em 3 segundos.</string>
     <string name="storage_folder_invalid">Selecione uma pasta válida.</string>
     <string name="storage_folder_unsupported">Esta pasta não pode ser usada pelo cache de mídia baseado em arquivos.</string>
-    <string name="storage_folder_not_writable">O ArchiveTune não pode gravar arquivos de cache nesta pasta.</string>
+    <string name="storage_folder_not_writable">O Resona não pode gravar arquivos de cache nesta pasta.</string>
     <string name="storage_cache_cleared">Cache limpo.</string>
     <string name="storage_cache_clear_failed">Não foi possível limpar o cache. Verifique o acesso ao cartão SD.</string>
     <string name="storage_clear_song_cache_progress">Limpando cache de músicas...%1$d%%</string>
     <string name="storage_clear_downloads_progress">Limpando downloads...%1$d%%</string>
     <string name="storage_clear_image_cache_progress">Limpando cache de imagens...%1$d%%</string>
     <string name="storage_clear_canvas_cache_progress">Limpando cache de canvas...%1$d%%</string>
-    <string name="storage_cache_clear_warning">Mantenha o ArchiveTune aberto enquanto os arquivos de cache são removidos.</string>
+    <string name="storage_cache_clear_warning">Mantenha o Resona aberto enquanto os arquivos de cache são removidos.</string>
     <string name="storage_size_ratio">%1$s / %2$s</string>
     <string name="sensitivity_percentage">%1$d%%</string>
     <string name="clear_song_cache_dialog">  Tem certeza de que deseja limpar todas as músicas em cache?</string>
@@ -554,7 +554,7 @@
     <string name="about_content_desc_donate">Doar</string>
     <string name="music_recognition_settings">Configurações de reconhecimento de música</string>
     <string name="music_recognition_background_title">Reconhecimento em segundo plano</string>
-    <string name="music_recognition_background_description">Quando ativado, o bloco de Configurações Rápidas reconhece o áudio que está sendo reproduzido neste dispositivo sem abrir o ArchiveTune.</string>
+    <string name="music_recognition_background_description">Quando ativado, o bloco de Configurações Rápidas reconhece o áudio que está sendo reproduzido neste dispositivo sem abrir o Resona.</string>
     <string name="music_recognition_background_foss_description">O reconhecimento em segundo plano não está disponível na versão FOSS. Em vez disso, o bloco “Configurações rápidas” abre a tela de reconhecimento.</string>
     <string name="music_recognition_notification_channel_name">Reconhecimento de músicas</string>
     <string name="music_recognition_notification_channel_description">Progresso e resultados no reconhecimento musical</string>
@@ -601,7 +601,7 @@
     <string name="aod_clock_bold_digital">Negrito digital</string>
     <string name="aod_clock_minimal">Mínimo</string>
     <string name="aod_customize_mode_enabled">Ativar o modo AOD</string>
-    <string name="aod_customize_mode_enabled_desc">Permita que o ArchiveTune exiba a tela do reprodutor que fica sempre ativa</string>
+    <string name="aod_customize_mode_enabled_desc">Permita que o Resona exiba a tela do reprodutor que fica sempre ativa</string>
     <string name="aod_clock_elegant_thin">Elegante e fino</string>
     <string name="aod_clock_pixel_stacked">Pixel empilhado</string>
     <string name="aod_customize_security_power">Segurança e Energia</string>
@@ -639,7 +639,7 @@
     <string name="aod_customize_auto_start_screen_off">Exibir AOD quando a tela for desligada</string>
     <string name="aod_customize_auto_start_screen_off_desc">Exibir automaticamente a tela ambiente AOD quando a tela for desligada durante a reprodução</string>
     <string name="aod_customize_screensaver_info_title">Proteção de tela do sistema (AOD em carregamento)</string>
-    <string name="aod_customize_screensaver_info_desc">Para ativar o AOD automaticamente durante o carregamento ou quando o aparelho estiver acoplado, acesse Configurações do Android &gt; Tela &gt; Protetor de tela e selecione ArchiveTune.</string>
+    <string name="aod_customize_screensaver_info_desc">Para ativar o AOD automaticamente durante o carregamento ou quando o aparelho estiver acoplado, acesse Configurações do Android &gt; Tela &gt; Protetor de tela e selecione Resona.</string>
     <string name="arrange_playlist_tags">Organizar tags da lista de reprodução</string>
     <string name="arrange_playlist_tags_desc">Escolha a ordem em que os filtros de tags são exibidos na sua biblioteca</string>
     <string name="arrange_library_chips">Organizar fichas da biblioteca</string>

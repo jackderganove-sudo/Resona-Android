@@ -152,7 +152,7 @@ object DiscordImageResolver {
             }
 
             "appicon" -> {
-                "https://raw.githubusercontent.com/rukamori/ArchiveTune/main/fastlane/metadata/android/en-US/images/icon.png"
+                "https://raw.githubusercontent.com/jackderganove-sudo/Resona-Android/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher_resona.png"
             }
 
             "custom" -> {

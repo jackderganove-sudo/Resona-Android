@@ -39,6 +39,8 @@ object TogetherOnlineEndpoint {
         }
 
     suspend fun baseUrlOrNull(dataStore: DataStore<Preferences>): String? {
+        // Resona: the online server is ArchiveTune's; no online sessions in this fork.
+        if (!moe.rukamori.archivetune.updates.ResonaFlags.TOGETHER_ONLINE_ENABLED) return null
         val now = System.currentTimeMillis()
         val cached = dataStore.getAsync(TogetherOnlineEndpointCacheKey)?.trim().orEmpty()
         val lastCheckedAt = dataStore.getAsync(TogetherOnlineEndpointLastCheckedAtKey, 0L)

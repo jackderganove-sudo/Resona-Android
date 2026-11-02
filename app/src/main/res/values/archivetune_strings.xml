@@ -24,7 +24,7 @@
     <string name="music_recognition_error">Something went wrong</string>
     <string name="music_recognition_settings">Music recognition settings</string>
     <string name="music_recognition_background_title">Recognition in background</string>
-    <string name="music_recognition_background_description">When enabled, the Quick Settings tile recognizes audio playing on this device without opening ArchiveTune.</string>
+    <string name="music_recognition_background_description">When enabled, the Quick Settings tile recognizes audio playing on this device without opening Resona.</string>
     <string name="music_recognition_background_foss_description">Background recognition is unavailable in the FOSS variant. The Quick Settings tile opens the recognition screen instead.</string>
     <string name="music_recognition_notification_channel_name">Music recognition</string>
     <string name="music_recognition_notification_channel_description">Music recognition progress and results</string>
@@ -141,7 +141,7 @@
     <string name="aod_customize_entry_desc">Customize the always-on player screen</string>
     <string name="aod_customize_preview">Live preview</string>
     <string name="aod_customize_mode_enabled">Enable AOD mode</string>
-    <string name="aod_customize_mode_enabled_desc">Allow ArchiveTune to show the always-on player screen</string>
+    <string name="aod_customize_mode_enabled_desc">Allow Resona to show the always-on player screen</string>
     <string name="aod_customize_visibility">Visibility</string>
     <string name="aod_customize_show_thumbnail">Show thumbnail</string>
     <string name="aod_customize_show_artist">Show artist</string>
@@ -252,7 +252,7 @@
     <string name="aod_customize_auto_start_screen_off">Display AOD when screen turns off</string>
     <string name="aod_customize_auto_start_screen_off_desc">Automatically show AOD ambient screen when screen turns off during playback</string>
     <string name="aod_customize_screensaver_info_title">System Screen Saver (Charging AOD)</string>
-    <string name="aod_customize_screensaver_info_desc">To activate AOD automatically while charging or docked, go to Android Settings &gt; Display &gt; Screen saver and select ArchiveTune.</string>
+    <string name="aod_customize_screensaver_info_desc">To activate AOD automatically while charging or docked, go to Android Settings &gt; Display &gt; Screen saver and select Resona.</string>
     <string name="retry_button">Retry</string>
     <string name="top_music_videos">Top music videos</string>
     <string name="trending">Trending</string>
@@ -452,14 +452,14 @@
     <string name="storage_folder_selected_restart">Storage folder saved. App will restart in 3 seconds.</string>
     <string name="storage_folder_invalid">Select a valid folder.</string>
     <string name="storage_folder_unsupported">This folder cannot be used by the file-backed media cache.</string>
-    <string name="storage_folder_not_writable">ArchiveTune cannot write cache files in this folder.</string>
+    <string name="storage_folder_not_writable">Resona cannot write cache files in this folder.</string>
     <string name="storage_cache_cleared">Cache cleared.</string>
     <string name="storage_cache_clear_failed">Cache could not be cleared. Check SD card access.</string>
     <string name="storage_clear_song_cache_progress">Clearing song cache...%1$d%%</string>
     <string name="storage_clear_downloads_progress">Clearing downloads...%1$d%%</string>
     <string name="storage_clear_image_cache_progress">Clearing image cache...%1$d%%</string>
     <string name="storage_clear_canvas_cache_progress">Clearing canvas cache...%1$d%%</string>
-    <string name="storage_cache_clear_warning">Keep ArchiveTune open while cache files are being removed.</string>
+    <string name="storage_cache_clear_warning">Keep Resona open while cache files are being removed.</string>
     <string name="storage_size_ratio">%1$s / %2$s</string>
     <string name="sensitivity_percentage">%1$d%%</string>
     <string name="clear_song_cache_dialog">  Are you sure you want to clear all cached songs?</string>

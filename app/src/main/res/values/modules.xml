@@ -138,7 +138,7 @@
     <string name="modules_metadata_types">Provider categories</string>
     <string name="modules_metadata_homepage">Homepage</string>
     <string name="modules_metadata_repository">Source repository</string>
-    <string name="modules_metadata_min_app">Minimum ArchiveTune version</string>
+    <string name="modules_metadata_min_app">Minimum Resona version</string>
     <string name="modules_metadata_runtime">Required runtime features</string>
     <string name="modules_link_failed">No application could open this link.</string>
 </resources>

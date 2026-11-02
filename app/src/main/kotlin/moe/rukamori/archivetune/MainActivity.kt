@@ -1652,7 +1652,8 @@ class MainActivity : ComponentActivity() {
                                 !hasPressed && (dataStore[LaunchCountKey] ?: 0) >= remindAfter
                             }
 
-                        starPromptPending = shouldShow
+                        // Resona: no ArchiveTune star/support appeal.
+                        starPromptPending = shouldShow && moe.rukamori.archivetune.updates.ResonaFlags.SHOW_SUPPORT_PROMPT
                     }
 
                     if (showStarDialog) {

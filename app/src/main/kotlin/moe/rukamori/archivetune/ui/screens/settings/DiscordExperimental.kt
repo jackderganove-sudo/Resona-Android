@@ -62,7 +62,7 @@ fun DiscordExperimental(navController: NavController) {
     val (button2Label, onButton2LabelChange) =
         rememberPreference(
             key = DiscordActivityButton2LabelKey,
-            defaultValue = "Go to ArchiveTune",
+            defaultValue = "Go to Resona",
         )
     val (button2Enabled, onButton2EnabledChange) =
         rememberPreference(
@@ -88,7 +88,7 @@ fun DiscordExperimental(navController: NavController) {
     val (button2CustomUrl, onButton2CustomUrlChange) =
         rememberPreference(
             key = DiscordActivityButton2CustomUrlKey,
-            defaultValue = "https://github.com/rukamori/ArchiveTune",
+            defaultValue = "https://github.com/jackderganove-sudo/Resona-Android",
         )
 
     Scaffold { inner ->

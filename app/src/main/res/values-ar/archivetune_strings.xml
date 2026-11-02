@@ -219,7 +219,7 @@
     <string name="suggestions">اقتراحات</string>
     <string name="music_recognition_settings">إعدادات التعرف على الموسيقى</string>
     <string name="music_recognition_background_title">التعرف في الخلفية</string>
-    <string name="music_recognition_background_description">عند التفعيل، تتعرف لوحة الإعدادات السريعة على الصوت المشغل على هذا الجهاز دون فتح ArchiveTune.</string>
+    <string name="music_recognition_background_description">عند التفعيل، تتعرف لوحة الإعدادات السريعة على الصوت المشغل على هذا الجهاز دون فتح Resona.</string>
     <string name="music_recognition_background_foss_description">التعرف في الخلفية غير متاح في نسخة FOSS. تفتح لوحة الإعدادات السريعة شاشة التعرف بدلاً من ذلك.</string>
     <string name="music_recognition_notification_channel_name">التعرف على الموسيقى</string>
     <string name="music_recognition_notification_channel_description">تقدم ونتائج التعرف على الموسيقى</string>
@@ -433,14 +433,14 @@
     <string name="storage_folder_selected_restart">تم حفظ مجلد التخزين. سيتم إعادة تشغيل التطبيق خلال 3 ثوانٍ.</string>
     <string name="storage_folder_invalid">اختر مجلدًا صالحًا.</string>
     <string name="storage_folder_unsupported">لا يمكن استخدام هذا المجلد بواسطة ذاكرة التخزين المؤقت للوسائط.</string>
-    <string name="storage_folder_not_writable">لا يمكن لـ ArchiveTune كتابة ملفات التخزين المؤقت في هذا المجلد.</string>
+    <string name="storage_folder_not_writable">لا يمكن لـ Resona كتابة ملفات التخزين المؤقت في هذا المجلد.</string>
     <string name="storage_cache_cleared">تم مسح ذاكرة التخزين المؤقت.</string>
     <string name="storage_cache_clear_failed">تعذر مسح ذاكرة التخزين المؤقت. تحقق من الوصول إلى بطاقة SD.</string>
     <string name="storage_clear_song_cache_progress">جاري مسح ذاكرة التخزين المؤقت للأغاني...%1$d%%</string>
     <string name="storage_clear_downloads_progress">جاري مسح التنزيلات...%1$d%%</string>
     <string name="storage_clear_image_cache_progress">جاري مسح ذاكرة التخزين المؤقت للصور...%1$d%%</string>
     <string name="storage_clear_canvas_cache_progress">جاري مسح ذاكرة التخزين المؤقت للشاشة التفاعلية...%1$d%%</string>
-    <string name="storage_cache_clear_warning">أبقِ ArchiveTune مفتوحًا أثناء إزالة ملفات التخزين المؤقت.</string>
+    <string name="storage_cache_clear_warning">أبقِ Resona مفتوحًا أثناء إزالة ملفات التخزين المؤقت.</string>
     <string name="storage_size_ratio">%1$s / %2$s</string>
     <string name="canvas_cache">ذاكرة التخزين المؤقت للشاشة التفاعلية</string>
     <string name="clear_canvas_cache">مسح ذاكرة التخزين المؤقت للشاشة التفاعلية</string>

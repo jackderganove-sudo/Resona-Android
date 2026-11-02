@@ -17,7 +17,7 @@
     <string name="music_recognition_error">किछु गड़बड़ भऽ गेल अछि</string>
     <string name="music_recognition_settings">संगीत पहिचानक सेटिंग्स</string>
     <string name="music_recognition_background_title">पृष्ठभूमिमे संगीत पहिचान</string>
-    <string name="music_recognition_background_description">सक्षम केलापर, क्विक सेटिंग्स टाइल ArchiveTune खोलने बिना एहि डिवाइस पर बजि रहल ऑडियोक पहिचान करैत अछि।</string>
+    <string name="music_recognition_background_description">सक्षम केलापर, क्विक सेटिंग्स टाइल Resona खोलने बिना एहि डिवाइस पर बजि रहल ऑडियोक पहिचान करैत अछि।</string>
     <string name="music_recognition_background_foss_description">FOSS संस्करणमे पृष्ठभूमिमे पहिचान अनुपलब्ध अछि। क्विक सेटिंग्स टाइल एकर बदला पहिचान स्क्रीन खोलैत अछि।</string>
     <string name="music_recognition_notification_channel_name">संगीत पहिचान</string>
     <string name="music_recognition_notification_channel_description">संगीत पहिचानक प्रगति आ परिणाम</string>

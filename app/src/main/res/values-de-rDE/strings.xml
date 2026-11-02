@@ -477,7 +477,7 @@
     <string name="sort_order_ascending">Aufsteigend</string>
     <string name="sort_order_descending">Absteigend</string>
     <string name="no_matching_playlists">Keine übereinstimmende Playlist</string>
-    <string name="archivetune_canvas">ArchiveTune-Canvas</string>
+    <string name="archivetune_canvas">Resona-Canvas</string>
     <string name="archivetune_canvas_desc">Albumcover animieren während des Abpielens</string>
     <string name="player_background_style_v8_v9_desc">Nicht verfügbar mit V8 und V9 Player-Stil</string>
     <string name="disable_animations">Animationen deaktivieren</string>
@@ -512,7 +512,7 @@
     <string name="library_top_mixes_loading">Bereite deine KI-Mixe vor…</string>
     <string name="widget_pause">Pause</string>
     <string name="widget_previous">Vorheriger</string>
-    <string name="widget_tap_to_open">Tippe, um ArchiveTune zu öffnen</string>
+    <string name="widget_tap_to_open">Tippe, um Resona zu öffnen</string>
     <string name="removed_n_songs_from_queue">%d Songs aus der Warteschlange entfernt</string>
     <string name="sort_by_most_played">Meistgespielt</string>
     <string name="slider_style_wavy">Wellig</string>
@@ -575,7 +575,7 @@
     <string name="romanization">Romanisierung</string>
     <string name="hide_video">Musikvideos verstecken</string>
     <string name="restore_success">Sicherung erfolgreich wiederhergestellt</string>
-    <string name="discord_login_description">Verbinde dein Discord-Konto über OAuth, damit ArchiveTune Rich Presence veröffentlichen kann.</string>
+    <string name="discord_login_description">Verbinde dein Discord-Konto über OAuth, damit Resona Rich Presence veröffentlichen kann.</string>
     <string name="discord_open_authorization">Discord-Autorisierung öffnen</string>
     <string name="discord_waiting_for_authorization">Warte auf Discord Autorisierung…</string>
     <string name="discord_authorization_success">Discord-Konto verbunden</string>
@@ -631,9 +631,9 @@
     <string name="update_notification_channel_name">App-Updates</string>
     <string name="update_notification_channel_desc">Benachrichtigungen bei neuen App-Updates</string>
     <string name="update_notification_title">Update verfügbar</string>
-    <string name="update_notification_text">ArchiveTune %s ist jetzt verfügbar</string>
+    <string name="update_notification_text">Resona %s ist jetzt verfügbar</string>
     <string name="download">Herunterladen</string>
-    <string name="permissions_title">Erlaube ArchiveTune am Besten zu funktionieren</string>
+    <string name="permissions_title">Erlaube Resona am Besten zu funktionieren</string>
     <string name="permissions_subtitle">Wir verwenden einige Berechtigungen um deine Musik zuverlässig zu spielen und verwalten. Diese kannst du jederzeit in den Systemeinstellungen verändern.</string>
     <string name="permission_storage_title">Speicherzugriff</string>
     <string name="permission_storage_desc">Benötigt um deine heruntergeladene und lokale Audiodateien wiederzugeben.</string>
@@ -764,9 +764,9 @@
     <string name="lastfm_login_network_error">Netzwerkfehler. Prüfe deine Verbindung.</string>
     <string name="lastfm_login_failed">Anmeldung fehlgeschlagen. Versuche es erneut.</string>
     <string name="duration_seconds_short">%1$ds</string>
-    <string name="onboarding_welcome_title">Willkommen bei ArchiveTune</string>
+    <string name="onboarding_welcome_title">Willkommen bei Resona</string>
     <string name="top_mixes">Top-Mixe für dich</string>
-    <string name="library_top_mixes_ai_not_configured_desc">KI-Integration wird benötigt, bevor ArchiveTune persönliche Top-Mixe erstellen kann.</string>
+    <string name="library_top_mixes_ai_not_configured_desc">KI-Integration wird benötigt, bevor Resona persönliche Top-Mixe erstellen kann.</string>
     <string name="library_top_mixes_no_valid_mixes">KI hat keine abspielbaren Mixe aus deinem bisherigen Verlauf zurückgegeben.</string>
     <string name="library_top_mixes_failed">Erstellung der Top-Mixe fehlgeschlagen</string>
     <string name="subscribed_only">Nur Abonnierte</string>
@@ -834,14 +834,14 @@
     <string name="lyrics_search_still_searching">Suche noch</string>
     <string name="unsupported_language">Sprache nicht unterstützt: %1$s</string>
     <string name="top_artist_badge">TOP-KÜNSTLER</string>
-    <string name="cast_sheet_subtitle">Wähle wo ArchiveTune spielen soll</string>
+    <string name="cast_sheet_subtitle">Wähle wo Resona spielen soll</string>
     <string name="cast_disconnect">Trennen</string>
     <string name="app_icon_description">App-Symbol auswählen</string>
     <string name="app_icon_subtitle">Personalisiere deinen Startbildschirm</string>
     <string name="enable_youlyplus_lyrics">YouLyPlus-Songtexte aktivieren</string>
     <string name="eq_waiting_for_audio_session">Warte auf Audiositzung</string>
     <string name="onboarding_permissions_title">Berechtigungen überprüfen</string>
-    <string name="onboarding_empty_subtitle">Zu ArchiveTune fortfahren.</string>
+    <string name="onboarding_empty_subtitle">Zu Resona fortfahren.</string>
     <string name="together_queue_count">%1$d in Warteschlange</string>
     <string name="together_shuffle_on">Shuffle an</string>
     <string name="together_shuffle_off">Shuffle aus</string>
@@ -880,7 +880,7 @@
     <string name="scheduled_backup">Automatische, geplante Sicherung</string>
     <string name="scheduled_backup_enabled">Geplante Sicherung aktivieren</string>
     <string name="scheduled_backup_frequency">Sicherungsplan</string>
-    <string name="scheduled_backup_frequency_description">Wähle, wie oft ArchiveTune eine Sicherung erstellt.</string>
+    <string name="scheduled_backup_frequency_description">Wähle, wie oft Resona eine Sicherung erstellt.</string>
     <string name="scheduled_backup_daily">Täglich</string>
     <string name="scheduled_backup_weekly">Wöchentlich</string>
     <string name="scheduled_backup_monthly">Monatlich</string>
@@ -933,7 +933,7 @@
     <string name="eq_screen_subtitle">Passe die Wiedergabe für deine Ohren und dein Equipment an</string>
     <string name="eq_sound_shaping_on">Soundanpassung ist an</string>
     <string name="eq_sound_shaping_off">Soundanpassung ist aus</string>
-    <string name="eq_enable_description">Diese Kontrollen auf die ArchiveTune-Wiedergabe anwenden</string>
+    <string name="eq_enable_description">Diese Kontrollen auf die Resona-Wiedergabe anwenden</string>
     <string name="eq_control_mode">Kontrollmodus</string>
     <string name="eq_advanced">Erweitert</string>
     <string name="eq_preset_number">Voreinstellung %1$d</string>
@@ -943,16 +943,16 @@
     <string name="download_speed">%1$s/s</string>
     <string name="download_progress_summary">%1$d%% · %2$s/s</string>
     <string name="download_action_failed">Download konnte nicht aktualisiert werden</string>
-    <string name="onboarding_community_subtitle">Folge der Entwicklung, melde Probleme oder unterstütze ArchiveTune.</string>
+    <string name="onboarding_community_subtitle">Folge der Entwicklung, melde Probleme oder unterstütze Resona.</string>
     <string name="onboarding_permission_app_installation_title">App-Installation</string>
-    <string name="onboarding_permission_app_installation_desc">Installiere heruntergeladene APK-Updates von ArchiveTune.</string>
+    <string name="onboarding_permission_app_installation_desc">Installiere heruntergeladene APK-Updates von Resona.</string>
     <string name="source">Quelle</string>
     <string name="onboarding_welcome_subtitle">Richte die Wiedergabe und lokale Musik ein und aktualisiere die Berechtigungen bevor du mit dem Hören beginnst.</string>
     <string name="onboarding_permission_notifications_desc">Wiedergabesteuerung und Musikaktivitäten im Benachrichtigungscenter anzeigen.</string>
     <string name="onboarding_permission_bluetooth_connect_desc">Verbinde mit Bluetooth-Audiogeräten in der Nähe für die Wiedergabe.</string>
-    <string name="music_together">ArchiveTune Music Together</string>
+    <string name="music_together">Resona Music Together</string>
     <string name="together_activity_playback_state_changed">%1$s änderte den Wiedergabestatus</string>
-    <string name="together_welcome_title">Willkommen bei ArchiveTune Music Together</string>
+    <string name="together_welcome_title">Willkommen bei Resona Music Together</string>
     <string name="eq_presets_description">Beginne ausgehend von einem geräteangepassten Sound</string>
     <string name="no_matching_downloads">Keine passenden Downloads</string>
     <string name="search_downloads">Downloads durchsuchen</string>
@@ -969,7 +969,7 @@
     <string name="gatekeeper_connection_blocked">Verbindung durch ArchiveTune Remote blockiert. Diese App konnte nicht als offizieller ArchiveTune-Build verifiziert werden. Installiere einen offiziellen Build von https://github.com/rukamori/ArchiveTune oder https://t.me/ArchiveTuneGC.</string>
     <string name="scheduled_backup_disabled_description">Automatische Sicherungen sind pausiert.</string>
     <string name="scheduled_backup_enabled_description">Sicherungen laufen automatisch nach dem untenstehenden Plan.</string>
-    <string name="together_welcome_host_body">Tippe Sitzung starten und teile dann den Sitzungslink. Lasse ArchiveTune während dem Hosten im Hintergrund offen.</string>
+    <string name="together_welcome_host_body">Tippe Sitzung starten und teile dann den Sitzungslink. Lasse Resona während dem Hosten im Hintergrund offen.</string>
     <string name="together_activity_log_empty_body">Sitzungsereignisse werden hier erscheinen wenn sie passieren.</string>
     <string name="together_activity_log">Aktivitätslog</string>
     <string name="together_repeat_mode">Wiederhole %1$d</string>
@@ -991,7 +991,7 @@
     <string name="widget_top_song_summary">Aktuell Top: %1$s</string>
     <string name="custom_background_subtitle">Vorschau und Anpassung des Players und des Hintergrunds für die Songtexte</string>
     <string name="custom_background_preview_player">Player</string>
-    <string name="custom_background_permission_error">ArchiveTune konnte den Zugriff auf dieses Bild nicht aufrechterhalten.</string>
+    <string name="custom_background_permission_error">Resona konnte den Zugriff auf dieses Bild nicht aufrechterhalten.</string>
     <string name="eq_signal">Signal</string>
     <string name="enable_betterlyrics_portato">BetterLyrics Portato aktivieren</string>
 </resources>

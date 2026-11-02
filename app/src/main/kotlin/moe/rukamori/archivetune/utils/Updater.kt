@@ -24,6 +24,8 @@ import moe.rukamori.archivetune.constants.GitHubReleasesEtagKey
 import moe.rukamori.archivetune.constants.GitHubReleasesFingerprintKey
 import moe.rukamori.archivetune.constants.GitHubReleasesJsonKey
 import moe.rukamori.archivetune.constants.GitHubReleasesLastCheckedAtKey
+import moe.rukamori.archivetune.constants.GitHubReleasesSourceKey
+import moe.rukamori.archivetune.updates.ResonaReleasePolicy
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -252,7 +254,11 @@ object Updater {
         val jsonArray = JSONArray(json)
         val releases = ArrayList<ReleaseInfo>(jsonArray.length())
         for (i in 0 until jsonArray.length()) {
-            releases.add(parseReleaseJson(jsonArray.getJSONObject(i), expectedArtifactName))
+            val release = parseReleaseJson(jsonArray.getJSONObject(i), expectedArtifactName)
+            // Resona: never ArchiveTune's (or any other repository's) releases.
+            if (ResonaReleasePolicy.isOwnRelease(release.htmlUrl, release.downloadUrl, releaseOwner, releaseRepo)) {
+                releases.add(release)
+            }
         }
         return releases
     }
@@ -298,7 +304,7 @@ object Updater {
                 val response = client.get("https://api.github.com/repos/$releaseOwner/$releaseRepo/releases/tags/${Uri.encode(tag)}") {
                     headers {
                         append("Accept", "application/vnd.github+json")
-                        append("User-Agent", "ArchiveTune")
+                        append("User-Agent", "Resona")
                     }
                     timeout { requestTimeoutMillis = 10_000 }
                 }
@@ -332,7 +338,7 @@ object Updater {
                 timeout { requestTimeoutMillis = 10_000 }
                 headers {
                     append("Accept", "application/vnd.github+json")
-                    append("User-Agent", "ArchiveTune")
+                    append("User-Agent", "Resona")
                     if (!cachedEtag.isNullOrBlank()) {
                         append("If-None-Match", cachedEtag)
                     }
@@ -363,6 +369,7 @@ object Updater {
             return emptyList()
         }
 
+        if (!ResonaReleasePolicy.isCacheUsable(App.instance.dataStore.getAsync(GitHubReleasesSourceKey), releaseOwner, releaseRepo)) return emptyList()
         val cachedJson = App.instance.dataStore.getAsync(GitHubReleasesJsonKey)
         return cachedJson
             ?.takeIf { it.isNotBlank() }
@@ -461,10 +468,14 @@ object Updater {
 
         return runCatchingCancellable {
             val now = System.currentTimeMillis()
-            val cachedJson = App.instance.dataStore.getAsync(GitHubReleasesJsonKey)
-            val cachedEtag = App.instance.dataStore.getAsync(GitHubReleasesEtagKey)
-            val lastCheckedAt = App.instance.dataStore.getAsync(GitHubReleasesLastCheckedAtKey, 0L)
-            val cachedFingerprint = App.instance.dataStore.getAsync(GitHubReleasesFingerprintKey)
+            // Resona: a cache from another repository (e.g. a restored ArchiveTune
+            // backup) is ignored completely, ETag included.
+            val sourceKey = ResonaReleasePolicy.repositoryKey(releaseOwner, releaseRepo)
+            val cacheIsOurs = ResonaReleasePolicy.isCacheUsable(App.instance.dataStore.getAsync(GitHubReleasesSourceKey), releaseOwner, releaseRepo)
+            val cachedJson = App.instance.dataStore.getAsync(GitHubReleasesJsonKey).takeIf { cacheIsOurs }
+            val cachedEtag = App.instance.dataStore.getAsync(GitHubReleasesEtagKey).takeIf { cacheIsOurs }
+            val lastCheckedAt = if (cacheIsOurs) App.instance.dataStore.getAsync(GitHubReleasesLastCheckedAtKey, 0L) else 0L
+            val cachedFingerprint = App.instance.dataStore.getAsync(GitHubReleasesFingerprintKey).takeIf { cacheIsOurs }
 
             val cachedReleases =
                 cachedJson
@@ -524,6 +535,7 @@ object Updater {
 
                     App.instance.dataStore.edit { settings ->
                         settings[GitHubReleasesLastCheckedAtKey] = now
+                        settings[GitHubReleasesSourceKey] = sourceKey
                         networkResult.etag?.let { settings[GitHubReleasesEtagKey] = it }
                         if (hasPayloadChanged || hasTopReleaseChanged || cachedJson.isNullOrBlank()) {
                             settings[GitHubReleasesJsonKey] = networkBody

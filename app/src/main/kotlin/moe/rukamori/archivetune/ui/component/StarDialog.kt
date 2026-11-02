@@ -184,7 +184,7 @@ fun StarDialog(
 
                         FilledTonalButton(
                             onClick = {
-                                uriHandler.openUri("https://github.com/rukamori/ArchiveTune")
+                                uriHandler.openUri("https://github.com/jackderganove-sudo/Resona-Android")
                                 onSupport()
                             },
                             modifier = Modifier.heightIn(min = 48.dp),

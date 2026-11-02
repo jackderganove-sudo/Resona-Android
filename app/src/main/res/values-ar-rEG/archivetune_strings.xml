@@ -323,14 +323,14 @@
     <string name="storage_folder_selected_restart">اتحفظ مجلد التخزين. التطبيق هيقفل ويفتح تاني خلال 3 ثواني.</string>
     <string name="storage_folder_invalid">اختار مجلد صالح.</string>
     <string name="storage_folder_unsupported">المجلد ده مش متاح للاستخدام بواسطة التخزين المؤقت المدعوم بالملفات.</string>
-    <string name="storage_folder_not_writable">ArchiveTune مش قادر يكتب ملفات التخزين المؤقت في المجلد ده.</string>
+    <string name="storage_folder_not_writable">Resona مش قادر يكتب ملفات التخزين المؤقت في المجلد ده.</string>
     <string name="storage_cache_cleared">اتمسحت الملفات المؤقتة.</string>
     <string name="storage_cache_clear_failed">معرفناش نمسح الملفات المؤقتة. اتأكد من صلاحية الوصول لكارت الميموري.</string>
     <string name="storage_clear_song_cache_progress">جاري مسح التخزين المؤقت للأغاني… %1$d%%</string>
     <string name="storage_clear_downloads_progress">جاري مسح التنزيلات… %1$d%%</string>
     <string name="storage_clear_image_cache_progress">جاري مسح التخزين المؤقت للصور… %1$d%%</string>
     <string name="storage_clear_canvas_cache_progress">جاري مسح التخزين المؤقت للخلفيات… %1$d%%</string>
-    <string name="storage_cache_clear_warning">سيب ArchiveTune مفتوح لحد ما نخلص مسح ملفات التخزين المؤقت.</string>
+    <string name="storage_cache_clear_warning">سيب Resona مفتوح لحد ما نخلص مسح ملفات التخزين المؤقت.</string>
     <string name="storage_size_ratio">%1$s / %2$s</string>
     <string name="sensitivity_percentage">%1$d%%</string>
     <string name="clear_song_cache_dialog">متأكد إنك عايز تمسح كل الأغاني المتخزنة مؤقتاً؟</string>
@@ -587,7 +587,7 @@
     <string name="stats_listening_patterns">أنماط الاستماع</string>
     <string name="stats_artist_breakdown">تفصيل الفنانين</string>
     <string name="about_position_yuki">dummy reze | مدير</string>
-    <string name="music_recognition_background_description">لما تفعل الميزة دي، زر الإعدادات السريعة هيتعرف على الصوت الشغال على الجهاز من غير ما تفتح ArchiveTune.</string>
+    <string name="music_recognition_background_description">لما تفعل الميزة دي، زر الإعدادات السريعة هيتعرف على الصوت الشغال على الجهاز من غير ما تفتح Resona.</string>
     <string name="music_recognition_notification_no_match_text">خلي المزيكا شغالة بوضوح وجرب التعرف تاني.</string>
     <string name="music_recognition_notification_recording_failed_text">التطبيق اللي شغال التاني ممكن يكون حاطط حماية مانعة تسجيل الصوت، أو المزيكا وقفت.</string>
 </resources>

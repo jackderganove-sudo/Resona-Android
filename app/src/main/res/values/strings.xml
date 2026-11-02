@@ -71,7 +71,7 @@
     <string name="library_top_mixes_refresh">Refresh mixes</string>
     <string name="library_top_mixes_configure_ai">Configure AI</string>
     <string name="library_top_mixes_ai_not_configured_title">Configure AI to build mixes</string>
-    <string name="library_top_mixes_ai_not_configured_desc">AI integration is required before ArchiveTune can build personal top mixes.</string>
+    <string name="library_top_mixes_ai_not_configured_desc">AI integration is required before Resona can build personal top mixes.</string>
     <string name="library_top_mixes_no_recent_history_title">No recent listening mix yet</string>
     <string name="library_top_mixes_no_recent_history">Listen to more songs, then refresh to build AI mixes from your recent history.</string>
     <string name="library_top_mixes_no_valid_mixes">AI did not return any playable mixes from your recent history.</string>
@@ -142,7 +142,7 @@
     <string name="retry">Retry</string>
     <string name="cast">Cast</string>
     <string name="cast_devices">Cast devices</string>
-    <string name="cast_sheet_subtitle">Choose where ArchiveTune plays</string>
+    <string name="cast_sheet_subtitle">Choose where Resona plays</string>
     <string name="cast_available_devices">Available devices</string>
     <string name="cast_searching_devices">Searching for devices</string>
     <string name="cast_no_devices">No Cast devices found</string>
@@ -162,7 +162,7 @@
     <string name="play">Play</string>
     <string name="widget_pause">Pause</string>
     <string name="widget_previous">Previous</string>
-    <string name="widget_tap_to_open">Tap to open ArchiveTune</string>
+    <string name="widget_tap_to_open">Tap to open Resona</string>
     <string name="widget_insights_title">Listening Insights</string>
     <string name="widget_recommendations">Recommendations</string>
     <string name="widget_listening_time_empty">No listening time yet</string>
@@ -468,14 +468,14 @@
     <string name="custom_background_adjustments_description">Adjust image in both previews.</string>
     <string name="custom_background_blur_value">%1$d dp</string>
     <string name="custom_background_scale_value">%1$d%%</string>
-    <string name="custom_background_permission_error">ArchiveTune could not keep access to this image.</string>
+    <string name="custom_background_permission_error">Resona could not keep access to this image.</string>
     <string name="custom_background_permission_cleanup_error">The previous image access could not be released.</string>
     <string name="add_image">Add image</string>
     <string name="blur">Blur</string>
     <string name="contrast">Contrast</string>
     <string name="brightness">Brightness</string>
     <string name="custom_value">Custom value</string>
-    <string name="archivetune_canvas">ArchiveTune Canvas</string>
+    <string name="archivetune_canvas">Resona Canvas</string>
     <string name="archivetune_canvas_desc">Animate album artwork while playing</string>
     <string name="player_background_style_v8_v9_desc">Unavailable with V8, V9, and V10 player styles</string>
     <string name="show_button1_description">Toggle visibility of button 1 in Discord Rich Presence</string>
@@ -520,9 +520,9 @@
     <string name="login">Login</string>
     <string name="not_logged_in">Not logged in</string>
     <string name="playback_confirmation_required" translatable="false">Playback confirmation required</string>
-    <string name="playback_requires_youtube_music_confirmation" translatable="false">Confirm playback in YouTube Music, then return to ArchiveTune.</string>
+    <string name="playback_requires_youtube_music_confirmation" translatable="false">Confirm playback in YouTube Music, then return to Resona.</string>
     <string name="playback_login_refresh_required" translatable="false">Refresh YouTube Music login</string>
-    <string name="playback_requires_youtube_music_login_refresh" translatable="false">Refresh your YouTube Music login, then return to ArchiveTune.</string>
+    <string name="playback_requires_youtube_music_login_refresh" translatable="false">Refresh your YouTube Music login, then return to Resona.</string>
     <string name="playback_error_unknown" translatable="false">Unknown error</string>
     <string name="playback_error_no_internet" translatable="false">No network connection</string>
     <string name="playback_error_details" translatable="false">Details</string>
@@ -641,7 +641,7 @@
     <string name="eq_screen_subtitle">Shape playback for your ears and equipment</string>
     <string name="eq_sound_shaping_on">Sound shaping is on</string>
     <string name="eq_sound_shaping_off">Sound shaping is off</string>
-    <string name="eq_enable_description">Applies these controls to ArchiveTune playback</string>
+    <string name="eq_enable_description">Applies these controls to Resona playback</string>
     <string name="eq_control_mode">Control mode</string>
     <string name="eq_basic">Basic</string>
     <string name="eq_advanced">Advanced</string>
@@ -758,12 +758,12 @@
     <string name="restore_failed">Failed to restore backup</string>
     <string name="discord_integration">Discord Integration</string>
     <string name="account_integrations_summary">Discord, Last.fm, Libre.fm, ListenBrainz</string>
-    <string name="discord_login_description">Connect your Discord account with OAuth so ArchiveTune can publish Rich Presence.</string>
+    <string name="discord_login_description">Connect your Discord account with OAuth so Resona can publish Rich Presence.</string>
     <string name="discord_open_authorization">Open Discord authorization</string>
     <string name="discord_waiting_for_authorization">Waiting for Discord authorization...</string>
     <string name="discord_authorization_success">Discord account connected</string>
     <string name="discord_authorization_failed">Discord authorization failed</string>
-    <string name="discord_account_ready">ArchiveTune is ready to publish Rich Presence for your listening session.</string>
+    <string name="discord_account_ready">Resona is ready to publish Rich Presence for your listening session.</string>
     <string name="discord_reauthorize_required_title">Discord session expired</string>
     <string name="discord_reauthorize_required_description">Rich Presence cannot be shown until you authorize Discord again.</string>
     <string name="discord_reauthorize_action">Reauthorize</string>
@@ -861,11 +861,11 @@
     <string name="app_update_title">App update</string>
     <string name="app_update_not_checked">Check for updates to see the latest release.</string>
     <string name="app_update_checking">Checking for updates</string>
-    <string name="app_update_checking_description">Looking for the latest ArchiveTune release.</string>
+    <string name="app_update_checking_description">Looking for the latest Resona release.</string>
     <string name="app_update_available">A fresh release is ready</string>
     <string name="app_update_required">Update required</string>
-    <string name="app_update_required_description">This version is at least two stable releases behind. Update ArchiveTune to continue.</string>
-    <string name="app_update_required_notice">Update ArchiveTune to continue.</string>
+    <string name="app_update_required_description">This version is at least two stable releases behind. Update Resona to continue.</string>
+    <string name="app_update_required_notice">Update Resona to continue.</string>
     <string name="app_update_available_description">See what’s changed, then update when you’re ready.</string>
     <string name="app_update_current">All caught up</string>
     <string name="app_update_empty">No release published yet</string>
@@ -901,7 +901,7 @@
     <string name="app_update_install_failed">Android couldn’t open the installer. You can try installing the downloaded APK again.</string>
     <string name="app_update_install_failed_title">Couldn’t open the installer</string>
     <string name="app_update_permission_title">Allow app installation</string>
-    <string name="app_update_permission_required">Allow ArchiveTune to install apps in Android settings, then try installing again.</string>
+    <string name="app_update_permission_required">Allow Resona to install apps in Android settings, then try installing again.</string>
     <string name="app_update_open_release_failed">The release page couldn’t open. Check that a browser is available and try again.</string>
     <string name="app_update_open_release_failed_title">Couldn’t open the release</string>
     <string name="update_text">Update</string>
@@ -990,7 +990,7 @@
     <string name="update_channel_release">Release</string>
     <string name="update_channel_release_desc">Tested updates from official GitHub Releases.</string>
     <string name="early_access_programs">Early access programs</string>
-    <string name="early_access_programs_desc">Try upcoming features before release and help shape ArchiveTune with your feedback. Join the Discord community to take part.</string>
+    <string name="early_access_programs_desc">Try upcoming features before release and help shape Resona with your feedback. Join the Discord community to take part.</string>
     <string name="early_access_open_failed">Could not open the Discord invitation. Check that a browser or Discord is installed.</string>
     <string name="recent_commits">Recent Commits</string>
     <string name="updates_loading_commits">Loading recent commits</string>
@@ -1004,7 +1004,7 @@
     <string name="update_notification_channel_name">App Updates</string>
     <string name="update_notification_channel_desc">Notifications for new app updates</string>
     <string name="update_notification_title">Update Available</string>
-    <string name="update_notification_text">ArchiveTune %s is now available</string>
+    <string name="update_notification_text">Resona %s is now available</string>
     <string name="download">Download</string>
     <string name="downloads">Downloads</string>
     <string name="download_in_progress">In progress</string>
@@ -1019,21 +1019,21 @@
     <string name="download_failed_state">Download failed</string>
     <string name="search_downloads">Search downloads</string>
     <string name="no_matching_downloads">No matching downloads</string>
-    <string name="permissions_title">Allow ArchiveTune to work best</string>
+    <string name="permissions_title">Allow Resona to work best</string>
     <string name="permissions_subtitle">We use a few permissions to play and manage your music reliably. You can change these anytime in system settings.</string>
     <string name="permission_storage_title">Storage access</string>
     <string name="permission_storage_desc">Required to read your downloaded and local audio files for playback.</string>
     <string name="permission_status_allowed">Allowed</string>
     <string name="next">Next</string>
     <string name="allow">Allow</string>
-    <string name="onboarding_welcome_title">Welcome to ArchiveTune</string>
+    <string name="onboarding_welcome_title">Welcome to Resona</string>
     <string name="onboarding_welcome_subtitle">Stream music and listen to your local collection.</string>
     <string name="onboarding_permissions_title">Choose your access</string>
     <string name="onboarding_permissions_subtitle">Every permission is optional. Choose what to allow now, or continue and decide later.</string>
     <string name="onboarding_login_title">Connect YouTube Music</string>
     <string name="onboarding_login_subtitle">Log in to sync your library and history across devices and get more reliable playback.</string>
     <string name="onboarding_login_optional">Optional. You can log in later from Settings.</string>
-    <string name="onboarding_login_benefits_title">Your account helps ArchiveTune</string>
+    <string name="onboarding_login_benefits_title">Your account helps Resona</string>
     <string name="onboarding_login_library_title">Sync your library</string>
     <string name="onboarding_login_library_desc">Keep your saved music and playlists available wherever you listen.</string>
     <string name="onboarding_login_history_title">Keep your history</string>
@@ -1042,30 +1042,30 @@
     <string name="onboarding_login_playback_desc">Use your account context for a more dependable playback experience.</string>
     <string name="onboarding_login_skip">Skip for now</string>
     <string name="onboarding_community_title">Make yourself at home</string>
-    <string name="onboarding_community_subtitle">Follow development, meet other listeners, or help shape ArchiveTune.</string>
+    <string name="onboarding_community_subtitle">Follow development, meet other listeners, or help shape Resona.</string>
     <string name="onboarding_finish">Start listening</string>
     <string name="onboarding_gms_variant">GMS edition</string>
     <string name="onboarding_foss_variant">FOSS edition</string>
     <string name="onboarding_version_label">Version %1$s</string>
     <string name="onboarding_empty_title">Setup unavailable</string>
-    <string name="onboarding_empty_subtitle">Continue to ArchiveTune.</string>
+    <string name="onboarding_empty_subtitle">Continue to Resona.</string>
     <string name="onboarding_error_generic">Couldn\'t load setup</string>
     <string name="onboarding_permission_allowed_by_install">Allowed by install</string>
     <string name="onboarding_permission_unavailable">Unavailable</string>
     <string name="onboarding_permission_notifications_title">Notifications</string>
     <string name="onboarding_permission_notifications_desc">Receive music activity and app alerts in the notification shade.</string>
     <string name="onboarding_permission_device_audio_capture_title">On-device audio recognition</string>
-    <string name="onboarding_permission_device_audio_capture_desc">Recognize music playing in other apps without using the microphone. Android asks for screen and audio capture approval each time, ArchiveTune processes audio only.</string>
+    <string name="onboarding_permission_device_audio_capture_desc">Recognize music playing in other apps without using the microphone. Android asks for screen and audio capture approval each time, Resona processes audio only.</string>
     <string name="onboarding_permission_bluetooth_connect_title">Bluetooth audio connection</string>
     <string name="onboarding_permission_bluetooth_connect_desc">Connect to nearby Bluetooth audio devices for playback.</string>
     <string name="onboarding_permission_network_title">Network access</string>
     <string name="onboarding_permission_network_desc">Stream music, load artwork, and check online app content.</string>
     <string name="onboarding_permission_playback_service_title">Background playback</string>
-    <string name="onboarding_permission_playback_service_desc">Keep music playing reliably when ArchiveTune is in the background.</string>
+    <string name="onboarding_permission_playback_service_desc">Keep music playing reliably when Resona is in the background.</string>
     <string name="onboarding_permission_audio_settings_title">Audio settings and vibration</string>
     <string name="onboarding_permission_audio_settings_desc">Adjust playback audio behavior and provide light touch feedback.</string>
     <string name="onboarding_permission_app_installation_title">App installation</string>
-    <string name="onboarding_permission_app_installation_desc">Install downloaded APK updates from ArchiveTune.</string>
+    <string name="onboarding_permission_app_installation_desc">Install downloaded APK updates from Resona.</string>
     <string name="onboarding_permission_bluetooth_scan_title">Bluetooth scan</string>
     <string name="onboarding_permission_bluetooth_scan_desc">Discover Cast and nearby playback devices.</string>
     <string name="onboarding_community_github_desc">Star the repository and follow releases.</string>
@@ -1086,7 +1086,7 @@
     <string name="onboarding_permission_blocked">Not allowed · change in Android settings</string>
     <string name="onboarding_permission_approval_at_use">Android asks when recognition starts</string>
     <string name="onboarding_permission_action_description">%1$s: %2$s</string>
-    <string name="onboarding_community_discord_desc">Discuss ArchiveTune, share feedback, and try early-access builds.</string>
+    <string name="onboarding_community_discord_desc">Discuss Resona, share feedback, and try early-access builds.</string>
     <string name="onboarding_support_development">Support development</string>
     <string name="onboarding_support_optional">Donations help support development. Joining the community and donating are optional.</string>
     <string name="onboarding_saving">Finishing setup…</string>
@@ -1099,7 +1099,7 @@
     <string name="playlist_suggestion_source_title">Playlist title</string>
     <string name="playlist_suggestion_source_content">Playlist content</string>
     <string name="playlist_suggestion_source_both">Playlist title and content</string>
-    <string name="music_together">ArchiveTune Music Together</string>
+    <string name="music_together">Resona Music Together</string>
     <string name="together_display_name">Display name</string>
     <string name="together_display_name_placeholder">Your name</string>
     <string name="together_port">Session port</string>
@@ -1170,10 +1170,10 @@
     <string name="together_activity_error">Error: %1$s</string>
     <string name="got_it">Got it</string>
     <string name="together_dont_show_again">Don\'t show this again</string>
-    <string name="together_welcome_title">Welcome to ArchiveTune Music Together</string>
+    <string name="together_welcome_title">Welcome to Resona Music Together</string>
     <string name="together_welcome_body">Music Together lets multiple devices share a live session with a synced queue and playback.</string>
     <string name="together_welcome_host_title">Host a session</string>
-    <string name="together_welcome_host_body">Tap Start session, then share the session link. Keep ArchiveTune open in the background while hosting.</string>
+    <string name="together_welcome_host_body">Tap Start session, then share the session link. Keep Resona open in the background while hosting.</string>
     <string name="together_welcome_join_title">Join from another device</string>
     <string name="together_welcome_join_body">Open the shared link, or enter code and tap Join. Your queue and playback will follow the host.</string>
     <string name="together_welcome_permissions_title">Permissions and safety</string>
@@ -1198,7 +1198,7 @@
     <string name="scheduled_backup_enabled_description">Backups run automatically using the schedule below.</string>
     <string name="scheduled_backup_disabled_description">Automatic backups are paused.</string>
     <string name="scheduled_backup_frequency">Backup schedule</string>
-    <string name="scheduled_backup_frequency_description">Choose how often ArchiveTune creates a backup.</string>
+    <string name="scheduled_backup_frequency_description">Choose how often Resona creates a backup.</string>
     <string name="scheduled_backup_daily">Daily</string>
     <string name="scheduled_backup_weekly">Weekly</string>
     <string name="scheduled_backup_monthly">Monthly</string>

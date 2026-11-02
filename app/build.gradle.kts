@@ -25,7 +25,8 @@ fun String.asBuildConfigString(): String =
             .replace("\t", "\\t")
     }\""
 
-val fallbackDataServerUrl = "archive-tune-admin-remote.vercel.app"
+// Resona: no ArchiveTune remote (gatekeeper is off as well).
+val fallbackDataServerUrl = ""
 val dataServerUrl =
     rootProject
         .file("DataServer.txt")

@@ -416,37 +416,15 @@ class AboutViewModel
                             id = "github",
                             iconResId = R.drawable.github,
                             labelResId = R.string.about_content_desc_github,
-                            url = "https://github.com/rukamori/ArchiveTune",
+                            url = "https://github.com/jackderganove-sudo/Resona-Android",
                         ),
+                        // Resona builds on ArchiveTune (credits below); its
+                        // community, donation and privacy links are ArchiveTune's own.
                         AboutLinkUiModel(
-                            id = "website",
+                            id = "archivetune",
                             iconResId = R.drawable.website,
                             labelResId = R.string.about_content_desc_website,
-                            url = "https://archivetune.miuka.moe",
-                        ),
-                        AboutLinkUiModel(
-                            id = "telegram",
-                            iconResId = R.drawable.telegram,
-                            labelResId = R.string.about_content_desc_telegram,
-                            url = "https://t.me/ArchiveTuneGC",
-                        ),
-                        AboutLinkUiModel(
-                            id = "donate",
-                            iconResId = R.drawable.coffee,
-                            labelResId = R.string.about_content_desc_donate,
-                            url = "https://miuka.moe/donate",
-                        ),
-                        AboutLinkUiModel(
-                            id = "discord",
-                            iconResId = R.drawable.discord,
-                            labelResId = R.string.discord,
-                            url = "https://discord.gg/archivetune",
-                        ),
-                        AboutLinkUiModel(
-                            id = "privacy_policy",
-                            iconResId = R.drawable.lock,
-                            labelResId = R.string.privacy,
-                            url = "https://archivetune.miuka.moe/privacy",
+                            url = "https://github.com/rukamori/ArchiveTune",
                         ),
                     ),
                 leadDeveloper =

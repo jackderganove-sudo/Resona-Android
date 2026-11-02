@@ -498,7 +498,7 @@
     <string name="year_in_music_empty_subtitle">Écoutez davantage de musique pendant %d et votre récapitulatif s\'affichera ici.</string>
     <string name="storage_location_free">%s libre</string>
     <string name="aod_customize_show_artist">Afficher l\'artiste</string>
-    <string name="storage_folder_not_writable">ArchiveTune ne peut pas enregistrer de fichiers de cache dans ce dossier.</string>
+    <string name="storage_folder_not_writable">Resona ne peut pas enregistrer de fichiers de cache dans ce dossier.</string>
     <string name="ai_api_status_failed">L\'API a échoué. Veuillez réessayer après avoir mis à jour les paramètres.</string>
     <string name="storage_folder_unsupported">Ce dossier ne peut pas être utilisé par le cache multimédia basé sur des fichiers.</string>
     <string name="force_sync_on_switch_account">Forcer la synchronisation sur le compte Switch</string>
@@ -541,7 +541,7 @@
     <string name="storage_clear_downloads_progress">Suppression des téléchargements... %1$d %%</string>
     <string name="storage_clear_image_cache_progress">Effacement du cache d\'images... %1$d %%</string>
     <string name="storage_clear_canvas_cache_progress">Effacement du cache du canevas... %1$d %%</string>
-    <string name="storage_cache_clear_warning">Laissez ArchiveTune ouvert pendant la suppression des fichiers de cache.</string>
+    <string name="storage_cache_clear_warning">Laissez Resona ouvert pendant la suppression des fichiers de cache.</string>
     <string name="history_duration_desc">Durée minimale d\'écoute pour qu\'un morceau soit considéré comme écouté</string>
     <string name="history_duration_seconds">%1$s s</string>
     <string name="top_albums">Meilleurs Albums</string>
@@ -556,7 +556,7 @@
     <string name="unblock_artist">Débloquer l\'artiste</string>
     <string name="music_recognition_settings">Paramètres de reconnaissance musicale</string>
     <string name="music_recognition_background_title">Reconnaissance en arrière-plan</string>
-    <string name="music_recognition_background_description">Lorsqu\'elle est activée, la vignette « Paramètres rapides » détecte la lecture audio sur cet appareil sans ouvrir ArchiveTune.</string>
+    <string name="music_recognition_background_description">Lorsqu\'elle est activée, la vignette « Paramètres rapides » détecte la lecture audio sur cet appareil sans ouvrir Resona.</string>
     <string name="music_recognition_background_foss_description">La reconnaissance d\'arrière-plan n\'est pas disponible dans la version FOSS. La vignette « Paramètres rapides » ouvre à la place l\'écran de reconnaissance.</string>
     <string name="music_recognition_notification_channel_name">Reconnaissance musicale</string>
     <string name="music_recognition_notification_channel_description">Progrès et résultats en matière de reconnaissance musicale</string>
@@ -607,7 +607,7 @@
     <string name="aod_customize_auto_start_screen_off">Afficher l\'AOD lorsque l\'écran s\'éteint</string>
     <string name="aod_customize_auto_start_screen_off_desc">Afficher automatiquement l\'écran d\'ambiance AOD lorsque l\'écran s\'éteint pendant la lecture</string>
     <string name="aod_customize_screensaver_info_title">Écran de veille système (AOD en charge)</string>
-    <string name="aod_customize_screensaver_info_desc">Pour activer automatiquement AOD pendant la recharge ou lorsque l\'appareil est connecté à sa station d\'accueil, accédez aux Paramètres Android &gt; Affichage &gt; Écran de veille, puis sélectionnez ArchiveTune.</string>
+    <string name="aod_customize_screensaver_info_desc">Pour activer automatiquement AOD pendant la recharge ou lorsque l\'appareil est connecté à sa station d\'accueil, accédez aux Paramètres Android &gt; Affichage &gt; Écran de veille, puis sélectionnez Resona.</string>
     <string name="aod_mode">Mode AOD</string>
     <string name="aod_customize_minimal_locked_view">Vue minimale verrouillée</string>
     <string name="aod_customize_touch_lock_desc">Empêche les contacts accidentels sur l\'écran AOD</string>
@@ -683,6 +683,6 @@
     <string name="arrange_library_chips">Trier les jetons de la bibliothèque</string>
     <string name="arrange_library_chips_desc">Choisissez l\'ordre d\'affichage des onglets dans votre bibliothèque</string>
     <string name="aod_customize_mode_enabled">Activer le mode AOD</string>
-    <string name="aod_customize_mode_enabled_desc">Autoriser ArchiveTune à afficher l\'écran du lecteur en mode permanent</string>
+    <string name="aod_customize_mode_enabled_desc">Autoriser Resona à afficher l\'écran du lecteur en mode permanent</string>
     <string name="ai_provider_openrouter">OpenRouter</string>
 </resources>

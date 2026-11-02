@@ -444,9 +444,9 @@
     <string name="update_notification_channel_name">Aggiornamenti dell\'app</string>
     <string name="update_notification_channel_desc">Notifiche per nuovi aggiornamenti dell\'app</string>
     <string name="update_notification_title">Aggiornamento disponibile</string>
-    <string name="update_notification_text">ArchiveTune %s è ora disponibile</string>
+    <string name="update_notification_text">Resona %s è ora disponibile</string>
     <string name="download">Scarica</string>
-    <string name="permissions_title">Consenti ad ArchiveTune di funzionare al meglio</string>
+    <string name="permissions_title">Consenti ad Resona di funzionare al meglio</string>
     <string name="permissions_subtitle">Utilizziamo alcune autorizzazioni per riprodurre e gestire la tua musica in modo affidabile. Puoi modificarli in qualsiasi momento nelle impostazioni di sistema.</string>
     <string name="permission_storage_title">Accesso allo spazio di archiviazione</string>
     <string name="permission_storage_desc">Necessario per leggere i file audio scaricati e locali per la riproduzione.</string>
@@ -486,7 +486,7 @@
     <string name="no_matching_playlists">Nessuna playlist corrispondente</string>
     <string name="random_theme_on_startup">Tema random all\'avvio</string>
     <string name="random_theme_on_startup_desc">Applica una palette di colori randomica ad ogni avvio dell\'app</string>
-    <string name="archivetune_canvas">Canvas ArchiveTune</string>
+    <string name="archivetune_canvas">Canvas Resona</string>
     <string name="archivetune_canvas_desc">Anima la copertina dell\'album durante la riproduzione</string>
     <string name="disable_animations">Disabilita animazioni</string>
     <string name="disable_animations_desc">Disabilita la maggior parte delle animazioni dell\'app. Raccomandato per dispositivi di fascia bassa</string>
@@ -538,5 +538,5 @@
     <string name="library_top_mixes_no_valid_mixes">L\'intelligenza artificiale non ha restituito alcun mix riproducibile dalla cronologia recente.</string>
     <string name="library_top_mixes_failed">Impossibile creare i mix migliori</string>
     <string name="your_playlists">Le tue playlist</string>
-    <string name="library_top_mixes_ai_not_configured_desc">L\'integrazione AI è richiesta prima, così che ArchiveTune possa creare personali mix in base ai tuoi gusti</string>
+    <string name="library_top_mixes_ai_not_configured_desc">L\'integrazione AI è richiesta prima, così che Resona possa creare personali mix in base ai tuoi gusti</string>
 </resources>

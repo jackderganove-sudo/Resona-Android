@@ -17,7 +17,7 @@
     <string name="music_recognition_error">Nəsə səhv getdi</string>
     <string name="music_recognition_settings">Musiqi tanıma parametrləri</string>
     <string name="music_recognition_background_title">Arxa planda tanınma</string>
-    <string name="music_recognition_background_description">Aktivləşdirildikdə, \"Tez-tez istifadə olunan parametrlər\" (Quick Settings) paneli \"ArchiveTune\" tətbiqini açmadan bu cihazda səsləndirilən audionu tanıyır.</string>
+    <string name="music_recognition_background_description">Aktivləşdirildikdə, \"Tez-tez istifadə olunan parametrlər\" (Quick Settings) paneli \"Resona\" tətbiqini açmadan bu cihazda səsləndirilən audionu tanıyır.</string>
     <string name="music_recognition_background_foss_description">FOSS versiyasında fon rejimində tanıma funksiyası mövcud deyil. Bunun əvəzinə, \"Tez tənzimləmələr\" panelindəki düymə tanıma ekranını açır.</string>
     <string name="music_recognition_notification_channel_name">Musiqinin tanınması</string>
     <string name="music_recognition_notification_channel_description">Musiqinin tanınması sahəsində irəliləyiş və nəticələr</string>
@@ -115,7 +115,7 @@
     <string name="aod_customize_entry_desc">Daim aktiv player ekranını fərdiləşdirin</string>
     <string name="aod_customize_preview">Canlı önizləmə</string>
     <string name="aod_customize_mode_enabled">Canlı önizləmə</string>
-    <string name="aod_customize_mode_enabled_desc">ArchiveTune-a həmişə aktiv pleyer ekranını göstərməyə icazə verin</string>
+    <string name="aod_customize_mode_enabled_desc">Resona-a həmişə aktiv pleyer ekranını göstərməyə icazə verin</string>
     <string name="aod_customize_visibility">Görünmə</string>
     <string name="aod_customize_show_thumbnail">Kiçik təsviri göstər</string>
     <string name="aod_customize_show_artist">İfaçını göstər</string>

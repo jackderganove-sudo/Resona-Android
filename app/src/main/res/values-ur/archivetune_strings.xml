@@ -17,7 +17,7 @@
     <string name="music_recognition_error">کچھ غلط ہو گیا</string>
     <string name="music_recognition_settings">موسیقی کی شناخت کی ترتیبات</string>
     <string name="music_recognition_background_title">پس منطر میں شناخت</string>
-    <string name="music_recognition_background_description">‫فعل ہونے پر، فوری ترتیبات والا کھپرا اس آلہ پر چلتی ہوئ موسیقی کی ArchiveTune کھولے بغیر شناخت کرتا ہے۔</string>
+    <string name="music_recognition_background_description">‫فعل ہونے پر، فوری ترتیبات والا کھپرا اس آلہ پر چلتی ہوئ موسیقی کی Resona کھولے بغیر شناخت کرتا ہے۔</string>
     <string name="music_recognition_background_foss_description">‫پس منطر میں شناخت کرنا FOSS والے نحخے میں دستیاب نہیں ہے۔ بلکے فوری ترتیبات والا کھپرا شناخت سکرین کھولتا ہے۔</string>
     <string name="music_recognition_notification_channel_name">موسیقی شناخت</string>
     <string name="music_recognition_notification_channel_description">موسیقی کی شناخت کا تقدم اور نتائج</string>
@@ -115,7 +115,7 @@
     <string name="aod_customize_entry_desc">ہمیشہ-جاری سکرین کو حسب ضرورت بنائیے</string>
     <string name="aod_customize_preview">زندہ پیش نظارہ</string>
     <string name="aod_customize_mode_enabled">‫AOD اسلوب فاعل</string>
-    <string name="aod_customize_mode_enabled_desc">‫ArchiveTune کو ہمیشہ-جاری سازندہ سکرین دکھانے کی اجازت دیجیے</string>
+    <string name="aod_customize_mode_enabled_desc">‫Resona کو ہمیشہ-جاری سازندہ سکرین دکھانے کی اجازت دیجیے</string>
     <string name="aod_customize_visibility">روئیت</string>
     <string name="aod_customize_show_thumbnail">تھمب نیل دکھایا جائے</string>
     <string name="aod_customize_show_artist">کلاکار دکھایا جائے</string>

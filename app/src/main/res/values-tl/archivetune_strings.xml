@@ -12,7 +12,7 @@
     <string name="music_recognition_lyrics_preview">Pasilip sa lyrics</string>
     <string name="music_recognition_permission_title">Permisyón para sa microphone</string>
     <string name="music_recognition_permission_desc">Payagan ang paggamit ng microphone sa pagkilala ng kanta.</string>
-    <string name="music_recognition_background_description">Kapag naka-enabled, ang Quick Settings tile ay kikilala sa tunog sa device kahit hindi buksan ang ArchiveTune.</string>
+    <string name="music_recognition_background_description">Kapag naka-enabled, ang Quick Settings tile ay kikilala sa tunog sa device kahit hindi buksan ang Resona.</string>
     <string name="music_recognition_history_search">Hanapin ang mga nakilalang kanta</string>
     <string name="music_recognition_permission_action">Payagan</string>
     <string name="music_recognition_error">May maling nangyari</string>
@@ -179,7 +179,7 @@
     <string name="aod_clock_pixel_stacked">Pixel stacked</string>
     <string name="explore">Tuklasin</string>
     <string name="aod_customize_mode_enabled">Itulot ang AOD mode</string>
-    <string name="aod_customize_mode_enabled_desc">Payagan ang ArchiveTune na ipakita ang always-on player screen</string>
+    <string name="aod_customize_mode_enabled_desc">Payagan ang Resona na ipakita ang always-on player screen</string>
     <string name="aod_accent_monochrome">Monochrome</string>
     <string name="aod_accent_theme">Tema</string>
     <string name="aod_position_top">Taas</string>
