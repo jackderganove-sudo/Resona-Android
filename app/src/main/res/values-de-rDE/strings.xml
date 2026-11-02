@@ -772,7 +772,7 @@
     <string name="subscribed_only">Nur Abonnierte</string>
     <string name="app_icon_available">Verfügbare Symbole</string>
     <string name="app_icon_community">Community-Symbol</string>
-    <string name="app_icon_builtin_description">Originales ArchiveTune‐Symbol</string>
+    <string name="app_icon_builtin_description">Originales Resona‐Symbol</string>
     <string name="app_icon_identifier">ID %1$s</string>
     <plurals name="app_icon_count">
         <item quantity="one">%d Symbol</item>

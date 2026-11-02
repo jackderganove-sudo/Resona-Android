@@ -792,7 +792,7 @@
     </plurals>
     <string name="app_icon_community_notice">Los iconos de la comunidad los crean los usuarios y pueden cambiar con el tiempo.</string>
     <string name="app_icon_identifier">ID %1$s</string>
-    <string name="app_icon_builtin_description">Icono original de ArchiveTune</string>
+    <string name="app_icon_builtin_description">Icono original de Resona</string>
     <string name="app_icon_community">Icono de la comunidad</string>
     <string name="app_icon_builtin">Integrado en</string>
     <string name="app_icon_available">Iconos disponibles</string>

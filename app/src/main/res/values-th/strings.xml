@@ -307,7 +307,7 @@
     <string name="app_icon_available">ไอคอนที่พร้อมใช้งาน</string>
     <string name="app_icon_builtin">ในตัว</string>
     <string name="app_icon_community">ไอคอนจากชุมชน</string>
-    <string name="app_icon_builtin_description">ไอคอน ArchiveTune แบบดั้งเดิม</string>
+    <string name="app_icon_builtin_description">ไอคอน Resona แบบดั้งเดิม</string>
     <string name="app_icon_community_notice">ไอคอนจากชุมชนสร้างโดยผู้ใช้ และอาจมีการ เปลี่ยนแปลงได้ตามเวลา</string>
     <plurals name="app_icon_count">
         <item quantity="other">%d ไอคอน</item>

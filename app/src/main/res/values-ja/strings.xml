@@ -323,7 +323,7 @@
     <string name="app_icon_available">利用可能なアイコン</string>
     <string name="app_icon_builtin">内蔵</string>
     <string name="app_icon_community">コミュニティアイコン</string>
-    <string name="app_icon_builtin_description">オリジナルの ArchiveTune アイコン</string>
+    <string name="app_icon_builtin_description">オリジナルの Resona アイコン</string>
     <string name="app_icon_identifier">ID %1$s</string>
     <string name="app_icon_community_notice">コミュニティ アイコンはユーザーによって作成され、時間の経過とともに変更される可能性があります。</string>
     <plurals name="app_icon_count">

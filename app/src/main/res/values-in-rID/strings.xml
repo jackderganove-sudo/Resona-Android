@@ -320,7 +320,7 @@
     <string name="app_icon_available">Ikon yang tersedia</string>
     <string name="app_icon_builtin">Bawaan</string>
     <string name="app_icon_community">Ikon komunitas</string>
-    <string name="app_icon_builtin_description">Ikon ArchiveTune asli</string>
+    <string name="app_icon_builtin_description">Ikon Resona asli</string>
     <string name="app_icon_identifier">ID %1$s</string>
     <string name="app_icon_community_notice">Ikon komunitas dibuat oleh pengguna dan dapat berubah seiring waktu.</string>
     <plurals name="app_icon_count">

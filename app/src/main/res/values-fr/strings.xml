@@ -927,7 +927,7 @@
     <string name="app_icon_available">Icônes disponibles</string>
     <string name="app_icon_builtin">Intégré</string>
     <string name="app_icon_community">Icône de la communauté</string>
-    <string name="app_icon_builtin_description">Icône ArchiveTune originale</string>
+    <string name="app_icon_builtin_description">Icône Resona originale</string>
     <string name="app_icon_identifier">ID %1$s</string>
     <string name="app_icon_community_notice">Les icônes de la communauté sont créées par les utilisateurs et peuvent évoluer au fil du temps.</string>
     <plurals name="app_icon_count">

@@ -918,7 +918,7 @@
     <string name="app_icon_available">可用圖標</string>
     <string name="app_icon_builtin">內建</string>
     <string name="app_icon_community">社區圖標</string>
-    <string name="app_icon_builtin_description">官方 ArchiveTune 圖標</string>
+    <string name="app_icon_builtin_description">官方 Resona 圖標</string>
     <string name="app_icon_identifier">ID %1$s</string>
     <string name="app_icon_community_notice">社區圖標由用戶創建，並可能隨時間推移而變化。</string>
     <plurals name="app_icon_count">

@@ -540,7 +540,7 @@
     <string name="app_icon_available">دستیاب کردہ تصاویر</string>
     <string name="app_icon_builtin">تعمیر شدہ</string>
     <string name="app_icon_community">سماجی تصویر</string>
-    <string name="app_icon_builtin_description">‫ArchiveTune کی اصل تصویر</string>
+    <string name="app_icon_builtin_description">‫Resona کی اصل تصویر</string>
     <string name="app_icon_identifier">ID %1$s</string>
     <string name="app_icon_community_notice">سماجی تصویرات صارفین کی جانب سے بنائ جاتیں ہیں اور وقت کے ساتھ بدل سکتی ہیں۔</string>
     <plurals name="app_icon_count">

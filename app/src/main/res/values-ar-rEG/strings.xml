@@ -341,7 +341,7 @@
     <string name="app_icon_available">الأيقونات المتاحة</string>
     <string name="app_icon_builtin">مدمج</string>
     <string name="app_icon_community">أيقونة من المجتمع</string>
-    <string name="app_icon_builtin_description">أيقونة ArchiveTune الأصلية</string>
+    <string name="app_icon_builtin_description">أيقونة Resona الأصلية</string>
     <string name="app_icon_identifier">معرف %1$s</string>
     <string name="app_icon_community_notice">أيقونات المجتمع بيعملها المستخدمين وممكن تتغير مع الوقت.</string>
     <plurals name="app_icon_count">
