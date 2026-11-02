@@ -82,14 +82,14 @@ statt ArchiveTunes Zeichen.
 | --- | --- |
 | Zum Drop springen (YouTube „Meistgehört“) | v1.0.3 – Player-Menü |
 | Playlist-Werkzeuge: Duplikate entfernen, nach Künstler aufteilen, CSV-Export | v1.0.4 – Werkzeug-Knopf im Kopf lokaler Playlists |
-| Smarte Downloads (WLAN, meistgehört 30 Tage + Likes, max. 150) | im nächsten Release – Einstellungen → Speicher |
-| Slowed/Sped-up-Erkennung (Lyrics-Zeiten skalieren, LRCLIB-Originallänge) | im nächsten Release – automatisch |
+| Smarte Downloads (WLAN, meistgehört 30 Tage + Likes, max. 150) | v1.0.5 – Einstellungen → Speicher |
+| Slowed/Sped-up-Erkennung (Lyrics-Zeiten skalieren, LRCLIB-Originallänge) | v1.0.5 – automatisch |
 | Crossfade, Sleep-Timer-Fade | gibt es in ArchiveTune schon (Einstellungen → Player) |
 | Mehrfachauswahl, Übersetzung, zusätzliche Lyrics-Anbieter | gibt es in ArchiveTune schon |
 | Frosted Glass | ArchiveTune hat Haze-Blur/Acryl; kein eigener Port nötig |
 | Versionsbewusstes Lyrics-Ranking | teilweise: ArchiveTunes Anbieter liefern nur Text, keine Kandidaten mit Titel/Dauer; Plausibilitäts-/Tempoprüfung über das Slowed-Modul |
-| Selbst-Sync (Tippen im Takt) | offen |
-| KI-Sync/-Kalibrierung (whisper.cpp) | offen – braucht ein natives whisper.cpp-Modul (NDK) und ein Modell-Download; großer Umbau |
+| Selbst-Sync (Tippen im Takt) | v1.0.6 – Lyrics-Menü → „Selbst synchronisieren“ (ArchiveTune hat dazu schon Versatz ±5 s) |
+| KI-Sync/-Kalibrierung (whisper.cpp) | **nicht umgesetzt** – siehe „Offen“ |
 
 ## Testliste für das Pixel
 
@@ -106,6 +106,7 @@ Grundfunktionen (ohne Login)
 - [ ] Download eines Songs, Wiedergabe im Flugmodus
 
 Resona-Extras
+- [ ] Lyrics-Menü → „Selbst synchronisieren“: Text-Lyrics im Takt antippen, speichern, laufen danach synchron
 - [ ] Player-Menü → „Zum Drop springen“ springt zur meistgehörten Stelle
 - [ ] Lokale Playlist → Werkzeug-Knopf: Duplikate entfernen / nach Künstler aufteilen / CSV teilen
 - [ ] Einstellungen → Speicher → „Smarte Downloads“ an, im WLAN laden die meistgehörten Songs
@@ -119,3 +120,13 @@ Start / Updates
 - [ ] Einstellungen → Über: Version passt zum Release (1.0.x)
 - [ ] Einstellungen → Updates → Suchen: findet nur Resona-Releases
 - [ ] Nach dem nächsten Release: Obtainium und der In-App-Updater melden das Update
+
+## Offen
+
+- **KI-Sync/-Kalibrierung für Android (whisper.cpp)**: auf dem iPad läuft das
+  mit WhisperKit (CoreML). Für Android bräuchte es whisper.cpp als natives
+  NDK-Modul (CMake, JNI) für alle ABIs, einen Modell-Download (75–140 MB),
+  das Dekodieren des Songs aus ExoPlayers Cache zu 16-kHz-PCM und den Port
+  des Abgleichs (LNDS + Theil–Sen). Das ist ein eigener großer Schritt mit
+  vielen CI-Durchläufen (je ~40 min); bis dahin gibt es Selbst-Sync und den
+  Versatz pro Song.
