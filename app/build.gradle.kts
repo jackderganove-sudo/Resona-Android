@@ -64,11 +64,14 @@ android {
     compileSdkMinor = 2
 
     defaultConfig {
-    applicationId = "moe.rukamori.archivetune"
+    // Resona: own application id (installs next to ArchiveTune); the code
+    // namespace stays moe.rukamori.archivetune so upstream merges stay easy.
+    applicationId = "dev.jackderganove.resona"
         minSdk = 26
         targetSdk = 37
-        versionCode = 142
-        versionName = "15.1.0"
+        // CI sets RESONA_VERSION_CODE / RESONA_VERSION_NAME per release.
+        versionCode = System.getenv("RESONA_VERSION_CODE")?.toIntOrNull() ?: 1
+        versionName = System.getenv("RESONA_VERSION_NAME")?.takeIf { it.isNotBlank() } ?: "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -114,11 +117,11 @@ android {
         val githubOwner =
             System.getenv("GITHUB_OWNER")?.trim()
                 ?: localProperties.getProperty("GITHUB_OWNER")?.trim()
-                ?: "rukamori"
+                ?: "jackderganove-sudo"
         val githubRepo =
             System.getenv("GITHUB_REPO")?.trim()
                 ?: localProperties.getProperty("GITHUB_REPO")?.trim()
-                ?: "ArchiveTune"
+                ?: "Resona-Android"
         buildConfigField("String", "GITHUB_OWNER", githubOwner.asBuildConfigString())
         buildConfigField("String", "GITHUB_REPO", githubRepo.asBuildConfigString())
 

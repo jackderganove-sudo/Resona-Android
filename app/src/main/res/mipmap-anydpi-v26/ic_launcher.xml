@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Resona icon (from the iPad app): full artwork as background layer,
+     symbol within the 66 % safe zone; monochrome for themed icons. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/ic_launcher_background" />
-    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
-    <monochrome android:drawable="@mipmap/ic_launcher_monochrome" />
+    <background android:drawable="@mipmap/ic_launcher_resona_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_resona_foreground" />
+    <monochrome android:drawable="@mipmap/ic_launcher_resona_monochrome" />
 </adaptive-icon>
