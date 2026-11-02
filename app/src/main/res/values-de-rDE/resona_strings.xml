@@ -23,4 +23,10 @@
     <string name="resona_export_csv_desc">Titel, Künstler, Album, Dauer und Link jedes Songs</string>
     <string name="resona_smart_downloads">Smarte Downloads</string>
     <string name="resona_smart_downloads_desc">Im WLAN deine meistgehörten Songs der letzten 30 Tage und deine Likes heruntergeladen halten (bis zu %d). Eigene Downloads werden nie entfernt.</string>
+    <string name="resona_tap_sync">Selbst synchronisieren</string>
+    <string name="resona_tap_sync_hint">Spiel den Song ab und tippe jeweils, wenn die angezeigte Zeile beginnt.</string>
+    <string name="resona_tap_sync_tap">Tippen</string>
+    <string name="resona_tap_sync_undo">Zurück</string>
+    <string name="resona_tap_sync_save">Speichern</string>
+    <string name="resona_tap_sync_done">Alle Zeilen gesetzt</string>
 </resources>

@@ -176,6 +176,18 @@ fun LyricsMenu(
         }
     }
 
+    // Resona: self-sync (tap the start of every line while the song plays).
+    var showTapSync by rememberSaveable { mutableStateOf(false) }
+    val tapSyncPlayer = moe.rukamori.archivetune.LocalPlayerConnection.current
+    if (showTapSync && tapSyncPlayer != null) {
+        moe.rukamori.archivetune.resona.ResonaTapSyncDialog(
+            lyrics = lyricsProvider()?.lyrics.orEmpty(),
+            positionMs = { tapSyncPlayer.player.currentPosition },
+            onSave = { viewModel.updateLyrics(mediaMetadataProvider(), it) },
+            onDismiss = { showTapSync = false },
+        )
+    }
+
     if (showEditDialog) {
         TextFieldDialog(
             onDismiss = { showEditDialog = false },
@@ -721,6 +733,18 @@ fun LyricsMenu(
                                 },
                                 text = stringResource(R.string.edit),
                                 onClick = { showEditDialog = true },
+                            ),
+                            NewAction(
+                                icon = {
+                                    Icon(
+                                        painter = painterResource(R.drawable.sync),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(28.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                },
+                                text = stringResource(R.string.resona_tap_sync),
+                                onClick = { showTapSync = true },
                             ),
                             NewAction(
                                 icon = {
