@@ -3,4 +3,23 @@
 <resources>
     <string name="resona_jump_to_drop">Jump to the drop</string>
     <string name="resona_jump_to_drop_desc">Skip to the most replayed part of the song</string>
+    <string name="resona_playlist_tools">Playlist tools</string>
+    <string name="resona_remove_duplicates">Remove duplicates</string>
+    <plurals name="resona_duplicates_found">
+        <item quantity="one">%d song is in this playlist twice</item>
+        <item quantity="other">%d songs are in this playlist twice</item>
+    </plurals>
+    <plurals name="resona_duplicates_removed">
+        <item quantity="one">%d duplicate removed</item>
+        <item quantity="other">%d duplicates removed</item>
+    </plurals>
+    <string name="resona_split_by_artist">Split by artist</string>
+    <string name="resona_split_by_artist_desc">Creates %d new playlists, one per main artist</string>
+    <string name="resona_playlist_split_other">Other</string>
+    <plurals name="resona_playlists_created">
+        <item quantity="one">%d playlist created</item>
+        <item quantity="other">%d playlists created</item>
+    </plurals>
+    <string name="resona_export_csv">Export as CSV</string>
+    <string name="resona_export_csv_desc">Title, artists, album, duration and link of every song</string>
 </resources>

@@ -433,6 +433,20 @@ fun LocalPlaylistScreen(
         )
     }
 
+    // Resona: playlist tools (duplicates, split by artist, CSV export).
+    var showResonaTools by remember { mutableStateOf(false) }
+    val toolsPlaylist = playlist
+    if (showResonaTools && toolsPlaylist != null) {
+        moe.rukamori.archivetune.resona.ResonaPlaylistToolsDialog(
+            database = database,
+            playlistId = toolsPlaylist.playlist.id,
+            playlistName = toolsPlaylist.playlist.name,
+            songs = songs,
+            onResult = { message -> coroutineScope.launch { snackbarHostState.showSnackbar(message) } },
+            onDismiss = { showResonaTools = false },
+        )
+    }
+
     var showDeletePlaylistDialog by remember { mutableStateOf(false) }
     if (showDeletePlaylistDialog) {
         DefaultDialog(
@@ -659,6 +673,14 @@ fun LocalPlaylistScreen(
                                     }
                                 },
                                 additionalPrimaryActions = { contentColor ->
+                                    if (editable && songs.isNotEmpty()) {
+                                        MediaDetailIconAction(
+                                            icon = R.drawable.tune,
+                                            contentDescription = R.string.resona_playlist_tools,
+                                            contentColor = contentColor,
+                                            onClick = { showResonaTools = true },
+                                        )
+                                    }
                                     if (editable) {
                                         MediaDetailIconAction(
                                             icon = R.drawable.delete,

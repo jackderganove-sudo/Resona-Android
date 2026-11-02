@@ -2,4 +2,23 @@
 <resources>
     <string name="resona_jump_to_drop">Zum Drop springen</string>
     <string name="resona_jump_to_drop_desc">Zur meistgehörten Stelle des Songs springen</string>
+    <string name="resona_playlist_tools">Playlist-Werkzeuge</string>
+    <string name="resona_remove_duplicates">Duplikate entfernen</string>
+    <plurals name="resona_duplicates_found">
+        <item quantity="one">%d Song ist doppelt in dieser Playlist</item>
+        <item quantity="other">%d Songs sind doppelt in dieser Playlist</item>
+    </plurals>
+    <plurals name="resona_duplicates_removed">
+        <item quantity="one">%d Duplikat entfernt</item>
+        <item quantity="other">%d Duplikate entfernt</item>
+    </plurals>
+    <string name="resona_split_by_artist">Nach Künstler aufteilen</string>
+    <string name="resona_split_by_artist_desc">Erstellt %d neue Playlists, eine pro Hauptkünstler</string>
+    <string name="resona_playlist_split_other">Sonstige</string>
+    <plurals name="resona_playlists_created">
+        <item quantity="one">%d Playlist erstellt</item>
+        <item quantity="other">%d Playlists erstellt</item>
+    </plurals>
+    <string name="resona_export_csv">Als CSV exportieren</string>
+    <string name="resona_export_csv_desc">Titel, Künstler, Album, Dauer und Link jedes Songs</string>
 </resources>
