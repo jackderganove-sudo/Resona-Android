@@ -152,6 +152,10 @@ fun PlayerMenu(
     val activityResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
     val librarySong by database.song(mediaMetadata.id).collectAsState(initial = null)
+    var dropSeconds by remember(mediaMetadata.id) { mutableStateOf<Double?>(null) }
+    LaunchedEffect(mediaMetadata.id) {
+        dropSeconds = moe.rukamori.archivetune.resona.MostReplayed.heatmap(mediaMetadata.id)?.dropTimeSeconds
+    }
     val coroutineScope = rememberCoroutineScope()
 
     val download by LocalDownloadUtil.current
@@ -693,6 +697,32 @@ fun PlayerMenu(
         }
         item {
             Spacer(modifier = Modifier.height(12.dp))
+        }
+        // Resona: "Jump to the drop" from YouTube's "Most replayed" heatmap.
+        val dropAt = dropSeconds
+        if (dropAt != null) {
+            item {
+                MenuSurfaceSection(modifier = Modifier.padding(vertical = 6.dp)) {
+                    ListItem(
+                        headlineContent = { Text(text = stringResource(R.string.resona_jump_to_drop)) },
+                        supportingContent = { Text(text = stringResource(R.string.resona_jump_to_drop_desc)) },
+                        leadingContent = {
+                            Icon(
+                                painter = painterResource(R.drawable.trending_up),
+                                contentDescription = null,
+                            )
+                        },
+                        modifier =
+                            Modifier.clickable {
+                                val duration = playerConnection.player.duration
+                                val target = (dropAt * 1000).toLong()
+                                playerConnection.player.seekTo(if (duration > 10_000) minOf(target, duration - 5_000) else target)
+                                onDismiss()
+                            },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    )
+                }
+            }
         }
         if (splitArtists.isNotEmpty() || mediaMetadata.album != null) {
             item {

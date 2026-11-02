@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings of Resona's own features (not from ArchiveTune). -->
+<resources>
+    <string name="resona_jump_to_drop">Jump to the drop</string>
+    <string name="resona_jump_to_drop_desc">Skip to the most replayed part of the song</string>
+</resources>
