@@ -139,8 +139,18 @@ private fun buildTypography(fontFamily: FontFamily) =
             ),
     )
 
-val AppFontFamily = FontFamily(Font(R.font.poppins))
-val LyricsFontFamily = FontFamily(Font(R.font.sfprodisplaybold))
+// Resona: the same four Poppins faces as on the iPad (no synthesized weights).
+val AppFontFamily =
+    FontFamily(
+        Font(R.font.poppins, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_semibold, FontWeight.SemiBold),
+        Font(R.font.poppins_bold, FontWeight.Bold),
+    )
+
+// Resona: the iPad shows lyrics in the system font (SF Pro, bold); SF Pro may
+// not be shipped on Android, so lyrics use Android's system font in bold.
+val LyricsFontFamily = FontFamily.Default
 val AppTypography = buildTypography(AppFontFamily)
 val SystemTypography = buildTypography(FontFamily.Default)
 
