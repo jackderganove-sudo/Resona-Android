@@ -29,4 +29,23 @@
     <string name="resona_tap_sync_undo">Zurück</string>
     <string name="resona_tap_sync_save">Speichern</string>
     <string name="resona_tap_sync_done">Alle Zeilen gesetzt</string>
+    <!-- Round 11: ArchiveTune's "What's new" was not translated; wording as on the iPad. -->
+    <string name="whats_new_title">Neu in Resona %1$s</string>
+    <string name="whats_new_heading">Neu in Resona</string>
+    <string name="whats_new_version">Version %1$s</string>
+    <string name="whats_new_features">Neu</string>
+    <string name="whats_new_fixes">Behoben</string>
+    <string name="whats_new_improvements">Verbessert</string>
+    <string name="whats_new_no_highlights">Die vollständigen Details stehen in den Release-Notes dieser Version.</string>
+    <string name="whats_new_no_highlights_title">Keine Highlights</string>
+    <string name="whats_new_loading">Neuerungen werden geladen …</string>
+    <string name="whats_new_saving">Wird gespeichert …</string>
+    <string name="whats_new_load_failed_title">Neuerungen konnten nicht geladen werden</string>
+    <string name="whats_new_load_failed_message">Versuch es erneut oder öffne die Release-Notes dieser Version.</string>
+    <string name="whats_new_not_published">Für diese Version gibt es noch keine Release-Notes.</string>
+    <string name="whats_new_acknowledgment_failed">Konnte nicht speichern, dass du diese Version gesehen hast. Tippe auf %1$s, um es erneut zu versuchen.</string>
+    <string name="whats_new_startup_failed">Neuerungen dieser Version konnten nicht geprüft werden.</string>
+    <string name="whats_new_open_failed">Release-Notes konnten nicht geöffnet werden.</string>
+    <!-- Same name as on the iPad. -->
+    <string name="liked_songs">Lieblingssongs</string>
 </resources>

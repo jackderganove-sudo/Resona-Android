@@ -41,7 +41,6 @@
     <string name="filter_featured_playlists">Empfohlene Playlists</string>
     <string name="no_results_found">Keine Ergebnisse gefunden</string>
     <string name="other_versions">Andere Versionen</string>
-    <string name="liked_songs">Songs, die ich mag</string>
     <string name="downloaded_songs">Heruntergeladene Songs</string>
     <string name="playlist_is_empty">Die Playlist ist leer</string>
     <string name="remove_download_playlist_confirm">Möchtest du wirklich alle \"%s\" Playlist-Songs aus dem Speicher für heruntergeladene Songs entfernen?</string>
