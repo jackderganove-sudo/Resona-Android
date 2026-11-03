@@ -1253,7 +1253,11 @@ fun BottomSheetPlayer(
         val resolvedCanvas = (canvasState as? CanvasPlaybackState.Success)
             ?.takeIf { it.request == canvasRequest }
             ?.video
-        val artworkCanvas = resolvedCanvas
+        // Resona: the canvas video only runs while it can be seen. Under the
+        // lyrics (which cover the player completely) every video frame forced
+        // a full-window redraw and pushed the lyrics' text rasters out of the
+        // GPU cache — they were re-uploaded every frame (lyrics scroll jank).
+        val artworkCanvas = resolvedCanvas?.takeUnless { isLyricsScreenVisible || !state.isExpandedOrExpanding }
 
         val controlsContent: @Composable ColumnScope.(MediaMetadata, Boolean) -> Unit = { mediaMetadata, landscape ->
             PlayerControlsContent(
