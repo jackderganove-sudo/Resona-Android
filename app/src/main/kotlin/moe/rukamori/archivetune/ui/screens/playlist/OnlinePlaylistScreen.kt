@@ -743,8 +743,8 @@ fun OnlinePlaylistScreen(
                                 } else {
                                     error ?: stringResource(R.string.playlist_not_found_desc)
                                 },
-                            iconRes = if (isPrivatePlaylist) null else R.drawable.error,
-                            imageRes = if (isPrivatePlaylist) R.drawable.anime_blank else null,
+                            iconRes = if (isPrivatePlaylist) R.drawable.lock else R.drawable.error,
+                            imageRes = null,
                             actionLabel = if (error != null && !isPrivatePlaylist) stringResource(R.string.retry) else null,
                             onAction = if (error != null && !isPrivatePlaylist) retry else null,
                             modifier =

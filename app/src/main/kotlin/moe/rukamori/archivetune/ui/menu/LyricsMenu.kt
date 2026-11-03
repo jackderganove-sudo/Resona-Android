@@ -193,7 +193,7 @@ fun LyricsMenu(
             onDismiss = { showEditDialog = false },
             icon = { Icon(painter = painterResource(R.drawable.edit), contentDescription = null) },
             title = { Text(text = mediaMetadataProvider().title) },
-            initialTextFieldValue = TextFieldValue(lyricsProvider()?.lyrics.orEmpty()),
+            initialTextFieldValue = TextFieldValue(moe.rukamori.archivetune.resona.ResonaLyricsText.editable(lyricsProvider()?.lyrics.orEmpty())),
             singleLine = false,
             onDone = {
                 viewModel.updateLyrics(mediaMetadataProvider(), it)
@@ -446,7 +446,7 @@ fun LyricsMenu(
     val isTranslationInProgress = isStandardTranslating || isAiTranslating
 
     if (showTranslateDialog) {
-        val initialText = lyricsProvider()?.lyrics.orEmpty()
+        val initialText = moe.rukamori.archivetune.resona.ResonaLyricsText.editable(lyricsProvider()?.lyrics.orEmpty())
         val (textFieldValue, setTextFieldValue) =
             rememberSaveable(stateSaver = TextFieldValue.Saver) {
                 mutableStateOf(TextFieldValue(text = initialText))

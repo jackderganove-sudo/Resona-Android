@@ -31,9 +31,8 @@ import java.util.Locale
  * every line while the song plays; the result is saved as LRC.
  */
 object TapSync {
-    /** Text lines without timestamps, empty lines dropped. */
-    fun lines(lyrics: String): List<String> =
-        LyricsTempo.stripTimestamps(lyrics).lines().map { it.trim() }.filter { it.isNotEmpty() }
+    /** Text lines in any format (TTML, LRC, enhanced LRC, plain), empty lines dropped. */
+    fun lines(lyrics: String): List<String> = ResonaLyricsText.lines(lyrics)
 
     fun buildLrc(lines: List<String>, timesMs: List<Long>): String =
         lines.indices.filter { it < timesMs.size }.joinToString("\n") { index ->

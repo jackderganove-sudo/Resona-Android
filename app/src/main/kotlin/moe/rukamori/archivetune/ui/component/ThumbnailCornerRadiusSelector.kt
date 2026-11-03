@@ -152,12 +152,20 @@ fun ThumbnailCornerRadiusModal(
                                 ),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_music_placeholder),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize(),
-                        )
+                        // Resona: neutral preview instead of ArchiveTune's artwork.
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.primaryContainer),
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.about_splash),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.fillMaxSize(0.5f),
+                            )
+                        }
                         Box(
                             modifier =
                                 Modifier
