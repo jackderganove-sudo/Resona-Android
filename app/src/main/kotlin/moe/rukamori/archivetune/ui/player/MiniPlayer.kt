@@ -312,6 +312,11 @@ private fun MiniPlayerBackground(
     shape: RoundedCornerShape,
     modifier: Modifier = Modifier,
 ) {
+    // Resona: the mini player is always the shared glass (round 11 D2).
+    if (true) {
+        moe.rukamori.archivetune.resona.ResonaGlassBackground(hazeState = hazeState, shape = shape, modifier = modifier)
+        return
+    }
     when (style) {
         MiniPlayerBackgroundStyle.THEME -> {
             Box(

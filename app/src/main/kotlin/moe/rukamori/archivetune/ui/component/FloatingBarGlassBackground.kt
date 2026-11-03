@@ -30,29 +30,6 @@ fun FloatingBarGlassBackground(
     pureBlack: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val colorScheme = MaterialTheme.colorScheme
-    val surfaceColor = if (pureBlack) Color.Black else colorScheme.surfaceContainerHigh
-    val isDarkSurface = pureBlack || colorScheme.surface.luminance() < colorScheme.onSurface.luminance()
-    val hazeInput = remember(hazeState) { HazeInput.Sources(hazeState) }
-    val glassStyle = remember(shape, surfaceColor, isDarkSurface) {
-        GlassStyle.clear.then {
-            shape(shape)
-            backgroundColor(surfaceColor)
-            tint(surfaceColor.copy(alpha = if (isDarkSurface) 0.2f else 0.16f))
-            whitePoint(if (isDarkSurface) -0.08f else 0.08f)
-            contrast(0f)
-            chromaMultiplier(1f)
-            specularIntensity(0.32f)
-            edgeShadow(Color.Black.copy(alpha = 0.06f))
-            ambientResponse(0.12f)
-        }
-    }
-    Box(
-        modifier = modifier.hazeGlass(
-            input = hazeInput,
-            style = glassStyle,
-            performanceMode = HazePerformanceMode.Default,
-            expandLayerBounds = true,
-        ),
-    )
+    // Resona: one glass for every floating bar (same values as the iPad).
+    moe.rukamori.archivetune.resona.ResonaGlassBackground(hazeState = hazeState, shape = shape, modifier = modifier)
 }

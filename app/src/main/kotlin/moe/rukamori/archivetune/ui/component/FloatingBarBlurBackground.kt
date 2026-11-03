@@ -27,26 +27,6 @@ fun FloatingBarBlurBackground(
     pureBlack: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val surfaceColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainerHigh
-    val hazeInput = remember(hazeState) { HazeInput.Sources(hazeState) }
-    val blurStyle = remember(isAcrylic, surfaceColor) {
-        HazeBlurStyle {
-            backgroundColor(surfaceColor)
-            blurRadius(if (isAcrylic) 32.dp else 8.dp)
-            noiseFactor(if (isAcrylic) 0.12f else 0f)
-            colorEffects(
-                listOf(
-                    HazeColorEffect.tint(surfaceColor.copy(alpha = if (isAcrylic) 0.72f else 0.62f)),
-                ),
-            )
-            fallbackColorEffect(HazeColorEffect.tint(surfaceColor))
-        }
-    }
-    Box(
-        modifier = modifier.hazeBlur(
-            input = hazeInput,
-            style = blurStyle,
-            expandLayerBounds = true,
-        ),
-    )
+    // Resona: one glass for every floating bar (same values as the iPad).
+    moe.rukamori.archivetune.resona.ResonaGlassBackground(hazeState = hazeState, modifier = modifier, edge = false)
 }

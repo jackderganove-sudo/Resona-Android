@@ -94,12 +94,8 @@ fun FloatingNavigationToolbar(
                 bottomEnd = lerp(FloatingBarStandaloneCornerRadius.value, FloatingBarOuterCornerRadius.value, miniPlayerProximity).dp,
             )
         }
-    val navigationContainerColor =
-        if (backgroundStyle == NavigationBarBackgroundStyle.THEME) {
-            if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
-        } else {
-            Color.Transparent
-        }
+    // Resona: the navigation bar is always the shared glass (round 11 D2).
+    val navigationContainerColor = Color.Transparent
     val motionScheme = MaterialTheme.motionScheme
     Box(
         modifier =
@@ -130,7 +126,7 @@ fun FloatingNavigationToolbar(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (backgroundStyle == NavigationBarBackgroundStyle.GLASS) {
+                    if (true) {
                         FloatingBarGlassBackground(
                             hazeState = hazeState,
                             shape = navigationShape,
