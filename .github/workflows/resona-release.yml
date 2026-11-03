@@ -7,14 +7,14 @@ name: Resona release
 # The keystore only exists during the build (secret).
 on:
   push:
-    branches: [main]
+    branches: [main, wip]
     paths-ignore:
       - 'docs/**'
       - '**/*.md'
   workflow_dispatch:
 
 concurrency:
-  group: resona-release
+  group: resona-release-${{ github.ref }}
   cancel-in-progress: false
 
 env:
@@ -170,6 +170,8 @@ jobs:
           if-no-files-found: ignore
 
   release:
+    # wip: build, tests and start check only (APKs as artifact for the Pixel).
+    if: github.ref == 'refs/heads/main'
     needs: [build, smoke]
     runs-on: ubuntu-latest
     permissions:
