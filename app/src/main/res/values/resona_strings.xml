@@ -30,4 +30,8 @@
     <string name="resona_tap_sync_undo">Undo</string>
     <string name="resona_tap_sync_save">Save</string>
     <string name="resona_tap_sync_done">All lines timed</string>
+    <string name="resona_gradient_canvas">Animated gradient (canvas)</string>
+    <string name="resona_gradient_cover">Animated gradient (cover)</string>
+    <string name="resona_gradient_static">Static gradient</string>
+    <string name="resona_gradient_desc">Always a colour gradient. Canvas: follows the colours of the song\'s canvas (the video stays hidden); without one the cover colours flow slowly. Pauses with the music and in battery saver.</string>
 </resources>

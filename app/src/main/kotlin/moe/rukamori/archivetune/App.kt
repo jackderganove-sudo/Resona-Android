@@ -146,6 +146,12 @@ class App :
         }
 
         initializeGatekeeper()
+        // Resona: the player background is always the colour gradient.
+        applicationScope.launch(Dispatchers.IO) {
+            runCatching {
+                dataStore.edit { it[moe.rukamori.archivetune.constants.PlayerBackgroundStyleKey] = moe.rukamori.archivetune.constants.PlayerBackgroundStyle.GRADIENT.name }
+            }
+        }
         // Resona: smart downloads worker (only when switched on).
         applicationScope.launch(Dispatchers.IO) {
             runCatching { moe.rukamori.archivetune.resona.SmartDownloads.scheduleFromSettings(this@App) }

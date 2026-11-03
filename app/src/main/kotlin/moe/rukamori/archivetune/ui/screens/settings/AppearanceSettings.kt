@@ -458,11 +458,11 @@ fun AppearanceSettings(navController: NavController) {
         mutableStateOf(false)
     }
 
-    LaunchedEffect(isPlayerStyleCustomizationEnabled, playerBackground) {
-        if (!isPlayerStyleCustomizationEnabled && playerBackground != PlayerBackgroundStyle.DEFAULT) {
-            onPlayerBackgroundChange(PlayerBackgroundStyle.DEFAULT)
-        }
-    }
+    val (resonaGradientMode, onResonaGradientModeChange) =
+        rememberEnumPreference(
+            moe.rukamori.archivetune.resona.ResonaGradientModeKey,
+            defaultValue = moe.rukamori.archivetune.resona.ResonaGradientMode.CANVAS,
+        )
 
     LaunchedEffect(isPlayerStyleCustomizationEnabled) {
         if (!isPlayerStyleCustomizationEnabled) {
@@ -826,40 +826,19 @@ fun AppearanceSettings(navController: NavController) {
                     )
                 }
 
+                // Resona: the player background is always a colour gradient (as on the iPad).
                 item {
                     EnumListPreference(
                         title = { Text(stringResource(R.string.player_background_style)) },
-                        description =
-                            if (isPlayerStyleCustomizationEnabled) {
-                                null
-                            } else {
-                                stringResource(R.string.player_background_style_v8_v9_desc)
-                            },
+                        description = stringResource(R.string.resona_gradient_desc),
                         icon = { Icon(painterResource(R.drawable.gradient), null) },
-                        selectedValue = playerBackground,
-                        onValueSelected = { selectedBackground ->
-                            onPlayerBackgroundChange(selectedBackground)
-                            when {
-                                selectedBackground == PlayerBackgroundStyle.CUSTOM -> {
-                                    onLyricsBackgroundChange(LyricsBackgroundStyle.CUSTOM)
-                                }
-
-                                configuredLyricsBackground == LyricsBackgroundStyle.CUSTOM -> {
-                                    onLyricsBackgroundChange(LyricsBackgroundStyle.DEFAULT)
-                                }
-                            }
-                        },
-                        isEnabled = isPlayerStyleCustomizationEnabled,
+                        selectedValue = resonaGradientMode,
+                        onValueSelected = onResonaGradientModeChange,
                         valueText = {
                             when (it) {
-                                PlayerBackgroundStyle.DEFAULT -> stringResource(R.string.follow_theme)
-                                PlayerBackgroundStyle.GRADIENT -> stringResource(R.string.gradient)
-                                PlayerBackgroundStyle.CUSTOM -> stringResource(R.string.custom)
-                                PlayerBackgroundStyle.BLUR -> stringResource(R.string.player_background_blur)
-                                PlayerBackgroundStyle.COLORING -> stringResource(R.string.coloring)
-                                PlayerBackgroundStyle.BLUR_GRADIENT -> stringResource(R.string.blur_gradient)
-                                PlayerBackgroundStyle.GLOW -> stringResource(R.string.glow)
-                                PlayerBackgroundStyle.GLOW_ANIMATED -> "Glow Animated"
+                                moe.rukamori.archivetune.resona.ResonaGradientMode.CANVAS -> stringResource(R.string.resona_gradient_canvas)
+                                moe.rukamori.archivetune.resona.ResonaGradientMode.COVER -> stringResource(R.string.resona_gradient_cover)
+                                moe.rukamori.archivetune.resona.ResonaGradientMode.STATIC -> stringResource(R.string.resona_gradient_static)
                             }
                         },
                     )

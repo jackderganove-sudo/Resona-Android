@@ -48,4 +48,8 @@
     <string name="whats_new_open_failed">Release-Notes konnten nicht geöffnet werden.</string>
     <!-- Same name as on the iPad. -->
     <string name="liked_songs">Lieblingssongs</string>
+    <string name="resona_gradient_canvas">Animierter Verlauf (Canvas)</string>
+    <string name="resona_gradient_cover">Animierter Verlauf (Cover)</string>
+    <string name="resona_gradient_static">Statischer Verlauf</string>
+    <string name="resona_gradient_desc">Immer ein Farbverlauf. Canvas: folgt den Farben des Canvas (das Video bleibt unsichtbar); ohne Canvas fließen die Cover-Farben langsam. Pausiert mit der Musik und im Energiesparmodus.</string>
 </resources>

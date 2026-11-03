@@ -3964,6 +3964,18 @@ fun PlayerBackground(
     val backgroundThumbnailUrl = backgroundSwapState.displayUrl
     val styleAppliesBlur =
         effectiveBlurRadius > 0f && effectiveBlurRadius >= 0.5f
+    // Resona: always the colour gradient (canvas colours / cover), as on the iPad.
+    if (playerBackground == PlayerBackgroundStyle.GRADIENT) {
+        val resonaPlayer = moe.rukamori.archivetune.LocalPlayerConnection.current
+        val resonaPlaying =
+            resonaPlayer?.isPlaying?.collectAsState()?.value ?: false
+        moe.rukamori.archivetune.resona.ResonaGradientBackground(
+            mediaId = mediaMetadata?.id,
+            coverColors = gradientColors,
+            isPlaying = resonaPlaying,
+        )
+        return
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         when (playerBackground) {
             PlayerBackgroundStyle.BLUR -> {

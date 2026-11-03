@@ -358,8 +358,10 @@ fun BottomSheetPlayer(
     )
     val playerUsesFixedBackground =
         playerDesignStyle == PlayerDesignStyle.V8 || playerDesignStyle == PlayerDesignStyle.V9 || playerDesignStyle == PlayerDesignStyle.V10
-    val playerBackground =
-        if (playerUsesFixedBackground) PlayerBackgroundStyle.DEFAULT else storedPlayerBackground
+    // Resona: the player background is always the colour gradient (all designs).
+    @Suppress("UNUSED_VARIABLE")
+    val ignoredStoredBackground = storedPlayerBackground to playerUsesFixedBackground
+    val playerBackground = PlayerBackgroundStyle.GRADIENT
 
     // Custom background preferences (image + effects)
     val (playerCustomImageUri) = rememberPreference(PlayerCustomImageUriKey, "")

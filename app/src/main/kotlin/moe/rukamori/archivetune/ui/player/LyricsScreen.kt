@@ -49,6 +49,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -534,9 +535,13 @@ private fun LyricsScreenBackground(
     ) {
         when (style) {
             LyricsBackgroundStyle.DEFAULT -> {
-                AppleMusicBackground(
-                    mediaMetadata = mediaMetadata,
-                    gradientColors = gradientColors,
+                // Resona: same colour gradient as the player (canvas colours / cover).
+                val resonaPlayer = moe.rukamori.archivetune.LocalPlayerConnection.current
+                val resonaPlaying = resonaPlayer?.isPlaying?.collectAsState()?.value ?: false
+                moe.rukamori.archivetune.resona.ResonaGradientBackground(
+                    mediaId = mediaMetadata?.id,
+                    coverColors = gradientColors,
+                    isPlaying = resonaPlaying,
                 )
             }
 
