@@ -73,6 +73,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -508,6 +509,11 @@ fun LyricsEnhanced(
                                 phoneticTextStyle = phoneticTextStyle,
                                 blendMode = BlendMode.SrcOver,
                                 useBlurEffect = lyricsLineBlur,
+                                // Resona: same depth step and line-change glide as the
+                                // iPad (1.4 pt blur per line of distance; one spring,
+                                // response 0.5 s, damping 0.78).
+                                blurDelta = with(LocalDensity.current) { 1.4.dp.toPx() },
+                                scrollAnimationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.78f, stiffness = 158f),
                                 showTranslation = showTranslations,
                                 showPhonetic = showPhonetics,
                                 anchor = lyricsViewportAnchor,
