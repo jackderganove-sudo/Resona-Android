@@ -79,6 +79,12 @@ import moe.rukamori.archivetune.utils.joinByBullet
 import sh.calvin.reorderable.DragGestureDetector
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.shadow
+import androidx.compose.animation.core.animateDpAsState
 
 private val QueueDragGestureDetector = DragGestureDetector { onDragStart, onDragEnd, onDragCancel, onDrag ->
     detectDragGestures(
@@ -270,6 +276,15 @@ private fun QueueSongRow(
         else -> colors.surfaceContainerLow
     }
     val container by animateColorAsState(target, MaterialTheme.motionScheme.fastEffectsSpec(), label = "QueueRowColor")
+    // Resona: text on the current row uses the colour paired with its
+    // container (white on a light grey row was unreadable for B/W covers).
+    val onContainer = when {
+        dragging -> colors.onSurface
+        entry.current -> colors.onPrimaryContainer
+        else -> Color.Unspecified
+    }
+    // Lifted row: soft shadow, fully rounded (round 11, same as the iPad).
+    val lift by animateDpAsState(if (dragging) 8.dp else 0.dp, label = "QueueRowLift")
     val click = remember(entry.id, onAction) { { onAction(QueueAction.Play(entry.id)) } }
     val select = remember(entry.id, onAction) { { onAction(QueueAction.Select(entry.id)) } }
     val menu = remember(entry.id, onAction) { { onAction(QueueAction.Menu(entry.id)) } }
@@ -303,6 +318,7 @@ private fun QueueSongRow(
         shapes = shapes,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
+            .shadow(lift, RoundedCornerShape(16.dp), clip = false)
             .semantics { customActions = accessibility },
         colors = ListItemDefaults.segmentedColors(containerColor = container),
         leadingContent = {
@@ -321,9 +337,9 @@ private fun QueueSongRow(
         overlineContent = if (entry.current) {
             {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(painterResource(if (controls.playing) R.drawable.play else R.drawable.pause), null, Modifier.size(16.dp))
+                    Icon(painterResource(if (controls.playing) R.drawable.play else R.drawable.pause), null, Modifier.size(16.dp), tint = onContainer.takeOrElse { LocalContentColor.current })
                     Text(stringResource(if (controls.playing) R.string.playing_desc else R.string.together_playback_paused),
-                        style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = onContainer,
                         modifier = Modifier.padding(start = 4.dp))
                 }
             }
@@ -333,6 +349,7 @@ private fun QueueSongRow(
             Text(
                 metadata,
                 style = MaterialTheme.typography.bodyMedium,
+                color = onContainer.takeOrElse { LocalContentColor.current }.copy(alpha = if (onContainer.isSpecified) 0.8f else 1f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -347,16 +364,19 @@ private fun QueueSongRow(
                             Icon(
                                 painterResource(if (controls.liked) R.drawable.favorite else R.drawable.favorite_border),
                                 stringResource(if (controls.liked) R.string.action_remove_like else R.string.action_like),
+                                tint = onContainer.takeOrElse { LocalContentColor.current },
                             )
                         }
                     }
-                    IconButton(onClick = menu) { Icon(painterResource(R.drawable.more_vert), stringResource(R.string.more_label)) }
+                    IconButton(onClick = menu) {
+                        Icon(painterResource(R.drawable.more_vert), stringResource(R.string.more_label), tint = onContainer.takeOrElse { LocalContentColor.current })
+                    }
                 }
             }
         },
     ) {
         Text(entry.title, style = if (entry.current) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
-            fontWeight = if (entry.current) FontWeight.Bold else FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            color = onContainer, fontWeight = if (entry.current) FontWeight.Bold else FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
 
