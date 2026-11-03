@@ -19,8 +19,8 @@ bleiben bewusst.
 | Bibliothek-Kacheln | iPad-Namen | „Lieblingssongs“ statt „Songs, die ich mag“ | ja – Android |
 | „Was ist neu“ | iPad-Begriffe | Android war auf Deutsch unübersetzt; jetzt „Neu in Resona“, Neu/Verbessert/Behoben | ja – Android |
 | Player Standard-Stil | gleich | Android-Player (ArchiveTune V-Design) und iPad sehen schon gleich aus: Cover, Titel + Teilen/Like/…, Wellen-Fortschritt, Pillen-Steuerung, Warteschlange/Sleep/Songtext unten | ja |
-| Player Editorial/Immersiv | iPad | auf Android vorhanden als V10 Editorial; Immersiv nur iPad | offen (Android) |
-| Codec-Zeile | iPad | „Opus · WEBM • kbps • kHz • MB“ ist genauer als Androids „WEBM • kbps • MB“ | offen (Android) |
+| Player Editorial/Immersiv | gleich | Android hat beide aus ArchiveTune 15 (V10 Editorial, Immersive Player), das iPad seit v0.8.12 nachgebaut; iPad-Immersiv jetzt mit einblendbarer Steuerung wie Android | ja |
+| Codec-Zeile | iPad | „Opus · WEBM • kbps • kHz • MB“ ist genauer als Androids „WEBM • kbps • MB“ | ja – Android (alle drei Player-Designs) |
 | Mini-Player | gleich | Cover, Titel/Künstler, Zurück/Play/Weiter | ja |
 | Lyrics-Ansicht | gleich | Kopf mit Cover, ✕ und …, Fortschritt + Steuerung unten | ja |
 | Warteschlange | gleich | beide mit Empfehlungs-Chips, Sperren, Auswahl | ja |
