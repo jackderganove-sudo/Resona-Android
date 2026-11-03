@@ -387,27 +387,13 @@ fun QueueCollapsedContentV2(
 
     Column(modifier = modifier.fillMaxWidth()) {
         if (showCodecOnPlayer && currentFormat != null) {
-            val codec =
-                currentFormat.codecs
-                    .takeIf { it.isNotBlank() }
-                    ?: currentFormat.containerLabel()
-
-            val container = currentFormat.containerLabel()
-
-            val codecLabel =
-                if (container.isNotBlank() && !codec.equals(container, ignoreCase = true)) {
-                    "$codec ($container)"
-                } else {
-                    codec
-                }
-
-            val bitrate = currentFormat.formattedBitrate()
-
+            // Resona: same audio details line as on the iPad.
+            val codecLabel = moe.rukamori.archivetune.resona.ResonaCodecLine.label(currentFormat)
+            val bitrate = moe.rukamori.archivetune.resona.ResonaCodecLine.bitrate(currentFormat)
             val extraText =
                 listOfNotNull(
                     currentFormat.sourceName,
-                    currentFormat.formattedSampleRate(),
-                    currentFormat.formattedFileSize().takeIf { it.isNotBlank() },
+                    moe.rukamori.archivetune.resona.ResonaCodecLine.extras(currentFormat).takeIf { it.isNotBlank() },
                 ).joinToString(separator = " • ")
 
             CodecInfoRow(
@@ -618,13 +604,10 @@ fun QueueCollapsedContentV3(
 
     Column(modifier = modifier.fillMaxWidth()) {
         if (showCodecOnPlayer && currentFormat != null) {
-            val container = currentFormat.containerLabel()
-            val bitrate = currentFormat.autoRateDisplay()
-
             CodecInfoRow(
-                codec = container,
-                bitrate = bitrate,
-                fileSize = "",
+                codec = moe.rukamori.archivetune.resona.ResonaCodecLine.label(currentFormat),
+                bitrate = moe.rukamori.archivetune.resona.ResonaCodecLine.bitrate(currentFormat),
+                fileSize = moe.rukamori.archivetune.resona.ResonaCodecLine.extras(currentFormat),
                 textColor = textBackgroundColor.copy(alpha = 0.5f),
             )
         }
@@ -766,14 +749,10 @@ fun QueueCollapsedContentV1(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (showCodecOnPlayer && currentFormat != null) {
-            val container = currentFormat.containerLabel()
-            val bitrate = currentFormat.autoRateDisplay()
-            val fileSize = currentFormat.formattedFileSize()
-
             CodecInfoRow(
-                codec = container,
-                bitrate = bitrate,
-                fileSize = fileSize,
+                codec = moe.rukamori.archivetune.resona.ResonaCodecLine.label(currentFormat),
+                bitrate = moe.rukamori.archivetune.resona.ResonaCodecLine.bitrate(currentFormat),
+                fileSize = moe.rukamori.archivetune.resona.ResonaCodecLine.extras(currentFormat),
                 textColor = textBackgroundColor.copy(alpha = 0.7f),
             )
         }
@@ -913,14 +892,10 @@ fun QueueCollapsedContentV4(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (showCodecOnPlayer && currentFormat != null) {
-            val container = currentFormat.containerLabel()
-            val bitrate = currentFormat.autoRateDisplay()
-            val fileSize = currentFormat.formattedFileSize()
-
             CodecInfoRow(
-                codec = container,
-                bitrate = bitrate,
-                fileSize = fileSize,
+                codec = moe.rukamori.archivetune.resona.ResonaCodecLine.label(currentFormat),
+                bitrate = moe.rukamori.archivetune.resona.ResonaCodecLine.bitrate(currentFormat),
+                fileSize = moe.rukamori.archivetune.resona.ResonaCodecLine.extras(currentFormat),
                 textColor = textBackgroundColor.copy(alpha = 0.6f),
             )
         }
@@ -1155,14 +1130,10 @@ fun QueueCollapsedContentV8(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (showCodecOnPlayer && currentFormat != null) {
-            val container = currentFormat.containerLabel()
-            val bitrate = currentFormat.autoRateDisplay()
-            val fileSize = currentFormat.formattedFileSize()
-
             CodecInfoRow(
-                codec = container,
-                bitrate = bitrate,
-                fileSize = fileSize,
+                codec = moe.rukamori.archivetune.resona.ResonaCodecLine.label(currentFormat),
+                bitrate = moe.rukamori.archivetune.resona.ResonaCodecLine.bitrate(currentFormat),
+                fileSize = moe.rukamori.archivetune.resona.ResonaCodecLine.extras(currentFormat),
                 textColor = textBackgroundColor.copy(alpha = 0.6f),
             )
         }
@@ -1344,14 +1315,10 @@ fun QueueCollapsedContentV9(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (showCodecOnPlayer && currentFormat != null) {
-            val container = currentFormat.containerLabel()
-            val bitrate = currentFormat.autoRateDisplay()
-            val fileSize = currentFormat.formattedFileSize()
-
             CodecInfoRow(
-                codec = container,
-                bitrate = bitrate,
-                fileSize = fileSize,
+                codec = moe.rukamori.archivetune.resona.ResonaCodecLine.label(currentFormat),
+                bitrate = moe.rukamori.archivetune.resona.ResonaCodecLine.bitrate(currentFormat),
+                fileSize = moe.rukamori.archivetune.resona.ResonaCodecLine.extras(currentFormat),
                 textColor = textBackgroundColor.copy(alpha = 0.6f),
             )
         }
