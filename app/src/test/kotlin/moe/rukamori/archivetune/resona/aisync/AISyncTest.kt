@@ -15,7 +15,7 @@ import org.junit.Test
 class AISyncTest {
     private val lines = listOf("la la erste Zeile", "zweite Zeile mit Wort Wort", "dritte Reihe hier", "vierte Zeile endet bald")
 
-    private fun recognition(of lines: List<String>, start: Double = 2.0): Pair<List<RecognizedWord>, List<Double>> {
+    private fun recognition(lines: List<String>, start: Double = 2.0): Pair<List<RecognizedWord>, List<Double>> {
         var t = start
         val words = ArrayList<RecognizedWord>()
         val starts = ArrayList<Double>()

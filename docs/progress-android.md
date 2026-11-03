@@ -171,3 +171,41 @@ Platzhaltertexten.
 Gewollt (ArchiveTune): Schnellaktionen Musikerkennung, Music Together,
 Zufallswiedergabe. Kein Überbleibsel; Gestaltung wird in Teil C (Angleichung)
 entschieden.
+
+## Runde 11 – Lyrics-Scroll ruckelt (nur mit Spotify-Canvas)
+
+Gemessen auf dem Pixel 11 Pro (Panel 120 Hz), wip-Build (Release mit R8),
+Songtext im Standardmodus „Enhanced“ (accompanist lyrics-ui), Zeilen-Blur an,
+Farbverlauf-Hintergrund an, Song mit Canvas. Nur Zahlen, keine Liedtexte.
+
+### Vorher
+`dumpsys gfxinfo` nach `reset`, 30 s Songtext:
+
+| Wert | vorher |
+|---|---|
+| Frames | 1726 |
+| Janky Frames | 489 (28,3 %) |
+| 50./90./95./99. Perzentil | 12 / 61 / 65 / 69 ms |
+| Missed Vsync / Slow UI thread / Slow bitmap uploads | 387 / 303 / 480 |
+| GPU 50./99. Perzentil | 3 / 13 ms |
+
+Perfetto-Trace (12 s, `gfx view sched freq`), Auswertung per trace_processor:
+- Hauptthread unauffällig (Recomposition ≤ 3 ms, `Lyrics.drawRow` ≤ 0,6 ms) –
+  er wartet in `postAndWait` auf den RenderThread.
+- RenderThread: `syncFrameState`/`prepareTree` bis 41 ms, darin
+  `allocateImageMemory` ≈ 21× pro Frame.
+- **Ursache:** in 9,7 s mehrere Tausend `Texture upload` der gerasterten
+  Songtext-Zeilen (≈ 2000×310 px, ≈ 0,5 ms je Stück, 5–6 pro Frame) und 174
+  Uploads eines 1080×1080-Bildes. Die Zeilen-Raster sind gecacht, wurden aber
+  aus dem GPU-Textur-Cache verdrängt und jeden Frame neu hochgeladen.
+- Auslöser (Hinweis aus dem Test: „nur wenn Canvas aktiv“): Der Canvas-Clip
+  lief als Video im Cover des Players **unter** dem Songtext weiter (der
+  Songtext ist ein Overlay über dem Player). Jedes Video-Frame erzwang ein
+  neues Bild des ganzen Fensters, und Video plus Offscreen-Ebenen sprengten
+  den Textur-Cache.
+
+### Fix
+- Canvas-Video läuft nur, wenn es sichtbar ist: nicht bei offenem Songtext,
+  nicht bei eingeklapptem Player (`Player.kt`, `artworkCanvas`). Der
+  Farbverlauf nutzt weiter die Canvas-Farben (einmal dekodierte
+  Farb-Zeitleiste, kein Video).
