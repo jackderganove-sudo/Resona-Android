@@ -148,3 +148,6 @@
 
 # engine HTTP Android/OkHttp Ktor
 -dontwarn kotlinx.coroutines.**
+
+# Resona AI sync: JNI symbols are bound to this class and its method names.
+-keep class moe.rukamori.archivetune.resona.aisync.WhisperNative { *; }

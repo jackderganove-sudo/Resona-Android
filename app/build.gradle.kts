@@ -62,6 +62,14 @@ android {
     namespace = "moe.rukamori.archivetune"
     compileSdk = 37
     ndkVersion = "30.0.16248370"
+
+    // Resona AI sync: whisper.cpp (submodule native/whisper.cpp) via JNI.
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
     compileSdkMinor = 2
 
     defaultConfig {

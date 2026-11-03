@@ -363,7 +363,7 @@
     <string name="update_text">Aktualisieren</string>
     <string name="translate">Übersetzen</string>
     <string name="language_label">Sprache</string>
-    <string name="lyrics">Text</string>
+    <string name="lyrics">Songtext</string>
     <string name="translation_success">Übersetzung gespeichert</string>
     <string name="translation_failed">Übersetzung fehlgeschlagen</string>
     <string name="discord_button_options">Schaltflächenoptionen</string>

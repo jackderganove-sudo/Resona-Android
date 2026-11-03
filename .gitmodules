@@ -10,3 +10,6 @@
 [submodule "morideobfuscator"]
 	path = morideobfuscator
 	url = https://github.com/rukamori/morideobfuscator.git
+[submodule "native/whisper.cpp"]
+	path = native/whisper.cpp
+	url = https://github.com/ggml-org/whisper.cpp.git

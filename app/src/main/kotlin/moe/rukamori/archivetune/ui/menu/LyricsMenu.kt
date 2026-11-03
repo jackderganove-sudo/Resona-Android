@@ -208,6 +208,20 @@ fun LyricsMenu(
         mutableStateOf(false)
     }
 
+    // Resona: AI sync / calibration (whisper.cpp on the device, round 11 D1).
+    var showAISync by rememberSaveable { mutableStateOf(false) }
+    if (showAISync) {
+        val metadata = mediaMetadataProvider()
+        moe.rukamori.archivetune.resona.aisync.ResonaAISyncDialog(
+            lyrics = lyricsProvider()?.lyrics.orEmpty(),
+            mediaId = metadata.id,
+            durationSeconds = metadata.duration,
+            onSave = { viewModel.updateLyrics(metadata, it) },
+            onSearchOther = { showSearchDialog = true },
+            onDismiss = { showAISync = false },
+        )
+    }
+
     val searchMediaMetadata =
         remember(showSearchDialog) {
             mediaMetadataProvider()
@@ -745,6 +759,18 @@ fun LyricsMenu(
                                 },
                                 text = stringResource(R.string.resona_tap_sync),
                                 onClick = { showTapSync = true },
+                            ),
+                            NewAction(
+                                icon = {
+                                    Icon(
+                                        painter = painterResource(R.drawable.sync),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(28.dp),
+                                        tint = MaterialTheme.colorScheme.primary,
+                                    )
+                                },
+                                text = stringResource(R.string.resona_ai_sync),
+                                onClick = { showAISync = true },
                             ),
                             NewAction(
                                 icon = {
