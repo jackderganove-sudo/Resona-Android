@@ -93,7 +93,7 @@
 
                 <data
                     android:host="together"
-                    android:scheme="archivetune" />
+                    android:scheme="resona" />
             </intent-filter>
 
             <!-- Youtube filter -->
@@ -197,7 +197,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="archivetune" android:host="module-session" />
+                <data android:scheme="resona" android:host="module-session" />
             </intent-filter>
         </activity>
 

@@ -130,3 +130,44 @@ Start / Updates
   des Abgleichs (LNDS + Theil–Sen). Das ist ein eigener großer Schritt mit
   vielen CI-Durchläufen (je ~40 min); bis dahin gibt es Selbst-Sync und den
   Versatz pro Song.
+
+## Runde 11 – Teil A (Android-Fixes)
+
+### A1 Logo
+ArchiveTunes Zeichen steckte in drei Vektoren, nicht nur im Launcher-Icon:
+`about_appbar` (Logo neben „Resona“ im Kopf der Startseite), `about_splash`
+(Über-Seite, Platzhalter im Mini-Player/Cover) und `small_icon`
+(Benachrichtigung, Update-Benachrichtigung, Widgets, Teilen-Karten, Rückblick).
+Alle drei zeigen jetzt das Resona-Glyph (Punkt + drei Bögen). Der
+Android-12-Splash nutzt das adaptive Launcher-Icon (schon Resona), das
+Monochrom-/Themed-Icon ebenso.
+
+### A2 Lyrics als Text
+Selbst-Sync zeigte TTML roh als XML. Neu: `ResonaLyricsText` zerlegt TTML, LRC,
+Enhanced LRC, QRC und Klartext in Zeilen (ArchiveTunes Parser, bei Fehlern ein
+eigener TTML-Leser). Genutzt von Selbst-Sync, Lyrics-Editor und dem Eingabefeld
+der Übersetzung (dort wird TTML zu LRC mit erhaltenen Zeiten statt XML).
+Teilen/Bild-Karten nutzen schon ArchiveTunes geparste Zeilen. Unit-Tests nur mit
+Platzhaltertexten.
+
+### A3 ArchiveTune-Überbleibsel (Suche über Code, Manifest, alle Sprachen)
+| Fund | Sichtbar? | Maßnahme |
+|---|---|---|
+| Logo in `about_appbar`, `about_splash`, `small_icon` | ja | Resona-Glyph |
+| Anime-Platzhalterbilder `ic_music_placeholder.png` (Eckenradius-Vorschau), `anime_blank.png` (private Playlist) | ja | entfernt; Glyph-Vorschau bzw. Schloss-Icon |
+| GMS-Werbe-/Unterstützungskarte „Support ArchiveTune“ in der Bibliothek (öffnet archivetune.miuka.moe/support) | ja | aus |
+| Deep-Links `archivetune://together`, `archivetune://login`, `archivetune://module-session` | ja (Links, Teilen) | `resona://…` (kein Konflikt mit installiertem ArchiveTune) |
+| Log-Export `archivetune-log-….txt` | ja | `resona-log-….txt` |
+| KI-Top-Mix-Prompt „music curator for ArchiveTune“ | indirekt | „for Resona“ |
+| User-Agent Mitwirkenden-Abruf | nein | „Resona“ |
+| Stern-/Spenden-Dialog (miuka.moe/donate) | war schon aus (v1.0.1) | – |
+| News, Listen-Together-Server, Daten-Server, Update-Quelle | war schon aus/umgestellt (v1.0.1) | – |
+| Texte in allen Sprachen | v1.0.1 ersetzt | geprüft: nur noch Credits, rukamoris eigener Unterstützertext (Dialog aus), Gatekeeper (aus) |
+| Interne Schlüssel (`archivetune_download_format_id`, Queue-Metadaten, WebView-Profil, Theme-Namen, Paketname `moe.rukamori.archivetune`) | nein | bleiben – Umbenennen würde gespeicherte Daten/Downloads brechen |
+| Backup-Dateiname | – | nutzt schon `app_name` → „Resona…“ |
+| Notification-Channels, Shortcuts | – | Namen aus Strings (Resona), keine statischen Shortcuts |
+
+### A4 Grüner „…“-Knopf auf der Startseite
+Gewollt (ArchiveTune): Schnellaktionen Musikerkennung, Music Together,
+Zufallswiedergabe. Kein Überbleibsel; Gestaltung wird in Teil C (Angleichung)
+entschieden.

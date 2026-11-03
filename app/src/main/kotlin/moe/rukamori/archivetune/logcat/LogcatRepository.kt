@@ -95,7 +95,7 @@ class LogcatRepository
                 val exportFile =
                     File(
                         exportDirectory,
-                        "archivetune-log-${System.currentTimeMillis()}.txt",
+                        "resona-log-${System.currentTimeMillis()}.txt",
                     )
                 exportFile.bufferedWriter(Charsets.UTF_8).use { writer ->
                     writer.write(content)

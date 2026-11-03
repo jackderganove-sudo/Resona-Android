@@ -42,7 +42,8 @@ import moe.rukamori.archivetune.ads.presentation.SupportArchiveTuneScreenState
 import moe.rukamori.archivetune.ads.presentation.SupportArchiveTuneUiEvent
 import moe.rukamori.archivetune.ads.presentation.SupportArchiveTuneViewModel
 
-internal const val supportArchiveTuneAvailable = true
+// Resona: no ArchiveTune support/ad card (opens archivetune.miuka.moe/support).
+internal const val supportArchiveTuneAvailable = false
 
 @Composable
 internal fun SupportArchiveTuneSection(

@@ -124,7 +124,7 @@ class RefreshLibraryTopMixesUseCase
                     config = config,
                     systemPrompt =
                         """
-                        You are a music curator for ArchiveTune.
+                        You are a music curator for Resona.
                         Analyze the provided candidate list of songs (representing the user's recent listening history), focusing on artists, titles, and album names to infer genres, styles, eras, and moods.
                         Build up to $TopMixCountLimit personal mixes based on this history.
                         Each mix should have a distinct musical identity, style, mood, or theme.

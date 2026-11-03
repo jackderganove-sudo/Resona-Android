@@ -718,7 +718,7 @@ class MusicService :
         if (lastPrompt?.first == mediaId && now - lastPrompt.second < 10000L) return
         lastLoginRecoveryPrompt = mediaId to now
 
-        val deepLink = Uri.parse("archivetune://login?url=${Uri.encode(targetUrl)}")
+        val deepLink = Uri.parse("resona://login?url=${Uri.encode(targetUrl)}")
         val intent =
             Intent(Intent.ACTION_VIEW, deepLink, this, MainActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

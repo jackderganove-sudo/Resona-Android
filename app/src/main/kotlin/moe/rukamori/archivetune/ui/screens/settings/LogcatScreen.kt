@@ -126,7 +126,7 @@ fun LogcatScreen(
                     val exportIntent =
                         Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
-                            clipData = ClipData.newRawUri("archivetune-log.txt", effect.uri)
+                            clipData = ClipData.newRawUri("resona-log.txt", effect.uri)
                             putExtra(Intent.EXTRA_STREAM, effect.uri)
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
