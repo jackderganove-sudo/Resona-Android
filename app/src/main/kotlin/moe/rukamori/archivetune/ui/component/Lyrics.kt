@@ -941,11 +941,13 @@ fun Lyrics(
                                 !isSynced || index == displayedCurrentLineIndex || (isSelectionModeActive && isSelected) ||
                                     isManualScrolling -> 0f
 
-                                distance == 1 -> 2f
+                                distance == 1 -> 1.4f
 
-                                distance == 2 -> 5f
+                                distance == 2 -> 2.8f
 
-                                else -> 12f
+                                distance == 3 -> 4.4f
+
+                                else -> 6f // Resona: same depth as the iPad
                             }
 
                         val animatedBlur by animateFloatAsState(

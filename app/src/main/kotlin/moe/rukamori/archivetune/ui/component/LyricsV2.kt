@@ -515,9 +515,10 @@ fun LyricsV2(
                     val targetInstrBlur =
                         when {
                             !isSynced || isActive || isManualScrolling -> 0f
-                            distanceFromActive == 1 -> 2f
-                            distanceFromActive == 2 -> 5f
-                            else -> 12f
+                            distanceFromActive == 1 -> 1.4f
+                            distanceFromActive == 2 -> 2.8f
+                            distanceFromActive == 3 -> 4.4f
+                            else -> 6f // Resona: same depth as the iPad
                         }
                     val animatedInstrBlur by androidx.compose.animation.core.animateFloatAsState(
                         targetValue = targetInstrBlur,
@@ -635,9 +636,10 @@ fun LyricsV2(
                 val targetBlur =
                     when {
                         !isSynced || isActive || (isSelectionModeActive && isSelected) || isManualScrolling -> 0f
-                        distanceFromActive == 1 -> 2f
-                        distanceFromActive == 2 -> 5f
-                        else -> 12f
+                        distanceFromActive == 1 -> 1.4f
+                        distanceFromActive == 2 -> 2.8f
+                        distanceFromActive == 3 -> 4.4f
+                        else -> 6f // Resona: same depth as the iPad
                     }
                 val animatedBlur by androidx.compose.animation.core.animateFloatAsState(
                     targetValue = targetBlur,
