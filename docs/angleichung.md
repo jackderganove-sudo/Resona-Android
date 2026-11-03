@@ -27,3 +27,17 @@ bleiben bewusst.
 | Einstellungen | iPad-Gruppierung | Konto/Verlauf · Aussehen/Wiedergabe/Canvas/Songtext/Inhalt · Integration/Equalizer/Speicher/Über – Android hat mehr Unterseiten | offen (Android) |
 | Glas-Look (Mini-Player, Leisten, Sheets, Player) | iPad | Teil D2 | offen |
 | KI-Sync/-Kalibrierung | iPad | Teil D1 | offen |
+
+## Theming (Ergänzung)
+
+| Element | Gewinner | Ergebnis / Begründung | erledigt |
+|---|---|---|---|
+| Schriftfamilie | gleich (Poppins) | beide Poppins; Android hatte nur einen Schnitt (Medium/Bold künstlich) → jetzt dieselben vier Schnitte wie das iPad (Regular/Medium/SemiBold/Bold, OFL) | ja – Android |
+| Typo-Skala (Display/Headline/Title/Body/Label) | gleich | zentral definiert auf beiden (iPad `M3TypeStyle.spec`, Android `Type.kt` → `MaterialTheme.typography`), identische Werte: Größe, Zeilenhöhe, Gewicht, Laufweite (M3-Grundskala) | ja (geprüft) |
+| Lyrics-Schrift | iPad (Systemschrift fett) | iPad nutzt SF Pro; Android lieferte SF Pro als Datei mit (Lizenz verbietet das außerhalb von Apple) → Android-Systemschrift fett | ja – Android |
+| Akzent aus dem Cover, Hell/Dunkel | gleich | beide leiten das Farbschema dynamisch aus dem Cover ab (M3 tonal) | ja (geprüft auf Screenshots) |
+| AMOLED/Schwarz | Android | Android hat „Pure Black“; iPad: „Einfarbig“-Hintergrund im Player, kein App-weites Schwarz | offen (iPad) |
+| Eckenradien | gleich | beide M3-Formen (extraLarge 28, large 16, medium 12) | ja (geprüft) |
+| Icons | je Plattform | iPad: SF Symbols, Android: Material Symbols – SF Symbols dürfen auf Android nicht verwendet werden; beide outlined, ähnliche Strichstärke | bewusst so |
+| Dialoge / Bottom-Sheets | iPad (Glas) | Android-Dialoge nutzen M3-Container (surfaceContainerHigh) statt Glas → mit D2 (gemeinsame Glas-Komponente) | offen (D2) |
+| Systemleisten | gleich | beide randlos, Inhalte unter Status-/Navigationsleiste | ja (geprüft) |
