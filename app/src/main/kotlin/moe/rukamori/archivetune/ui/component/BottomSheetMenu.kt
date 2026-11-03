@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 
@@ -70,9 +71,12 @@ class MenuState(
 fun BottomSheetMenu(
     modifier: Modifier = Modifier,
     state: MenuState,
-    background: Color = MaterialTheme.colorScheme.surface,
+    background: Color = Color.Unspecified,
 ) {
     val focusManager = LocalFocusManager.current
+    // Resona: menus are glass (round 11 D2) — the app behind is blurred on Android 12+.
+    val windowBlur = moe.rukamori.archivetune.resona.rememberCrossWindowBlur()
+    val sheetColor = background.takeOrElse { moe.rukamori.archivetune.resona.resonaSheetColor(windowBlur) }
 
     state.dialogContent?.invoke()
 
@@ -82,7 +86,7 @@ fun BottomSheetMenu(
                 focusManager.clearFocus()
                 state.isVisible = false
             },
-            containerColor = background,
+            containerColor = sheetColor,
             contentColor = MaterialTheme.colorScheme.onSurface,
             dragHandle = {
                 Box(
@@ -102,6 +106,7 @@ fun BottomSheetMenu(
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
             ) {
+                moe.rukamori.archivetune.resona.ResonaWindowBlurBehind(windowBlur)
                 state.content(this)
             }
         }

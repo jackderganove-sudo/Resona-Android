@@ -209,3 +209,18 @@ Perfetto-Trace (12 s, `gfx view sched freq`), Auswertung per trace_processor:
   nicht bei eingeklapptem Player (`Player.kt`, `artworkCanvas`). Der
   Farbverlauf nutzt weiter die Canvas-Farben (einmal dekodierte
   Farb-Zeitleiste, kein Video).
+
+### Gerätetests, gesammelt (Pixel war ~15 min nicht per adb verbunden)
+Werden am Stück gemacht, sobald das Pixel wieder verbunden ist:
+1. Lyrics-Scroll nachher: neuen wip-Build installieren, derselbe Song mit
+   Canvas, `gfxinfo reset` → 30 s Songtext → `framestats` (Janky, 90/95/99);
+   Perfetto-Trace beim Zeilenwechsel (Texture uploads, RenderThread);
+   mit Wort-Sync, Übersetzung, Farbverlauf an.
+2. Glas-Look: Miniplayer, Navigationsleiste (Screenshot neben iPad), Android 12+
+   mit Blur.
+3. KI-Sync: Dialog öffnen, Modell „Schnell“ laden (Fortschritt, Löschen),
+   Kalibrieren eines synchronisierten Songs, Laufzeit aus logcat
+   (`ResonaAISync: transcribed … in … s`), nur Zahlen loggen.
+4. Queue: Schatten der gezogenen Zeile, Lesbarkeit der aktuellen Zeile bei
+   Schwarz-Weiß-Cover.
+5. „Songtext“-Pille (statt „Text“).

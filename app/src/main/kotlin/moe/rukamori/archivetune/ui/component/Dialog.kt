@@ -99,9 +99,10 @@ fun DefaultDialog(
             Surface(
                 modifier = Modifier.heightIn(max = maxHeight),
                 shape = AlertDialogDefaults.shape,
-                color = AlertDialogDefaults.containerColor,
+                color = moe.rukamori.archivetune.resona.resonaSheetColor(moe.rukamori.archivetune.resona.rememberCrossWindowBlur()),
                 tonalElevation = AlertDialogDefaults.TonalElevation,
             ) {
+                moe.rukamori.archivetune.resona.ResonaWindowBlurBehind(moe.rukamori.archivetune.resona.rememberCrossWindowBlur())
                 Column(
                     modifier = modifier.padding(24.dp),
                 ) {
@@ -196,9 +197,10 @@ fun ActionPromptDialog(
             Surface(
                 modifier = Modifier.heightIn(max = maxHeight),
                 shape = AlertDialogDefaults.shape,
-                color = AlertDialogDefaults.containerColor,
+                color = moe.rukamori.archivetune.resona.resonaSheetColor(moe.rukamori.archivetune.resona.rememberCrossWindowBlur()),
                 tonalElevation = AlertDialogDefaults.TonalElevation,
             ) {
+                moe.rukamori.archivetune.resona.ResonaWindowBlurBehind(moe.rukamori.archivetune.resona.rememberCrossWindowBlur())
                 Column(
                     modifier = Modifier.padding(24.dp),
                 ) {
@@ -280,9 +282,10 @@ fun ListDialog(
             Surface(
                 modifier = Modifier.heightIn(max = maxHeight),
                 shape = AlertDialogDefaults.shape,
-                color = AlertDialogDefaults.containerColor,
+                color = moe.rukamori.archivetune.resona.resonaSheetColor(moe.rukamori.archivetune.resona.rememberCrossWindowBlur()),
                 tonalElevation = AlertDialogDefaults.TonalElevation,
             ) {
+                moe.rukamori.archivetune.resona.ResonaWindowBlurBehind(moe.rukamori.archivetune.resona.rememberCrossWindowBlur())
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = modifier.padding(vertical = 24.dp),
