@@ -676,7 +676,7 @@ private fun StorageLocationPickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = moe.rukamori.archivetune.resona.resonaSheetColor(false)ContainerLow,
+        containerColor = moe.rukamori.archivetune.resona.resonaSheetColor(false),
         shape = MaterialTheme.shapes.extraLarge,
         tonalElevation = 2.dp,
     ) {

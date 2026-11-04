@@ -204,23 +204,47 @@ Perfetto-Trace (12 s, `gfx view sched freq`), Auswertung per trace_processor:
   neues Bild des ganzen Fensters, und Video plus Offscreen-Ebenen sprengten
   den Textur-Cache.
 
-### Fix
-- Canvas-Video läuft nur, wenn es sichtbar ist: nicht bei offenem Songtext,
-  nicht bei eingeklapptem Player (`Player.kt`, `artworkCanvas`). Der
-  Farbverlauf nutzt weiter die Canvas-Farben (einmal dekodierte
-  Farb-Zeitleiste, kein Video).
+### Weitere Messungen (Pixel 11 Pro, je 30 s `gfxinfo`, 12 s Perfetto)
+Gleicher Song mit Canvas, wo nicht anders genannt. Nur Zahlen.
 
-### Gerätetests, gesammelt (Pixel war ~15 min nicht per adb verbunden)
-Werden am Stück gemacht, sobald das Pixel wieder verbunden ist:
-1. Lyrics-Scroll nachher: neuen wip-Build installieren, derselbe Song mit
-   Canvas, `gfxinfo reset` → 30 s Songtext → `framestats` (Janky, 90/95/99);
-   Perfetto-Trace beim Zeilenwechsel (Texture uploads, RenderThread);
-   mit Wort-Sync, Übersetzung, Farbverlauf an.
-2. Glas-Look: Miniplayer, Navigationsleiste (Screenshot neben iPad), Android 12+
-   mit Blur.
-3. KI-Sync: Dialog öffnen, Modell „Schnell“ laden (Fortschritt, Löschen),
-   Kalibrieren eines synchronisierten Songs, Laufzeit aus logcat
-   (`ResonaAISync: transcribed … in … s`), nur Zahlen loggen.
-4. Queue: Schatten der gezogenen Zeile, Lesbarkeit der aktuellen Zeile bei
-   Schwarz-Weiß-Cover.
-5. „Songtext“-Pille (statt „Text“).
+| Build / Lage | Janky | 90. / 99. Perzentil | Textur-Uploads |
+|---|---|---|---|
+| alt, quer | 41,98 % | 105 / 133 ms | 17.843 |
+| Canvas-Fix, quer | 0 % | 12 / 16 ms | 9 |
+| Canvas-Fix + Glas + Feder, hochkant | 66,41 % | 133 / 150 ms | 13.832 |
+| dieselbe Build, hochkant, Song ohne Canvas | 3,44 % | 16 / 81 ms | 9.116 |
+| dieselbe Build, hochkant, Zeilen-Blur aus | 2,03 % | 13 / 97 ms | 10 |
+
+### Ursachen
+1. Das Canvas-Video lief unter dem Songtext weiter (jedes Video-Bild ein neues
+   Fenster-Bild).
+2. Hauptursache hochkant: Der Blur pro Zeile der Bibliothek (RenderEffect) läuft
+   jeden Frame. `gfxinfo`: GPU-Cache 273 MB, 0 Byte freigebbar, 213 temporäre
+   Oberflächen (169 MB). Läuft der Cache über, wird jede gerasterte Textzeile
+   jeden Frame neu hochgeladen.
+
+### Fix
+- Canvas-Video läuft nur, wenn es sichtbar ist.
+- Tiefe als **ein** Durchgang über die ganze Liste (`LyricsDepthEffect.kt`,
+  Android 13+): scharf an der aktiven Zeile, mit Abstand 2,8 / 6 dp, symmetrisch,
+  scharf beim Scrollen von Hand. Darunter ohne Blur.
+- Zeilenwechsel als eine Feder wie auf dem iPad (Dämpfung 0,78, Response 0,5 s).
+
+### Nachher
+Messung mit dem Build mit Blur-Durchgang: folgt.
+
+## Runde 11 – weitere Funde beim Gerätetest
+- **Crash Onboarding (v1.0.1–v1.0.7):** letzte Seite suchte die entfernte
+  Spendenaktion per `.first`. Behoben; `pm clear` + Onboarding ohne Login + Start,
+  Suche, Abspielen, Bibliothek, Einstellungen auf dem Pixel ohne Absturz.
+  Instrumentation-Test `OnboardingWithoutLoginTest` läuft in der CI auf dem Emulator.
+- **Abspielen aus der Suche (mit Konto):** Eine leere Queue-Antwort leerte den
+  Player. Der Song läuft jetzt weiter, Empfehlungen füllen auf (geprüft: 18 Songs).
+  Vermutete Ursache der leeren Antwort: Antwortformat bei Konten, das der
+  Parser nicht kennt (nicht belegt).
+- **Rote Navigation:** Glas mischte ohne Song die eingebaute Standardfarbe bei.
+- **KI-Sync, erster Lauf:** 169 s Audio in 116,1 s (Schnell, 6 Threads), 0 Wörter.
+  Schwelle „keine Sprache“ aus, Sprache aus dem Songtext, zweiter Versuch mit
+  genauem Modell. Messung danach: folgt.
+- **Glas:** eine Komponente für Miniplayer und Navigation; alle `AlertDialog`s über
+  eine Hülle; Fenster-Blur ab Android 12; Sheets mit Tönung.
