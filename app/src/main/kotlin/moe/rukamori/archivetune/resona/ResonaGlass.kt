@@ -58,10 +58,14 @@ object ResonaGlass {
     val EDGE_WIDTH = 1.dp
     val BLUR_RADIUS = 28.dp
 
-    /** Cover colour of the current song (the theme seed), published by MainActivity. */
-    var coverColor by mutableStateOf(Color(0xFF2E7DB5))
+    /**
+     * Colour of the current song's cover (or the user's own theme colour),
+     * published by MainActivity. Null without either: no tint then — the theme's
+     * built-in default seed (a red) must never colour the glass.
+     */
+    var coverColor by mutableStateOf<Color?>(null)
 
-    fun tint(surface: Color, cover: Color): Color = lerp(surface, cover, COVER_MIX)
+    fun tint(surface: Color, cover: Color?): Color = if (cover == null) surface else lerp(surface, cover, COVER_MIX)
 
     val blurAvailable: Boolean get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 }

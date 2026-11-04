@@ -861,7 +861,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            androidx.compose.runtime.SideEffect { moe.rukamori.archivetune.resona.ResonaGlass.coverColor = themeColor }
+            androidx.compose.runtime.SideEffect { moe.rukamori.archivetune.resona.ResonaGlass.coverColor = themeColor.takeUnless { it == DefaultThemeColor } }
             ArchiveTuneTheme(
                 darkTheme = useDarkTheme,
                 pureBlack = pureBlack,

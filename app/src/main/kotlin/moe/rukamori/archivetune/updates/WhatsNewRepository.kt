@@ -22,7 +22,11 @@ class WhatsNewRepository @Inject constructor(
     suspend fun registerVersion(version: String): Boolean {
         val registered = context.dataStore.edit { preferences ->
             val previousVersion = preferences[WhatsNewVersionKey]
-            if (previousVersion == null || !Updater.isSameVersion(previousVersion, version)) {
+            if (previousVersion == null) {
+                // Resona: first run — nothing is "new" right after the onboarding.
+                preferences[WhatsNewVersionKey] = version
+                preferences[WhatsNewPendingKey] = false
+            } else if (!Updater.isSameVersion(previousVersion, version)) {
                 preferences[WhatsNewVersionKey] = version
                 preferences[WhatsNewPendingKey] = true
             }

@@ -63,7 +63,9 @@ class OnboardingWithoutLoginTest {
         tap(R.string.onboarding_finish)
         assertAppAlive("finishing the onboarding")
 
-        assertNotNull("Home tab missing after the onboarding", find(R.string.home, 45_000))
+        val home = find(R.string.home, 45_000)
+        val visible = device.findObjects(By.textContains("")).mapNotNull { it.text }.take(20)
+        assertNotNull("Home tab missing after the onboarding; on screen: $visible", home)
         for (tab in listOf(R.string.search, R.string.filter_library, R.string.home)) {
             tap(tab)
             device.waitForIdle()
