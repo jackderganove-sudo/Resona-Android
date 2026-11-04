@@ -403,13 +403,16 @@ fun LyricsSettings(
                 )
             }
 
-            item {
-                SwitchPreference(
-                    title = { Text(stringResource(R.string.lyrics_line_blur)) },
-                    icon = { Icon(painterResource(R.drawable.lyrics), null) },
-                    checked = lyricsLineBlur,
-                    onCheckedChange = onLyricsLineBlurChange,
-                )
+            // Resona: only the V2 mode blurs lines; the default mode has no blur.
+            if (lyricsMode == LyricsMode.V2) {
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.lyrics_line_blur)) },
+                        icon = { Icon(painterResource(R.drawable.lyrics), null) },
+                        checked = lyricsLineBlur,
+                        onCheckedChange = onLyricsLineBlurChange,
+                    )
+                }
             }
 
             item {

@@ -226,22 +226,27 @@ Gleicher Song mit Canvas, wo nicht anders genannt. Nur Zahlen.
 ### Fix
 - Canvas-Video läuft nur, wenn es sichtbar ist.
 - Zeilenwechsel als eine Feder wie auf dem iPad (Dämpfung 0,78, Response 0,5 s).
-- **Vorerst kein Zeilen-Blur** im Enhanced-Modus; der Schalter „Textzeilen
-  verwischen“ wirkt dort nicht. Versucht wurde ein einziger Durchgang über die ganze
-  Liste (`LyricsDepthEffect.kt`, Runtime-Shader, zwei Blur-Stufen): hochkant 100 %
-  Janky, 50./99. Perzentil 73/85 ms, GPU-Cache 317 MB, 0 freigebbar – schlechter
+- **Kein Zeilen-Blur** im Enhanced-Modus. Versucht wurde ein einziger Durchgang über
+  die ganze Liste (Runtime-Shader, zwei Blur-Stufen): hochkant 100 % Janky, 50./99. Perzentil 73/85 ms, GPU-Cache 317 MB, 0 freigebbar – schlechter
   als Blur pro Zeile. Das stoppte auch den ersten Release-Lauf von v1.0.8.
 
-### Nachher (Release v1.0.8, hochkant, 30 s)
-Janky 0,15 % (4 von 2.606 Frames), 50./90./95./99. Perzentil 9/11/12/18 ms, 0 langsame
-Bitmap-Uploads, 4 Textur-Uploads im Trace (vorher 13.832), GPU-Cache 276 MB mit
-43 MB Reserve. **Kein Canvas in dieser Messung:** Nach `pm clear` kam für den
-Testsong keiner mehr (vermutlich fehlt die Spotify-Anmeldung). Mit Canvas ist nur
-der Quer-Lauf gemessen (0 %, ohne die spätere Änderung); hochkant mit Canvas steht aus.
+### Nachher (Release v1.0.8, Pixel 11 Pro, hochkant, 30 s, 120-Hz-Panel)
+| | vorher (Blur pro Zeile) | v1.0.8 mit Canvas | v1.0.8 ohne Canvas |
+|---|---|---|---|
+| Janky | 66,41 % | **0,00 %** (0 von 2.661) | 0,15 % (4 von 2.606) |
+| 50./90./95./99. Perzentil | 77/133/150/150 ms | 8/10/11/14 ms | 9/11/12/18 ms |
+| Langsame Bitmap-Uploads | 504 | 0 | 0 |
+| Textur-Uploads im 12-s-Trace | 13.832 | 4 | 4 |
+| GPU-Cache (davon freigebbar) | 273 MB (0) | 286 MB (37 MB) | 276 MB (43 MB) |
 
-### Offen
-Tiefe wie auf dem iPad ohne Blur-Kosten (z. B. nur Transparenz nach Abstand oder ein
-vorab weichgezeichnetes Text-Raster). Der Code des Versuchs ist nicht eingebunden.
+Ziel „0 % Janky beim normalen Zeilenwechsel“ mit Canvas erreicht. Wort-Sync und
+Übersetzung wurden dabei nicht gezielt geprüft.
+
+### Entscheidung
+Der Standardmodus bleibt ohne Zeilen-Blur („sieht clean aus“, Rückmeldung nach dem
+Test); deshalb weicht er hier bewusst vom iPad ab. Der Schalter „Textzeilen
+verwischen“ erscheint nur noch im V2-Modus, der weiter pro Zeile verwischt und nicht
+gemessen wurde. Der Code des Ein-Durchgang-Versuchs ist entfernt.
 
 ## Runde 11 – weitere Funde beim Gerätetest
 - **Crash Onboarding (v1.0.1–v1.0.7):** letzte Seite suchte die entfernte
