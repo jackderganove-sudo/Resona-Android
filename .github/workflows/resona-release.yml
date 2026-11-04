@@ -99,6 +99,24 @@ jobs:
           }
           grep -E "BUILD SUCCESSFUL" test.log
 
+      - name: Onboarding test APKs
+        run: |
+          ./gradlew --no-daemon assembleGmsMobileX86_64Debug assembleGmsMobileX86_64DebugAndroidTest > instrumented.log 2>&1 || {
+            grep -E "^e: |error:|What went wrong" -A3 instrumented.log | head -80
+            tail -40 instrumented.log
+            exit 1
+          }
+          mkdir -p instrumented
+          cp "$(find app/build/outputs/apk -path '*gmsMobileX86_64/debug/*' -name '*.apk' | head -1)" instrumented/app-debug.apk
+          cp "$(find app/build/outputs/apk/androidTest -name '*.apk' | head -1)" instrumented/app-debug-androidTest.apk
+          ls -la instrumented
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: instrumented
+          path: instrumented/*.apk
+          retention-days: 3
+
       - name: Collect APKs
         run: |
           mkdir -p out
@@ -143,6 +161,11 @@ jobs:
           name: apks
           path: out
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: instrumented
+          path: instrumented
+
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -157,7 +180,9 @@ jobs:
           arch: x86_64
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          script: bash .github/scripts/resona-smoke.sh
+          script: |
+            bash .github/scripts/resona-smoke.sh
+            bash .github/scripts/resona-onboarding-test.sh
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -167,6 +192,9 @@ jobs:
             start.png
             ui.xml
             activity.txt
+            instrument.txt
+            onboarding-end.png
+            onboarding-logcat.txt
           if-no-files-found: ignore
 
   release:

@@ -431,7 +431,7 @@ private fun OnboardingPage(
     onPermissionAction: (OnboardingPermissionAction) -> Unit,
     onCommunityAction: (OnboardingCommunityActionUiModel) -> Unit,
 ) {
-    val pageModel = uiState.pages.first { it.id == page }
+    val pageModel = uiState.pages.firstOrNull { it.id == page } ?: return
     val animationsDisabled = LocalAnimationsDisabled.current
     var hasEntered by rememberSaveable { mutableStateOf(false) }
     val entrance =
@@ -620,38 +620,41 @@ private fun OnboardingPage(
                                 }
                             }
                         }
-                        val donation = uiState.communityActions.first { it.id == "donate" }
-                        Surface(
-                            shape = MaterialTheme.shapes.extraLarge,
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .animateEnterExit(enter = contentEnter, exit = ExitTransition.None),
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.padding(20.dp),
+                        // Resona has no donation action (see OnboardingUseCases): the
+                        // card only shows when the list really contains one.
+                        uiState.communityActions.firstOrNull { it.id == "donate" }?.let { donation ->
+                            Surface(
+                                shape = MaterialTheme.shapes.extraLarge,
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .animateEnterExit(enter = contentEnter, exit = ExitTransition.None),
                             ) {
-                                Text(
-                                    stringResource(R.string.onboarding_support_optional),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    textAlign = TextAlign.Center,
-                                )
-                                FilledTonalButton(
-                                    onClick = { onCommunityAction(donation) },
-                                    enabled = !uiState.isBusy && uiState.pages[uiState.currentPage].id == page,
-                                    shapes = ButtonDefaults.shapes(),
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.padding(20.dp),
                                 ) {
-                                    Icon(
-                                        painterResource(donation.iconResId),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(ButtonDefaults.IconSize),
+                                    Text(
+                                        stringResource(R.string.onboarding_support_optional),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textAlign = TextAlign.Center,
                                     )
-                                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                                    Text(stringResource(donation.titleResId))
+                                    FilledTonalButton(
+                                        onClick = { onCommunityAction(donation) },
+                                        enabled = !uiState.isBusy && uiState.pages[uiState.currentPage].id == page,
+                                        shapes = ButtonDefaults.shapes(),
+                                    ) {
+                                        Icon(
+                                            painterResource(donation.iconResId),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(ButtonDefaults.IconSize),
+                                        )
+                                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                                        Text(stringResource(donation.titleResId))
+                                    }
                                 }
                             }
                         }
