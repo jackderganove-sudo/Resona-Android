@@ -248,6 +248,9 @@ vorab weichgezeichnetes Text-Raster). Der Code des Versuchs ist nicht eingebunde
 - **Rote Navigation:** Glas mischte ohne Song die eingebaute Standardfarbe bei.
 - **KI-Sync, erster Lauf:** 169 s Audio in 116,1 s (Schnell, 6 Threads), 0 Wörter.
   Schwelle „keine Sprache“ aus, Sprache aus dem Songtext, zweiter Versuch mit
-  genauem Modell. Messung danach: folgt.
+  genauem Modell. Danach: 207 s Audio in 905,2 s (Schnell, Sprache en, 6 Threads,
+  Akku-Betrieb, Gerät warm), 244 Wörter (je 30 s: 0, 66, 18, 61, 15, 64, 20),
+  Kalibrierung 0,9985× / +0,22 s / 18 Anker. Erkennung geht, aber zu langsam →
+  keine Temperatur-Wiederholungen mehr (`temperature_inc = 0`); Messung folgt.
 - **Glas:** eine Komponente für Miniplayer und Navigation; alle `AlertDialog`s über
   eine Hülle; Fenster-Blur ab Android 12; Sheets mit Tönung.

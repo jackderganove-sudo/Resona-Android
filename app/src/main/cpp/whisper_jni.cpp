@@ -58,6 +58,9 @@ Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeTranscribe(
     // the iPad: threshold off, repeated choruses are not hallucinations.
     wp.no_speech_thold = 1.1f;
     wp.entropy_thold = 2.8f;
+    // One pass per window: without the threshold, retries at higher temperatures
+    // on hard music took 4.4 × the song's length (Pixel: 207 s audio in 905 s).
+    wp.temperature_inc = 0.0f;
     wp.abort_callback = abort_cb;
     wp.abort_callback_user_data = nullptr;
 
