@@ -263,6 +263,17 @@ gemessen wurde. Der Code des Ein-Durchgang-Versuchs ist entfernt.
   genauem Modell. Danach: 207 s Audio in 905,2 s (Schnell, Sprache en, 6 Threads,
   Akku-Betrieb, Gerät warm), 244 Wörter (je 30 s: 0, 66, 18, 61, 15, 64, 20),
   Kalibrierung 0,9985× / +0,22 s / 18 Anker. Erkennung geht, aber zu langsam →
-  keine Temperatur-Wiederholungen mehr (`temperature_inc = 0`); Messung folgt.
+  keine Temperatur-Wiederholungen mehr (`temperature_inc = 0`). Danach am Strom, mit
+  Musik und Canvas im Vordergrund: 169 s Audio in 407,5 s (2,4-fache Songlänge),
+  497 Wörter (je 30 s: 0, 83, 76, 165, 124, 49), 55 % der Songtext-Wörter getroffen,
+  Ergebnis „Fertig“. Noch deutlich langsamer als Echtzeit; Qualität des
+  gespeicherten Timings noch nicht beurteilt.
+- **Beobachtet, nicht geklärt:** Einmal schluckte die laufende App alle Berührungen
+  (Tasten gingen, ein zweites Resona-Fenster war offen, die Benachrichtigungsleiste
+  hatte den Fokus); erst ein Neustart half. Nicht reproduziert. Trat auf, als das
+  Menü-Sheet nach schnellen adb-Eingaben offen blieb.
+- **„Radio starten“** kam in demselben Zustand nicht an; davor funktionierte es.
+- „Play Date“ (Melanie Martinez): „Dieses Video ist nicht verfügbar“, reproduzierbar
+  nur bei diesem Titel.
 - **Glas:** eine Komponente für Miniplayer und Navigation; alle `AlertDialog`s über
   eine Hülle; Fenster-Blur ab Android 12; Sheets mit Tönung.
