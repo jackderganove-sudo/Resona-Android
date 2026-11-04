@@ -12,8 +12,11 @@ import android.media.MediaFormat
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build
 import android.os.SystemClock
 import android.util.Log
+import android.view.textclassifier.TextClassificationManager
+import android.view.textclassifier.TextLanguage
 import androidx.media3.common.C
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.cache.Cache
@@ -26,10 +29,13 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.rukamori.archivetune.playback.DownloadUtil
 import java.io.File
@@ -39,6 +45,7 @@ import java.nio.ByteOrder
 import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sqrt
 
 /** whisper.cpp through JNI (libresona_whisper). */
 object WhisperNative {
@@ -47,7 +54,7 @@ object WhisperNative {
     external fun nativeInit(path: String): Long
     external fun nativeFree(handle: Long)
     external fun nativeCancel(cancel: Boolean)
-    external fun nativeTranscribe(handle: Long, samples: FloatArray, threads: Int, offsetSeconds: Double): ByteArray
+    external fun nativeTranscribe(handle: Long, samples: FloatArray, threads: Int, offsetSeconds: Double, language: String?): ByteArray
 
     /** Parses the bridge's "text\tstart\tend" lines. */
     fun parse(tsv: String): List<RecognizedWord> =
@@ -59,6 +66,21 @@ object WhisperNative {
             val end = parts[2].toDoubleOrNull() ?: return@mapNotNull null
             if (text.isEmpty() || text.startsWith("[") || text.startsWith("(")) null else RecognizedWord(text, start, max(end, start + 0.05))
         }.toList()
+}
+
+/** Dominant language of the lyrics via the system's on-device detector; null = let whisper detect. */
+object LyricsLanguage {
+    fun detect(context: Context, lines: List<String>): String? {
+        val text = lines.joinToString("\n")
+        if (text.length <= 20 || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
+        return runCatching {
+            val manager = context.getSystemService(TextClassificationManager::class.java) ?: return null
+            val result = manager.textClassifier.detectLanguage(TextLanguage.Request.Builder(text).build())
+            if (result.localeHypothesisCount == 0) return null
+            val locale = result.getLocale(0)
+            locale.language.takeIf { it.isNotBlank() && result.getConfidenceScore(locale) > 0.5f }
+        }.getOrNull()
+    }
 }
 
 /** Whisper models, downloaded on demand (same choice as the iPad: fast / accurate). */
@@ -305,7 +327,24 @@ class ResonaAISync(private val context: Context) {
                 return fail(NOT_CACHED)
             }
             val audioSeconds = audio.size / 16_000.0
-            val words = transcribe(model, audio)
+            val language = withContext(Dispatchers.Default) { LyricsLanguage.detect(context, texts) }
+            var words = transcribe(model, audio, language)
+            // Same as the iPad: few words with the fast model → try the accurate one
+            // (when it's there or on Wi-Fi; a failed download keeps the first result).
+            if (words.size < audioSeconds * 0.3 && model == WhisperModel.FAST) {
+                val accurate = WhisperModel.ACCURATE
+                if (!accurate.isDownloaded(context) && WhisperModels.onUnmeteredNetwork(context)) {
+                    _phase.value = Phase.DownloadingModel(0.0)
+                    runCatching { WhisperModels.download(context, accurate) { _phase.value = Phase.DownloadingModel(it) } }
+                        .onFailure { if (it is CancellationException) throw it }
+                }
+                if (accurate.isDownloaded(context)) {
+                    Log.i(TAG, "only ${words.size} words with FAST → trying ACCURATE")
+                    val second = transcribe(accurate, audio, language)
+                    if (second.size > words.size) words = second
+                }
+            }
+            if (words.isEmpty()) return fail(NO_WORDS)
             last = Triple(words, texts, max(duration, audioSeconds))
 
             if (synced.any { it.startTime != null } && mode != Mode.FULL_SYNC) {
@@ -367,30 +406,54 @@ class ResonaAISync(private val context: Context) {
         return Lrc.serialize(LyricsAligner.monotonicTiming(lines)).also { _phase.value = Phase.Done(1.0, it) }
     }
 
-    private suspend fun transcribe(model: WhisperModel, audio: FloatArray): List<RecognizedWord> = withContext(Dispatchers.Default) {
+    private suspend fun transcribe(model: WhisperModel, audio: FloatArray, language: String?): List<RecognizedWord> = withContext(Dispatchers.Default) {
         WhisperNative.nativeCancel(false)
         val handle = WhisperNative.nativeInit(model.file(context).path)
         if (handle == 0L) error("model could not be loaded")
         val threads = Runtime.getRuntime().availableProcessors().coerceIn(2, 6)
         val chunk = 30 * 16_000
         val words = ArrayList<RecognizedWord>()
+        val perChunk = ArrayList<Int>()
         val started = SystemClock.elapsedRealtime()
+        // The native call blocks for a whole chunk: the bar moves on an estimate
+        // from the last chunk (it looked frozen), a cancel reaches the native side.
+        var chunkStartedAt = started
+        var chunkMillis = 40_000L
+        var offset = 0
+        var running = true
+        val ticker = launch {
+            try {
+                while (isActive) {
+                    val within = ((SystemClock.elapsedRealtime() - chunkStartedAt).toDouble() / chunkMillis).coerceAtMost(0.95)
+                    _phase.value = Phase.Transcribing(((offset + chunk * within) / audio.size).coerceAtMost(0.99))
+                    delay(400)
+                }
+            } finally {
+                if (running) WhisperNative.nativeCancel(true)
+            }
+        }
         try {
-            var offset = 0
             while (offset < audio.size) {
                 currentCoroutineContext().ensureActive()
-                _phase.value = Phase.Transcribing(offset.toDouble() / audio.size)
+                chunkStartedAt = SystemClock.elapsedRealtime()
                 val piece = audio.copyOfRange(offset, min(audio.size, offset + chunk))
-                val bytes = WhisperNative.nativeTranscribe(handle, piece, threads, offset / 16_000.0)
-                words += WhisperNative.parse(String(bytes, Charsets.UTF_8))
+                val bytes = WhisperNative.nativeTranscribe(handle, piece, threads, offset / 16_000.0, language)
+                val found = WhisperNative.parse(String(bytes, Charsets.UTF_8))
+                words += found
+                perChunk += found.size
+                chunkMillis = (SystemClock.elapsedRealtime() - chunkStartedAt).coerceAtLeast(1_000)
                 offset += chunk
             }
+            running = false
         } finally {
+            running = false
+            ticker.cancel()
             WhisperNative.nativeFree(handle)
         }
-        // Timing only, never recognized text.
-        Log.i(TAG, "transcribed %.0f s audio in %.1f s (model %s, %d threads, %d words)".format(
-            Locale.ROOT, audio.size / 16_000.0, (SystemClock.elapsedRealtime() - started) / 1000.0, model.name, threads, words.size))
+        // Numbers only, never recognized text.
+        val rms = sqrt(audio.fold(0.0) { sum, sample -> sum + sample * sample } / audio.size.coerceAtLeast(1))
+        Log.i(TAG, "transcribed %.0f s audio in %.1f s (model %s, lang %s, %d threads, %d words, per 30 s %s, rms %.3f)".format(
+            Locale.ROOT, audio.size / 16_000.0, (SystemClock.elapsedRealtime() - started) / 1000.0, model.name, language ?: "auto", threads, words.size, perChunk, rms))
         words
     }
 
@@ -403,6 +466,7 @@ class ResonaAISync(private val context: Context) {
         const val NOT_CACHED = "not-cached"
         const val UNAVAILABLE = "unavailable"
         const val NO_LYRICS = "no-lyrics"
+        const val NO_WORDS = "no-words"
     }
 }
 

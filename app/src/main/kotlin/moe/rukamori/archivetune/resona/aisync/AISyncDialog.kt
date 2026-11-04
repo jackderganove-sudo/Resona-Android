@@ -174,6 +174,7 @@ fun ResonaAISyncDialog(
                                 ResonaAISync.NOT_CACHED -> stringResource(R.string.resona_ai_not_cached)
                                 ResonaAISync.UNAVAILABLE -> stringResource(R.string.resona_ai_unavailable)
                                 ResonaAISync.NO_LYRICS -> stringResource(R.string.resona_ai_no_lyrics)
+                                ResonaAISync.NO_WORDS -> stringResource(R.string.resona_ai_no_words)
                                 else -> stringResource(R.string.resona_ai_failed, p.reason)
                             },
                             color = MaterialTheme.colorScheme.error,

@@ -62,4 +62,5 @@
     <string name="resona_ai_no_lyrics">No lyrics to sync.</string>
     <string name="resona_ai_failed">AI sync failed: %1$s</string>
     <string name="resona_ai_save">Save</string>
+    <string name="resona_ai_no_words">No words were recognized in this song. Is it instrumental, or very loud? The accurate model may do better.</string>
 </resources>

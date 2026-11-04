@@ -32,7 +32,7 @@ Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeCancel(JNIEnv *,
 
 extern "C" JNIEXPORT jbyteArray JNICALL
 Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeTranscribe(
-        JNIEnv *env, jobject, jlong handle, jfloatArray samples, jint threads, jdouble offsetSeconds) {
+        JNIEnv *env, jobject, jlong handle, jfloatArray samples, jint threads, jdouble offsetSeconds, jstring language) {
     auto *ctx = reinterpret_cast<whisper_context *>(handle);
     if (ctx == nullptr) return env->NewByteArray(0);
     jsize n = env->GetArrayLength(samples);
@@ -50,12 +50,20 @@ Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeTranscribe(
     wp.token_timestamps = true;   // word times
     wp.max_len = 1;               // one word per segment …
     wp.split_on_word = true;      // … split on words, not tokens
-    wp.language = "auto";
+    // Language of the lyrics when known; music makes auto-detection unreliable.
+    const char *lang = language != nullptr ? env->GetStringUTFChars(language, nullptr) : nullptr;
+    wp.language = lang != nullptr ? lang : "auto";
+    // Singing over loud music looks like "no speech": with the default
+    // threshold whole windows are dropped (0 words on the Pixel). Same as
+    // the iPad: threshold off, repeated choruses are not hallucinations.
+    wp.no_speech_thold = 1.1f;
+    wp.entropy_thold = 2.8f;
     wp.abort_callback = abort_cb;
     wp.abort_callback_user_data = nullptr;
 
     int rc = whisper_full(ctx, wp, data, n);
     env->ReleaseFloatArrayElements(samples, data, JNI_ABORT);
+    if (lang != nullptr) env->ReleaseStringUTFChars(language, lang);
     if (rc != 0) return env->NewByteArray(0);
 
     std::string out;

@@ -81,4 +81,5 @@
     <string name="resona_ai_failed">KI-Synchronisierung fehlgeschlagen: %1$s</string>
     <string name="resona_ai_save">Speichern</string>
     <string name="show_lyrics_translation">Übersetzung anzeigen</string>
+    <string name="resona_ai_no_words">In diesem Song wurden keine Wörter erkannt. Ist er instrumental oder sehr laut? Mit dem genauen Modell klappt es vielleicht besser.</string>
 </resources>
