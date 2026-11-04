@@ -63,6 +63,8 @@ class OnboardingWithoutLoginTest {
         tap(R.string.onboarding_finish)
         assertAppAlive("finishing the onboarding")
 
+        // An older build lands on the optional update screen first; it must offer "Later".
+        find(R.string.later, 15_000)?.click()
         val home = find(R.string.home, 45_000)
         val visible = device.findObjects(By.textContains("")).mapNotNull { it.text }.take(20)
         assertNotNull("Home tab missing after the onboarding; on screen: $visible", home)

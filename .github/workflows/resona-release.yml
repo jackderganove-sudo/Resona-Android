@@ -100,6 +100,9 @@ jobs:
           grep -E "BUILD SUCCESSFUL" test.log
 
       - name: Onboarding test APKs
+        env:
+          RESONA_VERSION_NAME: ${{ steps.version.outputs.name }}
+          RESONA_VERSION_CODE: ${{ steps.version.outputs.code }}
         run: |
           ./gradlew --no-daemon assembleGmsMobileX86_64Debug assembleGmsMobileX86_64DebugAndroidTest > instrumented.log 2>&1 || {
             grep -E "^e: |error:|What went wrong" -A3 instrumented.log | head -80
