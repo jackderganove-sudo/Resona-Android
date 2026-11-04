@@ -4202,7 +4202,14 @@ class MusicService :
                 currentQueue = EmptyQueue
                 queueTitle = null
                 initialQueueJob = null
-                player.clearMediaItems()
+                // Resona: an empty answer (YouTube's queue came back empty or
+                // unparsable) must not stop the song that is already playing —
+                // it used to clear the player when playing a search result.
+                if (preloadItem == null) {
+                    player.clearMediaItems()
+                } else if (autoLoadMoreEnabled) {
+                    onInfiniteQueueEnabled()
+                }
                 return@launch
             }
             if (preloadItem != null) {
