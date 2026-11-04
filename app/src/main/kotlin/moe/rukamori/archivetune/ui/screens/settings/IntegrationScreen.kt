@@ -433,7 +433,7 @@ private fun SpotifyLoginSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = moe.rukamori.archivetune.resona.resonaSheetColor(false),
     ) {
         Column(
             modifier =

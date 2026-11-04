@@ -536,7 +536,7 @@ private fun <T : Any> MultiSelectPreferenceBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         shape = RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = moe.rukamori.archivetune.resona.resonaSheetColor(false),
         contentColor = MaterialTheme.colorScheme.onSurface,
         dragHandle = {
             BottomSheetDefaults.DragHandle(
@@ -698,7 +698,7 @@ private fun <T> PreferenceSelectionBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         shape = RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = moe.rukamori.archivetune.resona.resonaSheetColor(false),
         contentColor = MaterialTheme.colorScheme.onSurface,
         dragHandle = {
             BottomSheetDefaults.DragHandle(

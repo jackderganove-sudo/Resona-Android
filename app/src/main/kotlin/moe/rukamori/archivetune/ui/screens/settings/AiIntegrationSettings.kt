@@ -645,7 +645,7 @@ private fun ModelPickerPreference(
             onDismissRequest = onDismissSheet,
             sheetState = sheetState,
             shape = RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = moe.rukamori.archivetune.resona.resonaSheetColor(false),
         ) {
             Text(
                 text = stringResource(R.string.ai_model),

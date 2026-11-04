@@ -186,7 +186,7 @@ fun Queue(
             sheetState = sheetState,
             sheetMaxWidth = Dp.Unspecified,
             modifier = Modifier.fillMaxSize(),
-            containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface,
+            containerColor = if (pureBlack) Color.Black else moe.rukamori.archivetune.resona.resonaSheetColor(false),
             contentColor = if (pureBlack) Color.White else MaterialTheme.colorScheme.onSurface,
             dragHandle = null,
             contentWindowInsets = { WindowInsets(0, 0, 0, 0) },

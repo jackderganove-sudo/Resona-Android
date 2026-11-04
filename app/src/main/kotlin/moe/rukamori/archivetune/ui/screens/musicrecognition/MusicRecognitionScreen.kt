@@ -584,7 +584,7 @@ private fun MusicRecognitionSettingsBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = moe.rukamori.archivetune.resona.resonaSheetColor(false),
     ) {
         LazyColumn(
             modifier = Modifier.widthIn(max = 680.dp).fillMaxWidth()
@@ -640,7 +640,7 @@ private fun RecognitionHistoryBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = moe.rukamori.archivetune.resona.resonaSheetColor(false),
     ) {
         LazyColumn(
             modifier = Modifier.widthIn(max = 840.dp).fillMaxSize()

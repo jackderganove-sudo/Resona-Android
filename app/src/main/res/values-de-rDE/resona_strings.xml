@@ -80,4 +80,5 @@
     <string name="resona_ai_no_lyrics">Kein Songtext zum Synchronisieren.</string>
     <string name="resona_ai_failed">KI-Synchronisierung fehlgeschlagen: %1$s</string>
     <string name="resona_ai_save">Speichern</string>
+    <string name="show_lyrics_translation">Übersetzung anzeigen</string>
 </resources>

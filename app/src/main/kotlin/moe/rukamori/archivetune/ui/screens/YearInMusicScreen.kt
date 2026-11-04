@@ -617,7 +617,7 @@ private fun ListeningHabits(data: RecapData, text: RecapText) {
 @Composable
 private fun YearPicker(selection: RecapSelection, sheetState: SheetState, callbacks: RecapCallbacks) {
     ModalBottomSheet(onDismissRequest = { callbacks.yearPicker(false) }, sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface) {
+        containerColor = moe.rukamori.archivetune.resona.resonaSheetColor(false)) {
         LazyColumn(contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 28.dp)) {
             item("title", "heading") { SectionTitle(stringResource(R.string.recap_choose_year)) }
             items(selection.years, key = { it }, contentType = { "year" }) { year ->
