@@ -225,13 +225,16 @@ Gleicher Song mit Canvas, wo nicht anders genannt. Nur Zahlen.
 
 ### Fix
 - Canvas-Video läuft nur, wenn es sichtbar ist.
-- Tiefe als **ein** Durchgang über die ganze Liste (`LyricsDepthEffect.kt`,
-  Android 13+): scharf an der aktiven Zeile, mit Abstand 2,8 / 6 dp, symmetrisch,
-  scharf beim Scrollen von Hand. Darunter ohne Blur.
 - Zeilenwechsel als eine Feder wie auf dem iPad (Dämpfung 0,78, Response 0,5 s).
+- **Vorerst kein Zeilen-Blur** im Enhanced-Modus; der Schalter „Textzeilen
+  verwischen“ wirkt dort nicht. Versucht wurde ein einziger Durchgang über die ganze
+  Liste (`LyricsDepthEffect.kt`, Runtime-Shader, zwei Blur-Stufen): hochkant 100 %
+  Janky, 50./99. Perzentil 73/85 ms, GPU-Cache 317 MB, 0 freigebbar – schlechter
+  als Blur pro Zeile. Das stoppte auch den ersten Release-Lauf von v1.0.8.
 
-### Nachher
-Messung mit dem Build mit Blur-Durchgang: folgt.
+### Offen
+Tiefe wie auf dem iPad ohne Blur-Kosten (z. B. nur Transparenz nach Abstand oder ein
+vorab weichgezeichnetes Text-Raster). Der Code des Versuchs ist nicht eingebunden.
 
 ## Runde 11 – weitere Funde beim Gerätetest
 - **Crash Onboarding (v1.0.1–v1.0.7):** letzte Seite suchte die entfernte
