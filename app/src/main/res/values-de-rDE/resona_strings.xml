@@ -119,4 +119,5 @@
     <string name="onboarding_error_save">Einrichtung konnte nicht gespeichert werden. Versuch es noch einmal.</string>
     <string name="onboarding_error_open_link">Dieser Link konnte nicht geöffnet werden. Ist ein Browser oder eine passende App installiert?</string>
     <string name="onboarding_error_open_permission">Berechtigungsabfrage oder Android-Einstellungen konnten nicht geöffnet werden.</string>
+    <string name="playback_error_reporting_hint">Bevor du das Problem meldest, aktualisiere bitte auf die neueste Version und versuche es noch einmal.</string>
 </resources>

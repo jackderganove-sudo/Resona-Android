@@ -232,6 +232,13 @@ Gleicher Song mit Canvas, wo nicht anders genannt. Nur Zahlen.
   Janky, 50./99. Perzentil 73/85 ms, GPU-Cache 317 MB, 0 freigebbar – schlechter
   als Blur pro Zeile. Das stoppte auch den ersten Release-Lauf von v1.0.8.
 
+### Nachher (Release v1.0.8, hochkant, 30 s)
+Janky 0,15 % (4 von 2.606 Frames), 50./90./95./99. Perzentil 9/11/12/18 ms, 0 langsame
+Bitmap-Uploads, 4 Textur-Uploads im Trace (vorher 13.832), GPU-Cache 276 MB mit
+43 MB Reserve. **Kein Canvas in dieser Messung:** Nach `pm clear` kam für den
+Testsong keiner mehr (vermutlich fehlt die Spotify-Anmeldung). Mit Canvas ist nur
+der Quer-Lauf gemessen (0 %, ohne die spätere Änderung); hochkant mit Canvas steht aus.
+
 ### Offen
 Tiefe wie auf dem iPad ohne Blur-Kosten (z. B. nur Transparenz nach Abstand oder ein
 vorab weichgezeichnetes Text-Raster). Der Code des Versuchs ist nicht eingebunden.
