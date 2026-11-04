@@ -276,4 +276,8 @@ gemessen wurde. Der Code des Ein-Durchgang-Versuchs ist entfernt.
 - „Play Date“ (Melanie Martinez): „Dieses Video ist nicht verfügbar“, reproduzierbar
   nur bei diesem Titel.
 - **Glas:** eine Komponente für Miniplayer und Navigation; alle `AlertDialog`s über
-  eine Hülle; Fenster-Blur ab Android 12; Sheets mit Tönung.
+  eine Hülle; Fenster-Blur ab Android 12; Sheets mit Tönung. Auf dem Pixel gesehen:
+  Menü-Sheet, KI-Dialog, Einstellungs-Dialog, Navigation ohne Song neutral
+  (`screens-r11/d2-*.png`). Nicht geprüft: Android unter 12 (Rückfall ohne Blur).
+- **Lyrics-Messung:** Der Testsong hat Wort-Sync; Übersetzung war nicht aktiv (eine
+  KI-Übersetzung ist ohne API-Schlüssel nicht testbar).
