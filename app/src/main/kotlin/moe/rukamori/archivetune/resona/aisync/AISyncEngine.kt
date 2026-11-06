@@ -63,7 +63,8 @@ object WhisperNative {
     external fun nativeInit(path: String): Long
     external fun nativeFree(handle: Long)
     external fun nativeCancel(cancel: Boolean)
-    external fun nativeTranscribe(handle: Long, samples: FloatArray, threads: Int, offsetSeconds: Double, language: String?): ByteArray
+    external fun nativeTranscribe(handle: Long, samples: FloatArray, threads: Int, offsetSeconds: Double, language: String?, options: String?): ByteArray
+    external fun nativeVad(modelPath: String, samples: FloatArray, threads: Int, threshold: Float, minSpeechMs: Int, minSilenceMs: Int, padMs: Int): FloatArray
 
     /** Parses the bridge's "text\tstart\tend" lines. */
     fun parse(tsv: String): List<RecognizedWord> =
@@ -337,6 +338,9 @@ class ResonaAISync(private val context: Context) {
             }
             val audioSeconds = audio.size / 16_000.0
             val language = withContext(Dispatchers.Default) { LyricsLanguage.detect(context, texts) }
+            if (AISyncBench.runIfConfigured(context, audio, texts, synced, duration, language) { _phase.value = Phase.Transcribing(it) }) {
+                return fail("bench finished")
+            }
             var words = transcribe(model, audio, language)
             // Same as the iPad: few words with the fast model → try the accurate one
             // (when it's there or on Wi-Fi; a failed download keeps the first result).
@@ -446,7 +450,7 @@ class ResonaAISync(private val context: Context) {
                 currentCoroutineContext().ensureActive()
                 chunkStartedAt = SystemClock.elapsedRealtime()
                 val piece = audio.copyOfRange(offset, min(audio.size, offset + chunk))
-                val bytes = WhisperNative.nativeTranscribe(handle, piece, threads, offset / 16_000.0, language)
+                val bytes = WhisperNative.nativeTranscribe(handle, piece, threads, offset / 16_000.0, language, null)
                 val found = WhisperNative.parse(String(bytes, Charsets.UTF_8))
                 words += found
                 perChunk += found.size
