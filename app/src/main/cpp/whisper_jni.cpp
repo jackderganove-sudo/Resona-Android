@@ -8,6 +8,7 @@
 #include <cstring>
 #include <string>
 #include "whisper.h"
+#include "ggml-backend.h"
 
 static std::atomic<bool> g_cancel(false);
 
@@ -30,13 +31,27 @@ static float option(const std::string &options, const char *key, float fallback)
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeInit(JNIEnv *env, jobject, jstring path) {
+Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeInit(JNIEnv *env, jobject, jstring path, jboolean gpu) {
     const char *p = env->GetStringUTFChars(path, nullptr);
     whisper_context_params cp = whisper_context_default_params();
-    cp.use_gpu = false;
+    cp.use_gpu = gpu == JNI_TRUE;
     whisper_context *ctx = whisper_init_from_file_with_params(p, cp);
     env->ReleaseStringUTFChars(path, p);
     return reinterpret_cast<jlong>(ctx);
+}
+
+/** Number of GPU devices the backends found (0 = CPU only). */
+extern "C" JNIEXPORT jint JNICALL
+Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeGpuDevices(JNIEnv *, jobject) {
+    int count = 0;
+    for (size_t i = 0; i < ggml_backend_dev_count(); i++) {
+        ggml_backend_dev_t dev = ggml_backend_dev_get(i);
+        if (ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_GPU) {
+            __android_log_print(ANDROID_LOG_INFO, "ResonaAISync", "gpu device: %s", ggml_backend_dev_description(dev));
+            count++;
+        }
+    }
+    return count;
 }
 
 extern "C" JNIEXPORT void JNICALL

@@ -60,7 +60,8 @@ object WhisperNative {
 
     val available: Boolean = cpuSupported() && runCatching { System.loadLibrary("resona_whisper") }.isSuccess
 
-    external fun nativeInit(path: String): Long
+    external fun nativeInit(path: String, gpu: Boolean): Long
+    external fun nativeGpuDevices(): Int
     external fun nativeFree(handle: Long)
     external fun nativeCancel(cancel: Boolean)
     external fun nativeTranscribe(handle: Long, samples: FloatArray, threads: Int, offsetSeconds: Double, language: String?, options: String?): ByteArray
@@ -436,7 +437,7 @@ class ResonaAISync(private val context: Context) {
         onPartial: (List<RecognizedWord>) -> Unit,
     ): List<RecognizedWord> = withContext(Dispatchers.Default) {
         WhisperNative.nativeCancel(false)
-        val handle = WhisperNative.nativeInit(model.file(context).path)
+        val handle = WhisperNative.nativeInit(model.file(context).path, false)
         if (handle == 0L) error("model could not be loaded")
         val threads = Runtime.getRuntime().availableProcessors().coerceIn(2, 6)
         val chunk = 30 * 16_000
