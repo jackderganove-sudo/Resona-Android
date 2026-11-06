@@ -35,4 +35,16 @@ class AISyncWindowsTest {
         val windows = AISyncWindows.fromSpeech(listOf(-1.0 to 5.0, 50.0 to 50.0, 58.0 to 70.0), 60.0, 30.0)
         assertEquals(listOf(AudioWindow(0.0, 5.0), AudioWindow(58.0, 60.0)), windows)
     }
+
+    @Test
+    fun linesSkipLongGapsAndKeepPadding() {
+        val lines = listOf(AlignedLine("a", 20.0), AlignedLine("b", 24.0), AlignedLine("c", 90.0))
+        val windows = AISyncWindows.fromLines(lines, 200.0, 30.0, pad = 3.0, lineMax = 10.0)
+        assertEquals(listOf(AudioWindow(17.0, 37.0), AudioWindow(87.0, 103.0)), windows)
+    }
+
+    @Test
+    fun linesWithoutTimesGiveNoWindows() {
+        assertTrue(AISyncWindows.fromLines(listOf(AlignedLine("a", null)), 100.0).isEmpty())
+    }
 }

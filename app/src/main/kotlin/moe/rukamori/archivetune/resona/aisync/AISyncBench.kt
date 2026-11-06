@@ -121,6 +121,8 @@ object AISyncBench {
                 val covered = speech.sumOf { it.second - it.first }
                 Log.i(TAG, "BENCH $name vad: %.1f s, %d segments, %.0f s speech of %.0f s".format(Locale.ROOT, vadSeconds, speech.size, covered, total))
                 AISyncWindows.fromSpeech(speech, total, length)
+            } else if (config["align"] == "lines") {
+                AISyncWindows.fromLines(synced, total, length)
             } else {
                 AISyncWindows.fixed(total, length)
             }
@@ -147,6 +149,7 @@ object AISyncBench {
             WhisperNative.nativeFree(handle)
         }
         val seconds = (SystemClock.elapsedRealtime() - started) / 1000.0
+        Log.i(TAG, "BENCH $name windows cover %.0f s of %.0f s".format(Locale.ROOT, windows.sumOf { it.seconds }, total))
         val sorted = words.sortedBy { it.start }
         val aligned = LyricsAligner.align(texts, sorted, maxOf(duration, total))
         // Timing error against the synced lyrics (the reference we have): median per line.

@@ -26,6 +26,24 @@ object AISyncWindows {
     }
 
     /**
+     * Only around the lines the synced lyrics expect: each line from its start
+     * (minus [pad], so slightly early lyrics stay covered) to the next line's
+     * start, at most [lineMax] seconds. Instrumental gaps are skipped.
+     */
+    fun fromLines(lines: List<AlignedLine>, total: Double, length: Double = 30.0, pad: Double = 3.0, lineMax: Double = 10.0): List<AudioWindow> {
+        val starts = lines.mapNotNull { it.startTime }.sorted()
+        val merged = ArrayList<Pair<Double, Double>>()
+        starts.forEachIndexed { index, start ->
+            val next = starts.getOrNull(index + 1) ?: (start + lineMax)
+            val from = start - pad
+            val to = min(next, start + lineMax) + pad
+            val last = merged.lastOrNull()
+            if (last != null && from <= last.second) merged[merged.size - 1] = last.first to max(last.second, to) else merged += from to to
+        }
+        return fromSpeech(merged, total, length)
+    }
+
+    /**
      * Only where someone sings: speech segments joined into windows of at most
      * [length] seconds. A segment longer than that is split; the gaps are skipped.
      */
