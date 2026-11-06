@@ -32,6 +32,7 @@ object AISyncBench {
     private const val TAG = "ResonaAISync"
     private const val MODELS = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/"
     private const val VAD = "https://huggingface.co/ggml-org/whisper-vad/resolve/main/"
+    private const val CTC = "https://huggingface.co/onnx-community/wav2vec2-base-960h-ONNX/resolve/main/onnx/"
 
     private fun fetch(dir: File, name: String, base: String): File {
         val target = File(dir, name)
@@ -79,11 +80,44 @@ object AISyncBench {
                 val name = parts.first()
                 val config = parts.drop(1).associate { it.substringBefore('=') to it.substringAfter('=', "") }
                 onProgress(index.toDouble() / lines.size)
-                measure(context, dir, name, config, audio, texts, synced, duration, language, total)
+                runCatching {
+                    if (config["ctc"] != null) {
+                        measureCtc(context, dir, name, config, audio, texts, synced, duration, total)
+                    } else {
+                        measure(context, dir, name, config, audio, texts, synced, duration, language, total)
+                    }
+                }.onFailure {
+                    if (it is kotlinx.coroutines.CancellationException) throw it
+                    Log.w(TAG, "BENCH $name failed: ${it.javaClass.simpleName}")
+                }
             }
         }
         Log.i(TAG, "BENCH done")
         return true
+    }
+
+    /** CTC forced alignment instead of a transcription; same report as Whisper's. */
+    private suspend fun measureCtc(
+        context: Context,
+        dir: File,
+        name: String,
+        config: Map<String, String>,
+        audio: FloatArray,
+        texts: List<String>,
+        synced: List<AlignedLine>,
+        duration: Double,
+        total: Double,
+    ) {
+        val model = fetch(dir, config["ctc"]!!, config["ctcbase"] ?: CTC)
+        val threads = config["threads"]?.toIntOrNull() ?: 4
+        val tempBefore = temperature(context)
+        val started = SystemClock.elapsedRealtime()
+        val emissions = CtcEmissions.compute(model.path, audio, threads, config["nnapi"] == "1")
+        val inference = (SystemClock.elapsedRealtime() - started) / 1000.0
+        val lyricWords = texts.flatMap { it.split(Regex("\\s+")) }.filter { it.isNotBlank() }
+        val words = CtcAligner.words(emissions, lyricWords, config["minconf"]?.toDoubleOrNull() ?: 0.05)
+        val seconds = (SystemClock.elapsedRealtime() - started) / 1000.0
+        report(name, seconds, total, words, texts, synced, duration, tempBefore, context, threads, "inference %.1f s, %d frames".format(Locale.ROOT, inference, emissions.size), 1)
     }
 
     private suspend fun measure(
@@ -152,6 +186,23 @@ object AISyncBench {
         }
         val seconds = (SystemClock.elapsedRealtime() - started) / 1000.0
         Log.i(TAG, "BENCH $name windows cover %.0f s of %.0f s".format(Locale.ROOT, windows.sumOf { it.seconds }, total))
+        report(name, seconds, total, words, texts, synced, duration, tempBefore, context, threads, perWindow.joinToString(" "), windows.size)
+    }
+
+    private fun report(
+        name: String,
+        seconds: Double,
+        total: Double,
+        words: List<RecognizedWord>,
+        texts: List<String>,
+        synced: List<AlignedLine>,
+        duration: Double,
+        tempBefore: Double,
+        context: Context,
+        threads: Int,
+        detail: String,
+        windowCount: Int,
+    ) {
         val sorted = words.sortedBy { it.start }
         val aligned = LyricsAligner.align(texts, sorted, maxOf(duration, total))
         // Timing error against the synced lyrics (the reference we have): median per line.
@@ -174,7 +225,7 @@ object AISyncBench {
             "BENCH %s: %.1f s (%.2f x song), %d words, match %d %%, line error median %.2f s, within 1 s %d %%, calibration %s, %d windows, %.1f→%.1f C, %s, threads %d, %s".format(
                 Locale.ROOT, name, seconds, seconds / total, words.size, (aligned.matchedRatio * 100).toInt(), median, within1,
                 fitted?.let { "%.4f/%+.2f/%d".format(Locale.ROOT, it.factor, it.offset, it.anchors) } ?: "none",
-                windows.size, tempBefore, temperature(context), if (charging(context)) "power" else "battery", threads, perWindow.joinToString(" "),
+                windowCount, tempBefore, temperature(context), if (charging(context)) "power" else "battery", threads, detail,
             ),
         )
     }
