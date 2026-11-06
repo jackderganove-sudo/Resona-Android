@@ -1,6 +1,7 @@
 // Resona: JNI bridge to whisper.cpp for AI sync (round 11 D1).
 // Returns recognized words as UTF-8 "text\tstart\tend\n" lines (seconds);
 // no lyrics are logged here.
+#include <android/log.h>
 #include <jni.h>
 #include <atomic>
 #include <string>
@@ -64,7 +65,13 @@ Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeTranscribe(
     wp.abort_callback = abort_cb;
     wp.abort_callback_user_data = nullptr;
 
+    whisper_reset_timings(ctx);
     int rc = whisper_full(ctx, wp, data, n);
+    // Numbers only, never text: where the time goes per 30 s window.
+    if (auto *t = whisper_get_timings(ctx)) {
+        __android_log_print(ANDROID_LOG_INFO, "ResonaAISync", "window at %.0f s: encode %.0f ms, decode %.0f ms, batch %.0f ms, prompt %.0f ms, threads %d, rc %d",
+                            offsetSeconds, t->encode_ms, t->decode_ms, t->batchd_ms, t->prompt_ms, threads, rc);
+    }
     env->ReleaseFloatArrayElements(samples, data, JNI_ABORT);
     if (lang != nullptr) env->ReleaseStringUTFChars(language, lang);
     if (rc != 0) return env->NewByteArray(0);

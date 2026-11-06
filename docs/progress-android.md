@@ -268,6 +268,10 @@ gemessen wurde. Der Code des Ein-Durchgang-Versuchs ist entfernt.
   497 Wörter (je 30 s: 0, 83, 76, 165, 124, 49), 55 % der Songtext-Wörter getroffen,
   Ergebnis „Fertig“. Noch deutlich langsamer als Echtzeit; Qualität des
   gespeicherten Timings noch nicht beurteilt.
+- **KI-Sync, Compiler-Flags:** `ggml-cpu` jetzt für armv8.2-a+dotprod+fp16 gebaut. Gleicher
+  Song, gleiches Ergebnis (497 Wörter, 55 %), aber nicht schneller: 606,3 s mit 5 Threads
+  auf Akku, warm (vorher 407,5 s mit 6 Threads am Strom). Thread-Änderung zurückgenommen,
+  Zeiten pro Fenster im Log, um Encoder und Decoder zu trennen.
 - **Beobachtet, nicht geklärt:** Einmal schluckte die laufende App alle Berührungen
   (Tasten gingen, ein zweites Resona-Fenster war offen, die Benachrichtigungsleiste
   hatte den Fokus); erst ein Neustart half. Nicht reproduziert. Trat auf, als das

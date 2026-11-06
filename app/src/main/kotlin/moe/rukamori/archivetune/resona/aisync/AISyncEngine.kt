@@ -419,8 +419,7 @@ class ResonaAISync(private val context: Context) {
         WhisperNative.nativeCancel(false)
         val handle = WhisperNative.nativeInit(model.file(context).path)
         if (handle == 0L) error("model could not be loaded")
-        // Leave room for playback and the UI: busy-waiting threads on taken cores slow everyone down.
-        val threads = (Runtime.getRuntime().availableProcessors() - 2).coerceIn(2, 6)
+        val threads = Runtime.getRuntime().availableProcessors().coerceIn(2, 6)
         val chunk = 30 * 16_000
         val words = ArrayList<RecognizedWord>()
         val perChunk = ArrayList<Int>()
