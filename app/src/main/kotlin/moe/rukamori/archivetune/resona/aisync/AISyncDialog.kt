@@ -86,7 +86,13 @@ fun ResonaAISyncDialog(
     val running = phase is ResonaAISync.Phase.DownloadingModel || phase is ResonaAISync.Phase.PreparingAudio ||
         phase is ResonaAISync.Phase.Transcribing || phase is ResonaAISync.Phase.Aligning
 
-    DisposableEffect(Unit) { onDispose { job?.cancel() } }
+    DisposableEffect(Unit) {
+        onDispose {
+            job?.cancel()
+            // The preview ends with the dialog; only "Save" keeps anything.
+            ResonaLyricsPreview.clear()
+        }
+    }
 
     fun start(mode: ResonaAISync.Mode) {
         job?.cancel()
@@ -134,7 +140,16 @@ fun ResonaAISyncDialog(
                     }
                     is ResonaAISync.Phase.DownloadingModel -> Progress(stringResource(R.string.resona_ai_downloading), p.fraction)
                     ResonaAISync.Phase.PreparingAudio -> Progress(stringResource(R.string.resona_ai_preparing), null)
-                    is ResonaAISync.Phase.Transcribing -> Progress(stringResource(R.string.resona_ai_listening), p.fraction)
+                    is ResonaAISync.Phase.Transcribing -> {
+                        Progress(stringResource(R.string.resona_ai_listening), p.fraction)
+                        if (p.sections > 1) {
+                            Text(
+                                stringResource(R.string.resona_ai_section, p.section, p.sections, p.words),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                     ResonaAISync.Phase.Aligning -> Progress(stringResource(R.string.resona_ai_matching), null)
                     is ResonaAISync.Phase.Done ->
                         Text(stringResource(R.string.resona_ai_done, (p.matched * 100).toInt()), color = MaterialTheme.colorScheme.primary)

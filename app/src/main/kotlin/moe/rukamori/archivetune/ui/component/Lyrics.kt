@@ -467,7 +467,11 @@ fun Lyrics(
 
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val lyricsEntity by playerConnection.currentLyrics.collectAsState(initial = null)
-    val lyrics = remember(lyricsEntity) { lyricsEntity?.lyrics?.trim() }
+    // Resona: the AI sync's result so far, only while it runs.
+    val aiPreview by moe.rukamori.archivetune.resona.aisync.ResonaLyricsPreview.current.collectAsState()
+    val lyrics = remember(lyricsEntity, aiPreview, mediaMetadata?.id) {
+        aiPreview?.takeIf { it.first == mediaMetadata?.id }?.second ?: lyricsEntity?.lyrics?.trim()
+    }
 
     val playerBackground by rememberEnumPreference(
         key = PlayerBackgroundStyleKey,

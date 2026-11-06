@@ -66,6 +66,7 @@
     <string name="resona_ai_downloading">KI-Modell wird geladen …</string>
     <string name="resona_ai_preparing">Audio wird vorbereitet …</string>
     <string name="resona_ai_listening">Song wird angehört …</string>
+    <string name="resona_ai_section">Abschnitt %1$d von %2$d · %3$d Wörter</string>
     <string name="resona_ai_matching">Wörter werden dem Songtext zugeordnet …</string>
     <string name="resona_ai_done">Fertig – %1$d %% der Wörter erkannt.</string>
     <string name="resona_ai_calibrated">Kalibriert: Tempo %1$s, Versatz %2$s (%3$d Ankerpunkte). Der Songtext bleibt unverändert.</string>

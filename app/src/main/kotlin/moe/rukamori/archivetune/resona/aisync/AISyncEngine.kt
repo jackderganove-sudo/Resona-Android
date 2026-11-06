@@ -305,7 +305,8 @@ class ResonaAISync(private val context: Context) {
         data object Idle : Phase
         data class DownloadingModel(val fraction: Double) : Phase
         data object PreparingAudio : Phase
-        data class Transcribing(val fraction: Double) : Phase
+        /** [section] of [sections] (1-based, 0 = not known yet), [words] so far. */
+        data class Transcribing(val fraction: Double, val section: Int = 0, val sections: Int = 0, val words: Int = 0) : Phase
         data object Aligning : Phase
         data class Done(val matched: Double, val lrc: String) : Phase
         data class Calibrated(val calibration: TempoCalibration, val lrc: String) : Phase
@@ -341,7 +342,10 @@ class ResonaAISync(private val context: Context) {
             if (AISyncBench.runIfConfigured(context, audio, texts, synced, duration, language) { _phase.value = Phase.Transcribing(it) }) {
                 return fail("bench finished")
             }
-            var words = transcribe(model, audio, language)
+            val onPartial: (List<RecognizedWord>) -> Unit = { soFar ->
+                ResonaLyricsPreview.show(mediaId, AISyncPartial.lrc(texts, synced, soFar, max(duration, audioSeconds)))
+            }
+            var words = transcribe(model, audio, language, onPartial)
             // Same as the iPad: few words with the fast model → try the accurate one
             // (when it's there or on Wi-Fi; a failed download keeps the first result).
             if (words.size < audioSeconds * 0.3 && model == WhisperModel.FAST) {
@@ -353,7 +357,7 @@ class ResonaAISync(private val context: Context) {
                 }
                 if (accurate.isDownloaded(context)) {
                     Log.i(TAG, "only ${words.size} words with FAST → trying ACCURATE")
-                    val second = transcribe(accurate, audio, language)
+                    val second = transcribe(accurate, audio, language, onPartial)
                     if (second.size > words.size) words = second
                 }
             }
@@ -365,7 +369,9 @@ class ResonaAISync(private val context: Context) {
                 when (val outcome = TempoCalibrator.fit(LyricsAligner.anchors(synced, words))) {
                     is TempoCalibrator.Outcome.Fitted -> {
                         Log.i(TAG, "calibration factor=%.4f offset=%.2f inliers=%d".format(Locale.ROOT, outcome.calibration.factor, outcome.calibration.offset, outcome.calibration.anchors))
-                        _phase.value = Phase.Calibrated(outcome.calibration, Lrc.serialize(TempoCalibrator.apply(synced, outcome.calibration)))
+                        val calibrated = Lrc.serialize(TempoCalibrator.apply(synced, outcome.calibration))
+                        ResonaLyricsPreview.show(mediaId, calibrated)
+                        _phase.value = Phase.Calibrated(outcome.calibration, calibrated)
                         return
                     }
                     is TempoCalibrator.Outcome.TooFewAnchors -> if (mode == Mode.CALIBRATE) { _phase.value = Phase.CalibrationFailed(outcome.count); return }
@@ -376,12 +382,16 @@ class ResonaAISync(private val context: Context) {
             val aligned = LyricsAligner.align(texts, words, max(duration, audioSeconds))
             Log.i(TAG, "matched ${(aligned.matchedRatio * 100).toInt()} % of ${texts.size} lines' words")
             if (aligned.matchedRatio >= 0.3) {
-                _phase.value = Phase.Done(aligned.matchedRatio, Lrc.serialize(aligned.lines))
+                val done = Lrc.serialize(aligned.lines)
+                ResonaLyricsPreview.show(mediaId, done)
+                _phase.value = Phase.Done(aligned.matchedRatio, done)
                 return
             }
+            ResonaLyricsPreview.clear()
             _phase.value = Phase.LowMatch(aligned.matchedRatio, LyricsAligner.lineOccurrences(texts, words).size)
         } catch (e: CancellationException) {
             WhisperNative.nativeCancel(true)
+            ResonaLyricsPreview.clear()
             _phase.value = Phase.Idle
             throw e
         } catch (e: Exception) {
@@ -419,7 +429,12 @@ class ResonaAISync(private val context: Context) {
         return Lrc.serialize(LyricsAligner.monotonicTiming(lines)).also { _phase.value = Phase.Done(1.0, it) }
     }
 
-    private suspend fun transcribe(model: WhisperModel, audio: FloatArray, language: String?): List<RecognizedWord> = withContext(Dispatchers.Default) {
+    private suspend fun transcribe(
+        model: WhisperModel,
+        audio: FloatArray,
+        language: String?,
+        onPartial: (List<RecognizedWord>) -> Unit,
+    ): List<RecognizedWord> = withContext(Dispatchers.Default) {
         WhisperNative.nativeCancel(false)
         val handle = WhisperNative.nativeInit(model.file(context).path)
         if (handle == 0L) error("model could not be loaded")
@@ -434,11 +449,18 @@ class ResonaAISync(private val context: Context) {
         var chunkMillis = 40_000L
         var offset = 0
         var running = true
+        val sections = (audio.size + chunk - 1) / chunk
+        var wordCount = 0
         val ticker = launch {
             try {
                 while (isActive) {
                     val within = ((SystemClock.elapsedRealtime() - chunkStartedAt).toDouble() / chunkMillis).coerceAtMost(0.95)
-                    _phase.value = Phase.Transcribing(((offset + chunk * within) / audio.size).coerceAtMost(0.99))
+                    _phase.value = Phase.Transcribing(
+                        ((offset + chunk * within) / audio.size).coerceAtMost(0.99),
+                        section = min(offset / chunk + 1, sections),
+                        sections = sections,
+                        words = wordCount,
+                    )
                     delay(400)
                 }
             } finally {
@@ -454,6 +476,8 @@ class ResonaAISync(private val context: Context) {
                 val found = WhisperNative.parse(String(bytes, Charsets.UTF_8))
                 words += found
                 perChunk += found.size
+                wordCount = words.size
+                onPartial(words)
                 chunkMillis = (SystemClock.elapsedRealtime() - chunkStartedAt).coerceAtLeast(1_000)
                 offset += chunk
             }
@@ -471,6 +495,7 @@ class ResonaAISync(private val context: Context) {
     }
 
     private fun fail(reason: String) {
+        ResonaLyricsPreview.clear()
         _phase.value = Phase.Failed(reason)
     }
 
@@ -481,6 +506,38 @@ class ResonaAISync(private val context: Context) {
         const val NO_LYRICS = "no-lyrics"
         const val NO_WORDS = "no-words"
     }
+}
+
+/** The result so far while a sync runs, through the same aligner as the final one. */
+object AISyncPartial {
+    /** Calibrated synced lyrics once a fit holds; plain lyrics once two lines are found; else null. */
+    fun lrc(texts: List<String>, synced: List<AlignedLine>, words: List<RecognizedWord>, duration: Double): String? {
+        if (synced.any { it.startTime != null }) {
+            val fitted = TempoCalibrator.fit(LyricsAligner.anchors(synced, words)) as? TempoCalibrator.Outcome.Fitted ?: return null
+            return Lrc.serialize(TempoCalibrator.apply(synced, fitted.calibration))
+        }
+        if (LyricsAligner.lineOccurrences(texts, words).size < 2) return null
+        return Lrc.serialize(LyricsAligner.align(texts, words, duration).lines)
+    }
+}
+
+/**
+ * What the lyrics view shows instead of the stored lyrics while a sync runs.
+ * Nothing here is written anywhere: closing or finishing the sync drops it.
+ */
+object ResonaLyricsPreview {
+    private val _current = MutableStateFlow<Pair<String, String>?>(null)
+    val current: StateFlow<Pair<String, String>?> = _current.asStateFlow()
+
+    fun show(mediaId: String, lrc: String?) {
+        if (lrc != null) _current.value = mediaId to lrc
+    }
+
+    fun clear() {
+        _current.value = null
+    }
+
+    fun forSong(mediaId: String?): String? = _current.value?.takeIf { it.first == mediaId }?.second
 }
 
 /** Enhanced LRC ("[mm:ss.xx]<mm:ss.xx>word …") for ArchiveTune's lyrics store. */

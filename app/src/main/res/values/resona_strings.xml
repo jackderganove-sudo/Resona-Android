@@ -48,6 +48,7 @@
     <string name="resona_ai_downloading">Downloading the AI model…</string>
     <string name="resona_ai_preparing">Preparing the audio…</string>
     <string name="resona_ai_listening">Listening to the song…</string>
+    <string name="resona_ai_section">Section %1$d of %2$d · %3$d words</string>
     <string name="resona_ai_matching">Matching words to the lyrics…</string>
     <string name="resona_ai_done">Done — %1$d %% of the words recognized.</string>
     <string name="resona_ai_calibrated">Calibrated: tempo %1$s, offset %2$s (%3$d anchor points). The lyrics stay as they are.</string>
