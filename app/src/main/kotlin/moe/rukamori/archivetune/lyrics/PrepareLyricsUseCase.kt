@@ -43,7 +43,11 @@ class PrepareLyricsUseCase
             combine(
                 repository.observeLyrics(mediaId),
                 repository.observePreferences(),
-            ) { entity, preferences -> entity to preferences }
+                // Resona: the AI sync's result so far, only while its dialog is open.
+                moe.rukamori.archivetune.resona.aisync.ResonaLyricsPreview.current,
+            ) { entity, preferences, preview ->
+                (preview?.takeIf { it.first == mediaId }?.second ?: entity) to preferences
+            }
                 .mapLatest { (entity, preferences) ->
                     withContext(Dispatchers.Default) {
                         prepare(entity, durationMs, preferences)
