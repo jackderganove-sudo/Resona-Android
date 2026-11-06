@@ -275,7 +275,9 @@ gemessen wurde. Der Code des Ein-Durchgang-Versuchs ist entfernt.
   343,9 s, gleiche 497 Wörter. Ein Encoder-Lauf ≈ 1 s, ein Fenster aber 25–125 s, weil
   whisper bei Musik nur wenig vorrückt und neu rechnet; ein Decoder-Schritt schwankt
   zwischen 19 und 911 ms (vermutlich Kern-Wechsel/Drosselung, nicht belegt). Deshalb
-  `single_segment`: ein Durchgang pro Fenster. Messung folgt.
+  `single_segment`: ein Durchgang pro Fenster. Ergebnis, gleicher Song, am Strom, mit Musik
+  und Canvas: **130,5 s (0,77-fache Songlänge), 476 Wörter, 52 % Treffer** (vorher 343,9 s,
+  497 Wörter, 55 %). Qualität des gespeicherten Timings weiter nicht beurteilt.
 - **Beobachtet, nicht geklärt:** Einmal schluckte die laufende App alle Berührungen
   (Tasten gingen, ein zweites Resona-Fenster war offen, die Benachrichtigungsleiste
   hatte den Fokus); erst ein Neustart half. Nicht reproduziert. Trat auf, als das
