@@ -990,8 +990,8 @@
     <string name="update_channel_release">Release</string>
     <string name="update_channel_release_desc">Tested updates from official GitHub Releases.</string>
     <string name="early_access_programs">Early access programs</string>
-    <string name="early_access_programs_desc">Try upcoming features before release and help shape Resona with your feedback. Join the Discord community to take part.</string>
-    <string name="early_access_open_failed">Could not open the Discord invitation. Check that a browser or Discord is installed.</string>
+    <string name="early_access_programs_desc">Try upcoming features before release and share your feedback on GitHub.</string>
+    <string name="early_access_open_failed">Could not open the link. Check that a browser is installed.</string>
     <string name="recent_commits">Recent Commits</string>
     <string name="updates_loading_commits">Loading recent commits</string>
     <string name="updates_recent_commits_count">%1$d recent commits</string>
