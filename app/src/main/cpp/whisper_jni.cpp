@@ -47,7 +47,10 @@ Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeTranscribe(
     wp.print_special = false;
     wp.translate = false;
     wp.no_context = true;
-    wp.single_segment = false;
+    // One pass per window (we cut the song into 30 s windows ourselves). Otherwise
+    // whisper moves on only a little on music and re-encodes again and again:
+    // encoding took 1 s, but a window took 20 to 110 s on the Pixel.
+    wp.single_segment = true;
     wp.token_timestamps = true;   // word times
     wp.max_len = 1;               // one word per segment …
     wp.split_on_word = true;      // … split on words, not tokens
@@ -71,6 +74,7 @@ Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeTranscribe(
     if (auto *t = whisper_get_timings(ctx)) {
         __android_log_print(ANDROID_LOG_INFO, "ResonaAISync", "window at %.0f s: encode %.0f ms, decode %.0f ms, batch %.0f ms, prompt %.0f ms, threads %d, rc %d",
                             offsetSeconds, t->encode_ms, t->decode_ms, t->batchd_ms, t->prompt_ms, threads, rc);
+        delete t;  // whisper_get_timings allocates a new struct per call.
     }
     env->ReleaseFloatArrayElements(samples, data, JNI_ABORT);
     if (lang != nullptr) env->ReleaseStringUTFChars(language, lang);
