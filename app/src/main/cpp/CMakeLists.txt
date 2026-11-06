@@ -35,7 +35,16 @@ target_link_options(resona_whisper PRIVATE -Wl,--gc-sections -Wl,--exclude-libs,
 
 set(GGML_OPENMP OFF CACHE BOOL "" FORCE)
 set(GGML_NATIVE OFF CACHE BOOL "" FORCE)
+# The CPU code lives in ggml-cpu, which only follows this variable: without it
+# it is built for plain armv8-a, without dot product and half-float instructions.
+# WhisperNative checks that the device has them before loading the library.
+if (${ANDROID_ABI} STREQUAL "arm64-v8a")
+    set(GGML_CPU_ARM_ARCH "armv8.2-a+dotprod+fp16" CACHE STRING "" FORCE)
+endif ()
 FetchContent_Declare(ggml SOURCE_DIR ${WHISPER_LIB_DIR}/ggml)
 FetchContent_MakeAvailable(ggml)
 target_compile_options(ggml PRIVATE ${GGML_COMPILE_OPTIONS})
+if (TARGET ggml-cpu)
+    target_compile_options(ggml-cpu PRIVATE -O3)
+endif ()
 target_link_libraries(resona_whisper ${LOG_LIB} android ggml)

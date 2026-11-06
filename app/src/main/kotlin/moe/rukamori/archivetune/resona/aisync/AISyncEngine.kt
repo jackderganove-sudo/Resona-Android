@@ -49,7 +49,16 @@ import kotlin.math.sqrt
 
 /** whisper.cpp through JNI (libresona_whisper). */
 object WhisperNative {
-    val available: Boolean = runCatching { System.loadLibrary("resona_whisper") }.isSuccess
+    /** The arm64 library needs dot product and half-float instructions (not on older phones). */
+    private fun cpuSupported(): Boolean {
+        if (Build.SUPPORTED_ABIS?.firstOrNull() != "arm64-v8a") return true
+        val features = runCatching {
+            File("/proc/cpuinfo").useLines { lines -> lines.firstOrNull { it.startsWith("Features") }.orEmpty() }
+        }.getOrDefault("").split(' ', '\t')
+        return "asimddp" in features && "fphp" in features
+    }
+
+    val available: Boolean = cpuSupported() && runCatching { System.loadLibrary("resona_whisper") }.isSuccess
 
     external fun nativeInit(path: String): Long
     external fun nativeFree(handle: Long)
@@ -410,7 +419,8 @@ class ResonaAISync(private val context: Context) {
         WhisperNative.nativeCancel(false)
         val handle = WhisperNative.nativeInit(model.file(context).path)
         if (handle == 0L) error("model could not be loaded")
-        val threads = Runtime.getRuntime().availableProcessors().coerceIn(2, 6)
+        // Leave room for playback and the UI: busy-waiting threads on taken cores slow everyone down.
+        val threads = (Runtime.getRuntime().availableProcessors() - 2).coerceIn(2, 6)
         val chunk = 30 * 16_000
         val words = ArrayList<RecognizedWord>()
         val perChunk = ArrayList<Int>()
