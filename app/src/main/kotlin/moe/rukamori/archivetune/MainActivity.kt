@@ -2632,7 +2632,9 @@ class MainActivity : ComponentActivity() {
                                         },
                                         modifier =
                                             Modifier
-                                                .then(floatingBarsHazeSourceModifier)
+                                                .graphicsLayer {
+                                                    alpha = if (playerBottomSheetState.isExpanded && moe.rukamori.archivetune.resona.LyricsDepthBench.hideBelow) 0f else 1f
+                                                }.then(floatingBarsHazeSourceModifier)
                                                 .then(
                                                     if (isTvDevice) {
                                                         Modifier

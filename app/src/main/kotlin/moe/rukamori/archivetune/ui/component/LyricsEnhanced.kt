@@ -83,6 +83,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import moe.rukamori.archivetune.resona.LyricsDepthBench
+import moe.rukamori.archivetune.resona.resonaLyricsDepth
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -478,6 +480,10 @@ fun LyricsEnhanced(
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     val lyricsViewportAnchor = remember(maxHeight) { LyricsAnchor.Fixed(maxHeight * 0.38f) }
+                    // Measuring only: variants from a file on the device.
+                    val benchContext = LocalContext.current
+                    remember(lyricsSessionKey) { LyricsDepthBench.load(benchContext) }
+                    val depthLevels = LyricsDepthBench.levels
 
                     CompositionLocalProvider(LocalLayoutDirection provides lyricsLayoutDirection) {
                         key(lyricsSessionKey, syncedLyrics) {
@@ -512,13 +518,20 @@ fun LyricsEnhanced(
                                 // (66 % janky in portrait), one pass over the list was worse
                                 // (100 %); without blur the Pixel stays smooth. Line change:
                                 // one spring like the iPad (response 0.5 s, damping 0.78).
-                                useBlurEffect = false,
+                                useBlurEffect = LyricsDepthBench.library,
                                 scrollAnimationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.78f, stiffness = 158f),
                                 showTranslation = showTranslations,
                                 showPhonetic = showPhonetics,
                                 anchor = lyricsViewportAnchor,
                                 keepAliveZone = 72.dp,
-                                modifier = Modifier.fillMaxSize(),
+                                modifier =
+                                    Modifier.fillMaxSize().resonaLyricsDepth(
+                                        enabled = depthLevels > 0,
+                                        anchorTop = maxHeight * 0.38f,
+                                        rowHeight = with(LocalDensity.current) { (lyricsTextSize.sp * 1.3f).toDp() },
+                                        manualScrolling = karaokeLyricsListState.isManualScrolling,
+                                        levels = depthLevels,
+                                    ),
                             )
                         }
                     }
