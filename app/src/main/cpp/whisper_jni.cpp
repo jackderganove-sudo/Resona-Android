@@ -14,6 +14,14 @@ static std::atomic<bool> g_cancel(false);
 
 static bool abort_cb(void *) { return g_cancel.load(); }
 
+// Threads for the decoder's per-token graphs (see CMakeLists.txt); 0 = as many as the encoder.
+static std::atomic<int> g_decode_threads(1);
+
+int resona_decode_threads(int n_threads) {
+    const int wanted = g_decode_threads.load();
+    return wanted > 0 && wanted < n_threads ? wanted : n_threads;
+}
+
 // Measuring: only whisper's "… time = … ms / … runs" lines (numbers, never text).
 static void timing_log(enum ggml_log_level, const char *text, void *) {
     if (text != nullptr && strstr(text, " time = ") != nullptr) {
@@ -107,6 +115,7 @@ Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeTranscribe(
     // One pass per window: without the threshold, retries at higher temperatures
     // on hard music took 4.4 × the song's length (Pixel: 207 s audio in 905 s).
     wp.temperature_inc = option(options, "tempinc", 0.0f);
+    g_decode_threads.store(static_cast<int>(option(options, "dthreads", 1)));
     wp.abort_callback = abort_cb;
     wp.abort_callback_user_data = nullptr;
 

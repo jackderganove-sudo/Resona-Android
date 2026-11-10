@@ -151,3 +151,7 @@
 
 # Resona AI sync: JNI symbols are bound to this class and its method names.
 -keep class moe.rukamori.archivetune.resona.aisync.WhisperNative { *; }
+
+# ONNX Runtime creates these from native code (TensorInfo, OnnxTensor, …).
+-keep class ai.onnxruntime.** { *; }
+-dontwarn ai.onnxruntime.**

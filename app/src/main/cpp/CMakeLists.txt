@@ -6,8 +6,25 @@ project(resona_whisper C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(WHISPER_LIB_DIR ${CMAKE_SOURCE_DIR}/../../../../native/whisper.cpp)
 
+# The decoder runs one small graph per token. Without OpenMP ggml starts a new
+# set of threads for every graph; on a phone they begin cold on slow cores, and a
+# token took 150-650 ms instead of 10 ms (Pixel, whisper base). whisper.cpp has
+# one thread count for encoder and decoder, so its two decoding calls get their
+# own (resona_decode_threads in whisper_jni.cpp); the encoder keeps all threads.
+file(READ ${WHISPER_LIB_DIR}/src/whisper.cpp RESONA_WHISPER_SRC)
+set(RESONA_DECODE_CALL "state->batch, params.n_threads, false, params.abort_callback")
+string(FIND "${RESONA_WHISPER_SRC}" "${RESONA_DECODE_CALL}" RESONA_DECODE_CALL_AT)
+if (RESONA_DECODE_CALL_AT EQUAL -1)
+    message(FATAL_ERROR "whisper.cpp changed: decoding call not found, update the decoder thread patch")
+endif ()
+string(REPLACE "${RESONA_DECODE_CALL}"
+    "state->batch, resona_decode_threads(params.n_threads), false, params.abort_callback"
+    RESONA_WHISPER_SRC "${RESONA_WHISPER_SRC}")
+file(WRITE ${CMAKE_BINARY_DIR}/resona_whisper_src.tmp "int resona_decode_threads(int n_threads);\n${RESONA_WHISPER_SRC}")
+configure_file(${CMAKE_BINARY_DIR}/resona_whisper_src.tmp ${CMAKE_BINARY_DIR}/resona_whisper_src.cpp COPYONLY)
+
 set(SOURCE_FILES
-    ${WHISPER_LIB_DIR}/src/whisper.cpp
+    ${CMAKE_BINARY_DIR}/resona_whisper_src.cpp
     ${CMAKE_SOURCE_DIR}/whisper_jni.cpp)
 if (EXISTS ${WHISPER_LIB_DIR}/src/aneforge/whisper-aneforge.cpp)
     list(APPEND SOURCE_FILES ${WHISPER_LIB_DIR}/src/aneforge/whisper-aneforge.cpp)
