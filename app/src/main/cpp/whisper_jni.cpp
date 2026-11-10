@@ -29,6 +29,10 @@ static void timing_log(enum ggml_log_level, const char *text, void *) {
     }
 }
 static void silent_log(enum ggml_log_level, const char *, void *) {}
+// Measuring: what the Vulkan backend says while it looks for a device.
+static void backend_log(enum ggml_log_level, const char *text, void *) {
+    if (text != nullptr) __android_log_print(ANDROID_LOG_INFO, "ResonaAISync", "ggml %s", text);
+}
 
 // "key=value,key=value" → value of key, or the fallback.
 static float option(const std::string &options, const char *key, float fallback) {
@@ -52,6 +56,8 @@ Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeInit(JNIEnv *env
 extern "C" JNIEXPORT jint JNICALL
 Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeGpuDevices(JNIEnv *, jobject) {
     int count = 0;
+    ggml_log_set(backend_log, nullptr);
+    __android_log_print(ANDROID_LOG_INFO, "ResonaAISync", "backends: %zu, devices: %zu", ggml_backend_reg_count(), ggml_backend_dev_count());
     for (size_t i = 0; i < ggml_backend_dev_count(); i++) {
         ggml_backend_dev_t dev = ggml_backend_dev_get(i);
         if (ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_GPU) {
@@ -59,6 +65,7 @@ Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeGpuDevices(JNIEn
             count++;
         }
     }
+    ggml_log_set(silent_log, nullptr);
     return count;
 }
 
