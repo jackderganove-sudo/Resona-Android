@@ -564,4 +564,26 @@
     <string name="resona_files_notification">Downloads werden als Dateien gespeichert</string>
     <string name="resona_files_count">%1$d von %2$d Songs</string>
     <string name="resona_downloads_only">Nur Downloads</string>
+    <string name="resona_stick_title">PS5-Stick</string>
+    <string name="resona_stick_choose">USB-Stick</string>
+    <string name="resona_stick_none">Noch nicht gewählt – den obersten Ordner des Sticks auswählen</string>
+    <string name="resona_stick_choose_first">Zuerst den USB-Stick auswählen.</string>
+    <string name="resona_stick_playlists">Playlists auf dem Stick</string>
+    <string name="resona_stick_playlists_count">%1$d ausgewählt</string>
+    <string name="resona_stick_flat">Flache Struktur</string>
+    <string name="resona_stick_flat_desc">Alle Songs direkt in Music/ („Playlist - Nr - Künstler - Titel“), für Player ohne Ordneransicht</string>
+    <string name="resona_stick_sync_now">Jetzt synchronisieren</string>
+    <string name="resona_stick_sync_desc">Music/&lt;Playlist&gt;/&lt;Nr&gt; - &lt;Künstler&gt; - &lt;Titel&gt;.m4a – neue Songs werden kopiert, entfernte gelöscht, andere Dateien bleiben unberührt</string>
+    <string name="resona_stick_syncing">PS5-Stick wird synchronisiert</string>
+    <string name="resona_stick_loading">Fehlende Songs werden geladen: %1$d von %2$d</string>
+    <string name="resona_stick_progress">Song %1$d von %2$d · %3$d MB</string>
+    <string name="resona_stick_done">Fertig. Stick sicher entfernen (Benachrichtigungen → USB-Laufwerk → Auswerfen), dann in die PS5 stecken.</string>
+    <string name="resona_stick_no_space">Nicht genug Platz auf dem Stick.</string>
+    <string name="resona_stick_cancelled">Abgebrochen – der nächste Abgleich macht dort weiter.</string>
+    <string name="resona_stick_failed">Der Stick ließ sich nicht beschreiben. Wähl ihn in den Einstellungen neu aus.</string>
+    <string name="resona_stick_ask">PS5-Stick synchronisieren?</string>
+    <string name="resona_stick_drop_title">Abgewählte Playlists entfernen?</string>
+    <string name="resona_stick_drop_text">Diese Ordner sind nicht mehr ausgewählt: %1$s. Gelöscht werden nur Songs, die Resona kopiert hat.</string>
+    <string name="resona_stick_drop_yes">Entfernen</string>
+    <string name="resona_stick_drop_keep">Behalten</string>
 </resources>

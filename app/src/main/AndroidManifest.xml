@@ -256,6 +256,22 @@
             </intent-filter>
         </service>
 
+        <!-- Resona PS5 stick: sync runs as a WorkManager foreground job (data sync). -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge" />
+
+        <!-- Resona PS5 stick: "Sync?" when the known stick is mounted; the notification's button. -->
+        <receiver
+            android:name=".resona.files.StickReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_MOUNTED" />
+                <data android:scheme="file" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".playback.ExoDownloadService"
             android:exported="false"

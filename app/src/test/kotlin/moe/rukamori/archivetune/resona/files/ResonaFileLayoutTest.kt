@@ -114,4 +114,17 @@ class ResonaFileLayoutTest {
             )
         assertEquals(mapOf("p1" to "Mix", "p2" to "mix (2)", "p3" to "Songs (2)"), manifest.folders)
     }
+
+    @Test
+    fun flatLayoutPutsEverythingInTheRoot() {
+        val playlists = listOf(WantedPlaylist("p1", "Eins", listOf("a", "c")))
+        val (steps, manifest) = ResonaFilePlan.plan(ResonaManifest(), playlists, emptyList(), info, copiesPerPlaylist = true, flat = true)
+        assertEquals(2, steps.size)
+        assertEquals("Eins - 01 - Platzhalter Band - Erfundener Titel.m4a", manifest.songs.getValue("p1/a").path)
+        // Renamed and deselected: files move or go, never a folder step.
+        val (renamed, _) = ResonaFilePlan.plan(manifest, listOf(WantedPlaylist("p1", "Zwei", listOf("a"))), emptyList(), info, true, flat = true)
+        assertTrue(renamed.none { it is FileStep.RenameFolder || it is FileStep.DeleteFolder })
+        assertTrue(FileStep.Move("a", "Eins - 01 - Platzhalter Band - Erfundener Titel.m4a", "Zwei - 01 - Platzhalter Band - Erfundener Titel.m4a") in renamed)
+        assertTrue(FileStep.Delete("c", "Eins - 02 - Niemand - Dritter Song.m4a") in renamed)
+    }
 }

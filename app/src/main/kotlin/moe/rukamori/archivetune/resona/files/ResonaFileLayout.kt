@@ -128,6 +128,7 @@ object ResonaFilePlan {
         looseSongs: List<String>,
         info: (String) -> SongInfo?,
         copiesPerPlaylist: Boolean,
+        flat: Boolean = false,
     ): Pair<List<FileStep>, ResonaManifest> {
         val steps = ArrayList<FileStep>()
         // Folder names: safe and unique, the "Songs" folder kept free.
@@ -138,10 +139,13 @@ object ResonaFilePlan {
             takenFolders += name
             folders[p.id] = name
         }
-        for ((id, oldName) in old.folders) {
-            val newName = folders[id]
-            if (newName == null) steps += FileStep.DeleteFolder(id, oldName)
-            else if (newName != oldName) steps += FileStep.RenameFolder(id, oldName, newName)
+        // Flat (all files directly in the root, "<Playlist> - NN - Artist - Title"): no folders to rename or drop.
+        if (!flat) {
+            for ((id, oldName) in old.folders) {
+                val newName = folders[id]
+                if (newName == null) steps += FileStep.DeleteFolder(id, oldName)
+                else if (newName != oldName) steps += FileStep.RenameFolder(id, oldName, newName)
+            }
         }
 
         // Wanted path per (song, place). Key: songId for single copies, "playlist/songId" for copies.
@@ -149,10 +153,12 @@ object ResonaFilePlan {
         val takenNames = HashMap<String, MutableSet<String>>()
         fun place(key: String, folder: String, number: Int?, songId: String) {
             val song = info(songId) ?: return
-            val names = takenNames.getOrPut(folder) { HashSet() }
-            val name = ResonaFileNames.unique(ResonaFileNames.song(number, song.artist, song.title), names)
+            val bucket = if (flat) "" else folder
+            val names = takenNames.getOrPut(bucket) { HashSet() }
+            val base = ResonaFileNames.song(number, song.artist, song.title)
+            val name = ResonaFileNames.unique(if (flat) ResonaFileNames.safe("$folder - $base", 200) else base, names)
             names += name
-            wanted[key] = "$folder/$name"
+            wanted[key] = if (flat) name else "$folder/$name"
         }
         for (p in playlists) {
             val folder = folders.getValue(p.id)
@@ -169,6 +175,7 @@ object ResonaFilePlan {
         // Old paths as they are after folder renames.
         val renamed = steps.filterIsInstance<FileStep.RenameFolder>().associate { it.from to it.to }
         fun afterRename(path: String): String {
+            if ('/' !in path) return path
             val folder = path.substringBefore('/')
             return renamed[folder]?.let { "$it/${path.substringAfter('/')}" } ?: path
         }
@@ -178,7 +185,7 @@ object ResonaFilePlan {
             val path = afterRename(oldSong.path)
             val target = wanted[key]
             when {
-                target == null -> if (oldSong.path.substringBefore('/') !in deletedFolders) steps += FileStep.Delete(key.substringAfter('/'), path)
+                target == null -> if ('/' !in oldSong.path || oldSong.path.substringBefore('/') !in deletedFolders) steps += FileStep.Delete(key.substringAfter('/'), path)
                 target != path -> {
                     steps += FileStep.Move(key.substringAfter('/'), path, target)
                     songs[key] = oldSong.copy(path = target)

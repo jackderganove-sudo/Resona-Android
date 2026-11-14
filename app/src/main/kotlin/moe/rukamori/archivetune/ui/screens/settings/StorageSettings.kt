@@ -311,8 +311,9 @@ fun StorageSettings(
                 }
             }
 
-            // Resona: downloads as files (round 12).
+            // Resona: downloads as files and the PS5 stick (round 12).
             moe.rukamori.archivetune.resona.files.DownloadFilesSettingsGroup()
+            moe.rukamori.archivetune.resona.files.Ps5StickSettingsGroup()
 
             if (clearDownloads) {
                 ActionPromptDialog(

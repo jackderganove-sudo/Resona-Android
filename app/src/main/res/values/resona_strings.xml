@@ -91,4 +91,26 @@
     <string name="resona_files_notification">Saving downloads as files</string>
     <string name="resona_files_count">%1$d of %2$d songs</string>
     <string name="resona_downloads_only">Downloads only</string>
+    <string name="resona_stick_title">PS5 stick</string>
+    <string name="resona_stick_choose">USB stick</string>
+    <string name="resona_stick_none">Not chosen yet – pick the stick\'s top folder</string>
+    <string name="resona_stick_choose_first">Pick the USB stick first.</string>
+    <string name="resona_stick_playlists">Playlists on the stick</string>
+    <string name="resona_stick_playlists_count">%1$d selected</string>
+    <string name="resona_stick_flat">Flat layout</string>
+    <string name="resona_stick_flat_desc">All songs directly in Music/ (\"Playlist - Nr - Artist - Title\"), for players that don\'t show folders</string>
+    <string name="resona_stick_sync_now">Sync now</string>
+    <string name="resona_stick_sync_desc">Music/&lt;Playlist&gt;/&lt;Nr&gt; - &lt;Artist&gt; - &lt;Title&gt;.m4a – new songs are copied, removed ones deleted, other files stay untouched</string>
+    <string name="resona_stick_syncing">Syncing PS5 stick</string>
+    <string name="resona_stick_loading">Downloading missing songs: %1$d of %2$d</string>
+    <string name="resona_stick_progress">Song %1$d of %2$d · %3$d MB</string>
+    <string name="resona_stick_done">Done. Remove the stick safely (notification shade → USB drive → Eject), then plug it into the PS5.</string>
+    <string name="resona_stick_no_space">Not enough space on the stick.</string>
+    <string name="resona_stick_cancelled">Cancelled – the next sync continues where it stopped.</string>
+    <string name="resona_stick_failed">The stick could not be written. Pick it again in the settings.</string>
+    <string name="resona_stick_ask">Sync PS5 stick?</string>
+    <string name="resona_stick_drop_title">Remove deselected playlists?</string>
+    <string name="resona_stick_drop_text">These folders are no longer selected: %1$s. Only songs Resona copied are deleted.</string>
+    <string name="resona_stick_drop_yes">Remove</string>
+    <string name="resona_stick_drop_keep">Keep</string>
 </resources>
