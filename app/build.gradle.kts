@@ -105,6 +105,9 @@ android {
         buildConfigField("String", "DATA_SERVER_URL", dataServerUrl.asBuildConfigString())
         buildConfigField("String", "API_BEARER_TOKEN", apiBearerToken.asBuildConfigString())
         buildConfigField("boolean", "GATEKEEPER_ENABLED", "false")
+        // Measuring switches (files on the device choose AI sync and lyrics variants):
+        // only in builds of the wip branch, never in a release.
+        buildConfigField("boolean", "RESONA_MEASURE", (System.getenv("RESONA_MEASURE") == "1").toString())
         buildConfigField("boolean", "LEAK_CANARY_TOGGLE_AVAILABLE", "false")
 
         val nightlyBuildHash =

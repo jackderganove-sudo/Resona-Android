@@ -160,9 +160,7 @@ object AISyncBench {
             } else {
                 AISyncWindows.fixed(total, length)
             }
-        val gpu = config["gpu"] == "1"
-        if (gpu) Log.i(TAG, "BENCH $name gpu devices: ${WhisperNative.nativeGpuDevices()}")
-        val handle = WhisperNative.nativeInit(model.path, gpu)
+        val handle = WhisperNative.nativeInit(model.path)
         if (handle == 0L) {
             Log.w(TAG, "BENCH $name: model failed to load")
             return

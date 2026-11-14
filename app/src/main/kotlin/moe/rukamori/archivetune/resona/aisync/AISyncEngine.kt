@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import moe.rukamori.archivetune.BuildConfig
 import moe.rukamori.archivetune.playback.DownloadUtil
 import java.io.File
 import java.net.HttpURLConnection
@@ -60,8 +61,7 @@ object WhisperNative {
 
     val available: Boolean = cpuSupported() && runCatching { System.loadLibrary("resona_whisper") }.isSuccess
 
-    external fun nativeInit(path: String, gpu: Boolean): Long
-    external fun nativeGpuDevices(): Int
+    external fun nativeInit(path: String): Long
     external fun nativeFree(handle: Long)
     external fun nativeCancel(cancel: Boolean)
     external fun nativeTranscribe(handle: Long, samples: FloatArray, threads: Int, offsetSeconds: Double, language: String?, options: String?): ByteArray
@@ -271,6 +271,10 @@ object CachedSongAudio {
         return resample(mono.toArray(), sampleRate, 16_000)
     }
 
+    /** Whether [audioSeconds] of decoded audio are the whole song of [duration] seconds (0 = unknown). */
+    fun coversSong(audioSeconds: Double, duration: Double): Boolean =
+        duration <= 0 || audioSeconds >= duration * 0.95 - 2
+
     fun resample(input: FloatArray, from: Int, to: Int): FloatArray {
         if (from == to || input.isEmpty()) return input
         val outLength = (input.size.toLong() * to / from).toInt()
@@ -339,8 +343,11 @@ class ResonaAISync(private val context: Context) {
                 return fail(NOT_CACHED)
             }
             val audioSeconds = audio.size / 16_000.0
+            // A song still loading is only partly in the cache: its first part alone
+            // would be aligned against the whole lyrics.
+            if (!CachedSongAudio.coversSong(audioSeconds, duration)) return fail(NOT_CACHED)
             val language = withContext(Dispatchers.Default) { LyricsLanguage.detect(context, texts) }
-            if (AISyncBench.runIfConfigured(context, audio, texts, synced, duration, language) { _phase.value = Phase.Transcribing(it) }) {
+            if (BuildConfig.RESONA_MEASURE && AISyncBench.runIfConfigured(context, audio, texts, synced, duration, language) { _phase.value = Phase.Transcribing(it) }) {
                 return fail("bench finished")
             }
             val onPartial: (List<RecognizedWord>) -> Unit = { soFar ->
@@ -437,9 +444,9 @@ class ResonaAISync(private val context: Context) {
         onPartial: (List<RecognizedWord>) -> Unit,
     ): List<RecognizedWord> = withContext(Dispatchers.Default) {
         WhisperNative.nativeCancel(false)
-        val handle = WhisperNative.nativeInit(model.file(context).path, false)
+        val handle = WhisperNative.nativeInit(model.file(context).path)
         if (handle == 0L) error("model could not be loaded")
-        val threads = Runtime.getRuntime().availableProcessors().coerceIn(2, 6)
+        val threads = ENCODER_THREADS
         val chunk = 30 * 16_000
         val words = ArrayList<RecognizedWord>()
         val perChunk = ArrayList<Int>()
@@ -503,6 +510,13 @@ class ResonaAISync(private val context: Context) {
     companion object {
         const val TAG = "ResonaAISync"
         const val NOT_CACHED = "not-cached"
+
+        /**
+         * Threads for the encoder (one large graph per 30 s). The decoder always
+         * runs on one thread (whisper_jni.cpp): with more it took 150-650 ms per
+         * token on the Pixel instead of 10 ms.
+         */
+        val ENCODER_THREADS = Runtime.getRuntime().availableProcessors().coerceIn(1, 4)
         const val UNAVAILABLE = "unavailable"
         const val NO_LYRICS = "no-lyrics"
         const val NO_WORDS = "no-words"

@@ -127,6 +127,7 @@ object LyricsDepthBench {
     var hideBelow by mutableStateOf(false)
 
     fun load(context: android.content.Context) {
+        if (!moe.rukamori.archivetune.BuildConfig.RESONA_MEASURE) return
         val values = runCatching {
             java.io.File(context.getExternalFilesDir(null), "lyrics-depth.txt").readText()
                 .trim().split(Regex("\\s+")).associate { it.substringBefore('=') to it.substringAfter('=') }

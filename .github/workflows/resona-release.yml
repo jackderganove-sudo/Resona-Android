@@ -76,6 +76,8 @@ jobs:
           RESONA_VERSION_CODE: ${{ steps.version.outputs.code }}
           LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
           LASTFM_SECRET: ${{ secrets.LASTFM_SECRET }}
+          # Measuring switches exist only in wip builds; a release never has them.
+          RESONA_MEASURE: ${{ github.ref_name == 'wip' && '1' || '0' }}
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon assembleGmsMobileArm64Release assembleGmsMobileUniversalRelease > build.log 2>&1 || {
