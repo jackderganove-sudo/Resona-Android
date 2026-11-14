@@ -291,3 +291,53 @@ gemessen wurde. Der Code des Ein-Durchgang-Versuchs ist entfernt.
   (`screens-r11/d2-*.png`). Nicht geprüft: Android unter 12 (Rückfall ohne Blur).
 - **Lyrics-Messung:** Der Testsong hat Wort-Sync; Übersetzung war nicht aktiv (eine
   KI-Übersetzung ist ohne API-Schlüssel nicht testbar).
+
+## Runde 11 – KI-Sync schneller (Messungen auf dem Pixel 11 Pro)
+
+Testsong 169 s, 59 Zeilen mit Zeit (Englisch). „Treffer“ = Anteil der Songtext-Wörter, die
+der Aligner findet; „Zeilenfehler“ = Median des Abstands zur Zeile des Anbieters. Nur
+Zahlen, kein Text. Messmodus: Datei `aisync-bench.txt` auf dem Gerät (nur in wip-Builds).
+
+### Ursache der Langsamkeit
+Der Encoder braucht pro 30-s-Fenster nur 0,8–2 s. Die Zeit ging fast ganz in den Decoder:
+150–650 ms pro Token statt ~10 ms. ggml startet ohne OpenMP für jeden Graphen neue
+Threads; der Decoder rechnet einen kleinen Graphen pro Token, die Threads starten kalt auf
+langsamen Kernen (Tensor G6: 2× 2,65 GHz, 4× 3,38 GHz, 1× 4,11 GHz). Mit einem Thread:
+
+| Variante (Modell base, 6 Fenster à 30 s) | Laufzeit | × Songlänge | Wörter | Treffer | Zeilenfehler | Temp. |
+|---|---|---|---|---|---|---|
+| bisher, 6 Threads (Akku) | 147,1 s | 0,87 | 476 | 52 % | 2,22 s | 25,8→32,0 °C |
+| 5 Threads (Strom) | 268,3 s | 1,59 | 476 | 52 % | 2,22 s | 32,0→34,9 °C |
+| 4 Threads (Strom) | 356,7 s | 2,11 | 476 | 52 % | 2,22 s | 34,9→36,7 °C |
+| q5_1, 4 Threads | 608,7 s | 3,60 | 581 | 62 % | 3,02 s | 36,7→38,4 °C |
+| q8_0, 4 Threads | 112,5 s | 0,66 | 472 | 58 % | 3,07 s | 38,4 °C |
+| **1 Thread** | **22,6 s** | **0,13** | 476 | 52 % | 2,22 s | 35,9 °C |
+| 2 Threads | 44,0 s | 0,26 | 476 | 52 % | 2,22 s | 35,9→37,1 °C |
+| Vulkan-GPU, 1 Thread (erster Lauf, Shader-Aufbau) | 47,5 s | 0,28 | 475 | 52 % | 2,22 s | 37,1→38,1 °C |
+| Vulkan-GPU, 4 Threads | 30,8 s | 0,18 | 475 | 52 % | 2,22 s | 38,1 °C |
+
+Ergebnis gleich, nur die Zeit ändert sich: **7,5-fach schneller als der Song** (22,6 s für
+169 s) mit einem Thread – das Ziel „3–5× schneller“ ist damit erreicht. Eingebaut: whisper.cpp
+bekommt für den Decoder eine eigene Thread-Zahl (1), der Encoder bis zu 4 (Patch beim Bauen,
+`app/src/main/cpp/CMakeLists.txt`). **Diese Kombination ist noch nicht gemessen**; die
+22,6 s gelten für einen Thread insgesamt.
+
+- **Quantisierte Modelle (q5_1/q8_0):** nicht übernommen – mehr Wörter, aber größerer
+  Zeilenfehler (3,0 s statt 2,2 s); q5_1 war mit dem alten Thread-Problem sogar langsamer.
+- **Vulkan (GPU, PowerVR):** gemessen und wieder ausgebaut. ggml fand auf dem Pixel kein
+  GPU-Gerät (die Läufe liefen also auf der CPU), die APK wurde 50 MB größer und hätte unter
+  Android 10 gar nicht geladen.
+- **VAD (Silero) und Fenster entlang der Lyrics-Zeilen:** Die Messreihe lief auf einem nur
+  teilweise geladenen Song (111 s statt 169 s, 31 Zeilen) und ist deshalb nicht mit der
+  Tabelle vergleichbar. Tendenz: VAD erkannte nur 21 s Gesang (17 % Treffer) – auf Musik
+  ungeeignet, nicht übernommen. Lyrics-Fenster: 0,91 s Zeilenfehler, 61 % innerhalb 1 s
+  (bester Wert), Wiederholung auf dem vollständigen Song steht aus.
+  Teilweise geladene Songs werden jetzt nicht mehr synchronisiert („nicht im Cache“).
+- **CTC-Forced-Alignment (wav2vec2, ONNX):** eingebaut (Viterbi mit synthetischen Tests,
+  gleicher Aligner), der erste Lauf stürzte im Release ab (R8 entfernte Klassen von ONNX
+  Runtime, behoben). Messung steht aus.
+- **Fortschritt und Teilergebnisse:** Der Dialog zeigt „Abschnitt x von y · n Wörter“; das
+  Ergebnis bis dahin erscheint live im Songtext (nur Vorschau, gespeichert wird erst mit
+  „Speichern“).
+- iPad-Vergleich: Das iPad nutzt WhisperKit `openai_whisper-base` auf der Neural Engine; ein
+  Messwert für denselben Song liegt noch nicht vor.
