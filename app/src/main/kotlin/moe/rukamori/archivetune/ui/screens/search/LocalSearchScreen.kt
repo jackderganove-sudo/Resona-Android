@@ -117,12 +117,21 @@ fun LocalSearchScreen(
             )
         }
 
+        // Resona: "Downloads only" shows only downloaded songs (round 12).
+        val (downloadsOnly, _) = moe.rukamori.archivetune.resona.files.rememberDownloadsOnly()
+        val completedDownloads = moe.rukamori.archivetune.resona.files.rememberCompletedDownloads()
         LazyColumn(
             state = lazyListState,
             contentPadding = PaddingValues(top = 8.dp),
             modifier = Modifier.weight(1f),
         ) {
-            result.map.forEach { (filter, items) ->
+            item(key = "resona_downloads_only") {
+                moe.rukamori.archivetune.resona.files.DownloadsOnlyChip()
+            }
+            result.map
+                .mapValues { (_, items) -> if (downloadsOnly) items.filter { it !is Song || it.id in completedDownloads } else items }
+                .filterValues { it.isNotEmpty() }
+                .forEach { (filter, items) ->
                 if (result.filter == LocalFilter.ALL) {
                     item(key = filter) {
                         val filterIcon =

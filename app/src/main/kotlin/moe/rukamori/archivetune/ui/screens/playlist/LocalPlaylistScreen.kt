@@ -247,12 +247,16 @@ fun LocalPlaylistScreen(
         mutableStateOf(TextFieldValue())
     }
 
+    // Resona: "Downloads only" (round 12).
+    val (downloadsOnly, _) = moe.rukamori.archivetune.resona.files.rememberDownloadsOnly()
+    val completedDownloads = moe.rukamori.archivetune.resona.files.rememberCompletedDownloads()
     val filteredSongs =
-        remember(songs, query) {
+        remember(songs, query, downloadsOnly, completedDownloads) {
+            val base = if (downloadsOnly) songs.filter { it.song.id in completedDownloads } else songs
             if (query.text.isEmpty()) {
-                songs
+                base
             } else {
-                songs.filter { song ->
+                base.filter { song ->
                     song.song.song.title
                         .contains(query.text, ignoreCase = true) ||
                         song.song.artists.fastAny { it.name.contains(query.text, ignoreCase = true) }
@@ -871,10 +875,14 @@ fun LocalPlaylistScreen(
                 }
             }
 
+            item(key = "resona_downloads_only") {
+                moe.rukamori.archivetune.resona.files.DownloadsOnlyChip()
+            }
+
             // Songs List
             if (!selection) {
                 itemsIndexed(
-                    items = if (isSearching) filteredSongs else mutableSongs,
+                    items = if (isSearching || downloadsOnly) filteredSongs else mutableSongs,
                     key = { _, song -> song.map.id },
                 ) { index, song ->
                     ReorderableItem(

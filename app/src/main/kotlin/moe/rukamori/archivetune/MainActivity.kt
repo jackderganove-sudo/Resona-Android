@@ -1069,7 +1069,10 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    var searchSource by rememberEnumPreference(SearchSourceKey, SearchSource.ONLINE)
+                    var searchSourceSetting by rememberEnumPreference(SearchSourceKey, SearchSource.ONLINE)
+                    // Resona: "Downloads only" (offline) searches the library (round 12).
+                    val (resonaDownloadsOnly, _) = moe.rukamori.archivetune.resona.files.rememberDownloadsOnly()
+                    val searchSource = if (resonaDownloadsOnly) SearchSource.LOCAL else searchSourceSetting
 
                     val searchBarFocusRequester = remember { FocusRequester() }
                     val tvRailFocusRequester = remember { FocusRequester() }
@@ -2171,7 +2174,7 @@ class MainActivity : ComponentActivity() {
                                                             }
                                                             IconButton(
                                                                 onClick = {
-                                                                    searchSource =
+                                                                    searchSourceSetting =
                                                                         if (searchSource ==
                                                                             SearchSource.ONLINE
                                                                         ) {
@@ -2380,7 +2383,7 @@ class MainActivity : ComponentActivity() {
                                                         }
                                                     },
                                                     onSearchItemDoubleClick = {
-                                                        searchSource = SearchSource.ONLINE
+                                                        searchSourceSetting = SearchSource.ONLINE
                                                         openSearch()
                                                     },
                                                 )

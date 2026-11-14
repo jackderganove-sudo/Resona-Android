@@ -90,4 +90,5 @@
     <string name="resona_files_progress">%1$d of %2$d songs saved (%3$d MB)</string>
     <string name="resona_files_notification">Saving downloads as files</string>
     <string name="resona_files_count">%1$d of %2$d songs</string>
+    <string name="resona_downloads_only">Downloads only</string>
 </resources>

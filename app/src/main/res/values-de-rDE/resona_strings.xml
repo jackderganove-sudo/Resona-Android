@@ -563,4 +563,5 @@
     <string name="resona_files_progress">%1$d von %2$d Songs gespeichert (%3$d MB)</string>
     <string name="resona_files_notification">Downloads werden als Dateien gespeichert</string>
     <string name="resona_files_count">%1$d von %2$d Songs</string>
+    <string name="resona_downloads_only">Nur Downloads</string>
 </resources>

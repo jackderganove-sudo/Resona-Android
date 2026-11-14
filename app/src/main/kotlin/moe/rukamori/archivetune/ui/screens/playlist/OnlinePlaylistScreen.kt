@@ -199,13 +199,17 @@ fun OnlinePlaylistScreen(
     var query by
         rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue()) }
 
+    // Resona: "Downloads only" (round 12).
+    val (downloadsOnly, _) = moe.rukamori.archivetune.resona.files.rememberDownloadsOnly()
+    val completedDownloads = moe.rukamori.archivetune.resona.files.rememberCompletedDownloads()
     val filteredSongs =
-        remember(songs, query) {
+        remember(songs, query, downloadsOnly, completedDownloads) {
+            val indexed = songs.mapIndexed { index, song -> index to song }
+                .filter { (_, song) -> !downloadsOnly || song.id in completedDownloads }
             if (query.text.isEmpty()) {
-                songs.mapIndexed { index, song -> index to song }
+                indexed
             } else {
-                songs
-                    .mapIndexed { index, song -> index to song }
+                indexed
                     .filter { (_, song) ->
                         song.title.contains(query.text, ignoreCase = true) ||
                             song.artists.fastAny { it.name.contains(query.text, ignoreCase = true) }
@@ -642,6 +646,10 @@ fun OnlinePlaylistScreen(
                                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 32.dp),
                             )
                         }
+                    }
+
+                    item(key = "resona_downloads_only") {
+                        moe.rukamori.archivetune.resona.files.DownloadsOnlyChip()
                     }
 
                     // Songs List
