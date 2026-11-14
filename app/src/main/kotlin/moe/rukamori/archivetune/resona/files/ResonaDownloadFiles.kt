@@ -161,13 +161,43 @@ class ResonaDownloadFiles
             return media
         }
 
-        private fun tryPrepare(dir: File): Boolean =
-            runCatching {
+        private fun tryPrepare(dir: File): Boolean {
+            val existed = dir.exists()
+            val ok = runCatching {
                 dir.mkdirs()
                 val nomedia = File(dir, ".nomedia")
                 if (!nomedia.exists()) nomedia.createNewFile()
                 nomedia.exists()
             }.getOrDefault(false)
+            // Music/ only takes audio files from apps (no .nomedia): don't leave an empty folder behind.
+            if (!ok && !existed) runCatching { if (dir.listFiles().isNullOrEmpty()) dir.delete() }
+            return ok
+        }
+
+        /**
+         * A new file named exactly [name]. A plain folder's DocumentFile appends the
+         * MIME type's extension (".nomedia.bin", "x.m4a.m4a"), so plain folders use
+         * java.io; a picked folder (SAF) gets octet-stream for non-audio names.
+         */
+        private fun createChild(dir: DocumentFile, mime: String, name: String): DocumentFile? {
+            if (dir.uri.scheme == "file") {
+                val file = File(dir.uri.path!!, name)
+                if (!file.exists() && !runCatching { file.createNewFile() }.getOrDefault(false)) return null
+                return DocumentFile.fromFile(file)
+            }
+            val created = dir.createFile(if (name.endsWith(".m4a")) mime else "application/octet-stream", name) ?: return null
+            if (created.name != name) created.renameTo(name)
+            return created
+        }
+
+        private fun createFolder(parent: DocumentFile, name: String): DocumentFile? {
+            if (parent.uri.scheme == "file") {
+                val dir = File(parent.uri.path!!, name)
+                dir.mkdirs()
+                return if (dir.isDirectory) DocumentFile.fromFile(dir) else null
+            }
+            return parent.createDirectory(name)
+        }
 
         private fun root(): DocumentFile? {
             chosenFolder?.let { tree -> return DocumentFile.fromTreeUri(context, tree) }
@@ -184,7 +214,7 @@ class ResonaDownloadFiles
 
         private fun folder(name: String): DocumentFile? {
             val root = root() ?: return null
-            return root.findFile(name)?.takeIf { it.isDirectory } ?: root.createDirectory(name)
+            return root.findFile(name)?.takeIf { it.isDirectory } ?: createFolder(root, name)
         }
 
         private fun loadManifest() {
@@ -197,16 +227,17 @@ class ResonaDownloadFiles
         private fun saveManifest() {
             runCatching {
                 val root = root() ?: return
-                val file = root.findFile(MANIFEST) ?: root.createFile("application/json", MANIFEST) ?: return
+                val file = root.findFile(MANIFEST) ?: createChild(root, "application/json", MANIFEST) ?: return
                 context.contentResolver.openOutputStream(file.uri, "wt")?.use { it.write(manifest.encode().toByteArray()) }
             }
         }
 
         private fun ensureNomedia() {
             val root = root() ?: return
+            root.findFile(".nomedia.bin")?.delete()
             if (root.findFile(".nomedia") == null) {
                 // Before any audio file, so the media scanner never lists one.
-                root.createFile("application/octet-stream", ".nomedia")
+                createChild(root, "application/octet-stream", ".nomedia")
             }
         }
 
@@ -296,7 +327,7 @@ class ResonaDownloadFiles
                 source.renameTo(name)
                 return
             }
-            val target = targetFolder.createFile("audio/mp4", name) ?: return
+            val target = createChild(targetFolder, "audio/mp4", name) ?: return
             context.contentResolver.openInputStream(source.uri)?.use { input ->
                 context.contentResolver.openOutputStream(target.uri)?.use { input.copyTo(it) }
             }
@@ -326,7 +357,7 @@ class ResonaDownloadFiles
                 val folder = folder(path.substringBefore('/')) ?: return 0
                 val name = path.substringAfter('/')
                 folder.findFile(name)?.delete()
-                val target = folder.createFile("audio/mp4", name) ?: return 0
+                val target = createChild(folder, "audio/mp4", name) ?: return 0
                 context.contentResolver.openOutputStream(target.uri)?.use { out -> m4a.inputStream().use { it.copyTo(out) } }
                 val size = m4a.length()
                 // The file is the download now: free the cache copy.
@@ -367,7 +398,7 @@ class ResonaDownloadFiles
                 // A song lives once: in this folder or, when another playlist has it, there.
                 val lines = m.playlists[id].orEmpty().mapNotNull { m.songs[it]?.path }
                     .map { if (it.substringBefore('/') == folderName) it.substringAfter('/') else "../$it" }
-                val file = dir.findFile(PLAYLIST_FILE) ?: dir.createFile("audio/x-mpegurl", PLAYLIST_FILE) ?: continue
+                val file = dir.findFile(PLAYLIST_FILE) ?: createChild(dir, "audio/x-mpegurl", PLAYLIST_FILE) ?: continue
                 runCatching {
                     context.contentResolver.openOutputStream(file.uri, "wt")?.use { it.write(("#EXTM3U\n" + lines.joinToString("\n") + "\n").toByteArray()) }
                 }

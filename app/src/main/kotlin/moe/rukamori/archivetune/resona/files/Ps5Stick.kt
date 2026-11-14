@@ -260,6 +260,7 @@ object Ps5Stick {
         val name = path.substringAfterLast('/')
         folder.findFile(name)?.delete()
         val target = folder.createFile("audio/mp4", name) ?: return 0
+        if (target.name != name) target.renameTo(name)
         var count = 0L
         context.contentResolver.openInputStream(source)?.use { input ->
             context.contentResolver.openOutputStream(target.uri)?.use { out -> count = input.copyTo(out, 256 * 1024) }
