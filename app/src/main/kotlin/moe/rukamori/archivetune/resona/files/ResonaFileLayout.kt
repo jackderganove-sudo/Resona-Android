@@ -22,8 +22,8 @@ object ResonaFileNames {
     /** FAT32/exFAT-safe: forbidden characters → "_", no leading/trailing dots or spaces, length-limited. */
     fun safe(name: String, maxLength: Int = 80): String {
         var out = Normalizer.normalize(name, Normalizer.Form.NFC)
-            .replace(forbidden, "_")
             .replace(Regex("\\s+"), " ")
+            .replace(forbidden, "_")
             .trim()
             .trim('.', ' ')
         if (out.length > maxLength) {
