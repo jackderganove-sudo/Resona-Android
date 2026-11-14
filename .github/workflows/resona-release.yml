@@ -112,9 +112,12 @@ jobs:
             exit 1
           }
           mkdir -p instrumented
-          cp "$(find app/build/outputs/apk -path '*gmsMobileX86_64/debug/*' -name '*.apk' | head -1)" instrumented/app-debug.apk
+          # Not the androidTest APK, whose folder matches the same pattern.
+          cp "$(find app/build/outputs/apk -path '*gmsMobileX86_64/debug/*' -not -path '*/androidTest/*' -name '*.apk' | head -1)" instrumented/app-debug.apk
           cp "$(find app/build/outputs/apk/androidTest -name '*.apk' | head -1)" instrumented/app-debug-androidTest.apk
           ls -la instrumented
+          # The app is far bigger than the test APK: catch a swapped file here, not on the emulator.
+          test "$(stat -c %s instrumented/app-debug.apk)" -gt "$(( $(stat -c %s instrumented/app-debug-androidTest.apk) * 10 ))"
 
       - uses: actions/upload-artifact@v4
         with:
