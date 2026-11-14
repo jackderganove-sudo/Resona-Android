@@ -889,6 +889,7 @@ fun QueueCollapsedContentV4(
     onSleepTimerClick: () -> Unit,
     onShowLyrics: () -> Unit,
     modifier: Modifier = Modifier,
+    onSpeakersClick: (() -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (showCodecOnPlayer && currentFormat != null) {
@@ -994,6 +995,15 @@ fun QueueCollapsedContentV4(
             }
 
             Spacer(modifier = Modifier.width(10.dp))
+
+            // Resona: speakers, same place as on the iPad (round 12).
+            if (onSpeakersClick != null) {
+                moe.rukamori.archivetune.resona.speakers.PlayerSpeakerButton(
+                    color = textBackgroundColor,
+                    onClick = onSpeakersClick,
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+            }
 
             // Lyrics button (pill)
             Box(

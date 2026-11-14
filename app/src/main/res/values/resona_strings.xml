@@ -64,4 +64,23 @@
     <string name="resona_ai_failed">AI sync failed: %1$s</string>
     <string name="resona_ai_save">Save</string>
     <string name="resona_ai_no_words">No words were recognized in this song. Is it instrumental, or very loud? The accurate model may do better.</string>
+    <string name="resona_speakers">Speakers</string>
+    <string name="resona_speakers_this_device">This device</string>
+    <string name="resona_speakers_connected">Connected</string>
+    <string name="resona_speakers_in_range">In range</string>
+    <string name="resona_speakers_paired">Paired</string>
+    <string name="resona_speakers_choose">Choose output</string>
+    <string name="resona_speakers_choose_hint">Phone, Bluetooth devices in range and Cast</string>
+    <string name="resona_speakers_new">New Bluetooth device?</string>
+    <string name="resona_speakers_search">Search nearby</string>
+    <string name="resona_speakers_searching">Searching…</string>
+    <string name="resona_speakers_none_found">No audio devices found nearby</string>
+    <string name="resona_speakers_pair">Tap to pair</string>
+    <string name="resona_speakers_pairing">Pairing…</string>
+    <string name="resona_speakers_connecting">Connecting…</string>
+    <string name="resona_speakers_permission">To show paired speakers and search for new ones, Resona needs the Bluetooth permission. Playback works without it.</string>
+    <string name="resona_speakers_allow">Allow</string>
+    <string name="resona_speakers_bt_off">Bluetooth is off</string>
+    <string name="resona_speakers_bt_on">Turn on</string>
+    <string name="resona_speakers_connect_in_system">Android only lets system apps connect directly – tap the device in the list.</string>
 </resources>

@@ -537,4 +537,23 @@
     <string name="early_access_programs_desc">Probiere kommende Funktionen vorab aus und gib Feedback auf GitHub.</string>
     <string name="early_access_open_failed">Der Link konnte nicht geöffnet werden. Prüfe, ob ein Browser installiert ist.</string>
     <string name="binimum_lyrics">Binimum-Songtexte</string>
+    <string name="resona_speakers">Lautsprecher</string>
+    <string name="resona_speakers_this_device">Dieses Gerät</string>
+    <string name="resona_speakers_connected">Verbunden</string>
+    <string name="resona_speakers_in_range">In Reichweite</string>
+    <string name="resona_speakers_paired">Gekoppelt</string>
+    <string name="resona_speakers_choose">Ausgabe wählen</string>
+    <string name="resona_speakers_choose_hint">Telefon, Bluetooth-Geräte in Reichweite und Cast</string>
+    <string name="resona_speakers_new">Neues Bluetooth-Gerät?</string>
+    <string name="resona_speakers_search">In der Nähe suchen</string>
+    <string name="resona_speakers_searching">Suche läuft …</string>
+    <string name="resona_speakers_none_found">Keine Audio-Geräte in der Nähe gefunden</string>
+    <string name="resona_speakers_pair">Tippen zum Koppeln</string>
+    <string name="resona_speakers_pairing">Wird gekoppelt …</string>
+    <string name="resona_speakers_connecting">Wird verbunden …</string>
+    <string name="resona_speakers_permission">Damit Resona gekoppelte Lautsprecher anzeigen und neue suchen kann, braucht es die Bluetooth-Erlaubnis. Abspielen geht auch ohne.</string>
+    <string name="resona_speakers_allow">Erlauben</string>
+    <string name="resona_speakers_bt_off">Bluetooth ist aus</string>
+    <string name="resona_speakers_bt_on">Einschalten</string>
+    <string name="resona_speakers_connect_in_system">Android lässt nur System-Apps direkt verbinden – tipp das Gerät in der Liste an.</string>
 </resources>

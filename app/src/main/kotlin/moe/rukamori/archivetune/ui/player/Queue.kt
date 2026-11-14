@@ -347,6 +347,11 @@ internal fun QueueFooter(
                         viewModel.sleepTimerClick()
                     },
                     onShowLyrics = onShowLyrics,
+                    onSpeakersClick = {
+                        menuState.show {
+                            moe.rukamori.archivetune.resona.speakers.SpeakerSheetContent(onDismiss = menuState::dismiss)
+                        }
+                    },
                 )
             }
 
@@ -380,6 +385,11 @@ internal fun QueueFooter(
                         viewModel.sleepTimerClick()
                     },
                     onShowLyrics = onShowLyrics,
+                    onSpeakersClick = {
+                        menuState.show {
+                            moe.rukamori.archivetune.resona.speakers.SpeakerSheetContent(onDismiss = menuState::dismiss)
+                        }
+                    },
                 )
             }
 

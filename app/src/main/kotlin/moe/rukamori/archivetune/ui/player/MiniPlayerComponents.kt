@@ -317,14 +317,21 @@ fun RowScope.MiniPlayerInfo(
             transitionSpec = { fadeIn() togetherWith fadeOut() },
             label = "artist",
         ) { artists ->
-            Text(
-                text = artists.joinToString { it.name },
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.secondary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.basicMarquee(),
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = artists.joinToString { it.name },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.secondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false).basicMarquee(),
+                )
+                // Resona: where it plays, when that isn't this phone (same as the iPad).
+                moe.rukamori.archivetune.resona.speakers.CurrentOutputLabel(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
         }
     }
 }
