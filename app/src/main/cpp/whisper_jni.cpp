@@ -29,6 +29,14 @@ static void timing_log(enum ggml_log_level, const char *text, void *) {
 }
 static void silent_log(enum ggml_log_level, const char *, void *) {}
 
+// "key=value,key=value" → value of key, or the fallback.
+static float option(const std::string &options, const char *key, float fallback) {
+    const std::string needle = std::string(key) + "=";
+    size_t at = options.find(needle);
+    if (at == std::string::npos || (at > 0 && options[at - 1] != ',')) return fallback;
+    return strtof(options.c_str() + at + needle.size(), nullptr);
+}
+
 extern "C" JNIEXPORT jlong JNICALL
 Java_moe_rukamori_archivetune_resona_aisync_WhisperNative_nativeInit(JNIEnv *env, jobject, jstring path) {
     const char *p = env->GetStringUTFChars(path, nullptr);
