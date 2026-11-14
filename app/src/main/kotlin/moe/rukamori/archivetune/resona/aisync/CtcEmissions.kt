@@ -18,9 +18,9 @@ import kotlin.math.sqrt
 
 /** Per-frame log probabilities from a CTC model (ONNX Runtime; NNAPI when asked, CPU otherwise). */
 object CtcEmissions {
-    private const val WINDOW = 30 * 16_000
+    const val WINDOW = 30 * 16_000
 
-    suspend fun compute(modelPath: String, audio: FloatArray, threads: Int, nnapi: Boolean): Array<FloatArray> {
+    suspend fun compute(modelPath: String, audio: FloatArray, threads: Int, nnapi: Boolean, onWindow: (Int) -> Unit = {}): Array<FloatArray> {
         val env = OrtEnvironment.getEnvironment()
         val options = OrtSession.SessionOptions().apply {
             setIntraOpNumThreads(threads)
@@ -47,6 +47,7 @@ object CtcEmissions {
                     }
                 }
                 offset += WINDOW
+                onWindow(offset / WINDOW)
             }
         }
         return frames.toTypedArray()

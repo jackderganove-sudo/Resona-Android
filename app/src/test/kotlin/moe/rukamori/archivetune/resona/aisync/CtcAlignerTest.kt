@@ -81,4 +81,11 @@ class CtcAlignerTest {
         assertEquals(2.0, aligned.lines[0].startTime!!, 0.2)
         assertEquals(8.0, aligned.lines[1].startTime!!, 0.2)
     }
+
+    @Test
+    fun ctcOnlyForLatinLyrics() {
+        assertTrue(CtcModel.suits(listOf("Ein erfundener Platzhaltertext", "mit Umlauten wie müde und süß")))
+        assertTrue(!CtcModel.suits(listOf("これは架空のテキストです", "ここにも架空の行があります")))
+        assertTrue(!CtcModel.suits(listOf("kurz")))
+    }
 }

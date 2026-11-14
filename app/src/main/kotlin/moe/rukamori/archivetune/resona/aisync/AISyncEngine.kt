@@ -94,6 +94,25 @@ object LyricsLanguage {
     }
 }
 
+/** wav2vec2-base-960h (int8, ONNX) for forced alignment; English letters, accents folded. */
+object CtcModel {
+    const val URL = "https://huggingface.co/onnx-community/wav2vec2-base-960h-ONNX/resolve/main/onnx/model_int8.onnx"
+    const val APPROX_MB = 95
+    const val THREADS = 4
+    const val MIN_CONFIDENCE = 0.05
+
+    fun file(context: Context) = File(File(context.filesDir, "whisper"), "wav2vec2-base-960h-int8.onnx")
+
+    fun isDownloaded(context: Context) = file(context).let { it.isFile && it.length() > APPROX_MB * 900_000L }
+
+    /** Only lyrics written mostly in letters the model knows (Latin script). */
+    fun suits(texts: List<String>): Boolean {
+        val letters = texts.joinToString("").filter { it.isLetter() }
+        if (letters.length < 20) return false
+        return CtcAligner.letters(letters).size >= letters.length * 0.8
+    }
+}
+
 /** Whisper models, downloaded on demand (same choice as the iPad: fast / accurate). */
 enum class WhisperModel(val fileName: String, val approxMb: Int) {
     FAST("ggml-base.bin", 148),
@@ -114,11 +133,13 @@ object WhisperModels {
     }
 
     /** Downloads into a temp file and renames when complete; reports 0…1. */
-    suspend fun download(context: Context, model: WhisperModel, onProgress: (Double) -> Unit) = withContext(Dispatchers.IO) {
-        val target = model.file(context)
+    suspend fun download(context: Context, model: WhisperModel, onProgress: (Double) -> Unit) =
+        downloadUrl(context, model.url, model.file(context), model.approxMb, onProgress)
+
+    suspend fun downloadUrl(context: Context, url: String, target: File, approxMb: Int, onProgress: (Double) -> Unit) = withContext(Dispatchers.IO) {
         target.parentFile?.mkdirs()
         val partial = File(target.parentFile, target.name + ".part")
-        val connection = (URL(model.url).openConnection() as HttpURLConnection).apply {
+        val connection = (URL(url).openConnection() as HttpURLConnection).apply {
             connectTimeout = 15_000
             readTimeout = 30_000
             instanceFollowRedirects = true
@@ -126,7 +147,7 @@ object WhisperModels {
         }
         try {
             if (connection.responseCode !in 200..299) error("HTTP ${connection.responseCode}")
-            val total = connection.contentLengthLong.takeIf { it > 0 } ?: (model.approxMb * 1_000_000L)
+            val total = connection.contentLengthLong.takeIf { it > 0 } ?: (approxMb * 1_000_000L)
             connection.inputStream.use { input ->
                 partial.outputStream().use { output ->
                     val buffer = ByteArray(256 * 1024)
@@ -337,11 +358,6 @@ class ResonaAISync(private val context: Context) {
     suspend fun run(mediaId: String, texts: List<String>, synced: List<AlignedLine>, duration: Double, mode: Mode, model: WhisperModel) {
         try {
             if (texts.size < 2) return fail(NO_LYRICS)
-            if (!WhisperNative.available) return fail(UNAVAILABLE)
-            if (!model.isDownloaded(context)) {
-                _phase.value = Phase.DownloadingModel(0.0)
-                WhisperModels.download(context, model) { _phase.value = Phase.DownloadingModel(it) }
-            }
             _phase.value = Phase.PreparingAudio
             val audio = try {
                 CachedSongAudio.pcm16k(context, mediaId)
@@ -352,12 +368,34 @@ class ResonaAISync(private val context: Context) {
             // A song still loading is only partly in the cache: its first part alone
             // would be aligned against the whole lyrics.
             if (!CachedSongAudio.coversSong(audioSeconds, duration)) return fail(NOT_CACHED)
+            val total = max(duration, audioSeconds)
             val language = withContext(Dispatchers.Default) { LyricsLanguage.detect(context, texts) }
             if (BuildConfig.RESONA_MEASURE && AISyncBench.runIfConfigured(context, audio, texts, synced, duration, language) { _phase.value = Phase.Transcribing(it) }) {
                 return fail("bench finished")
             }
+
+            // 1. The lyrics are known: forced alignment with a CTC model (measured on the
+            // Pixel: 10 s for 169 s, line error 0.07 s vs 2.2 s with Whisper). Whisper
+            // stays for "lyrics from audio" and when this gives no usable result.
+            if (CtcModel.suits(texts)) {
+                val ctcWords = runCatching { alignWithCtc(audio, texts) }
+                    .onFailure { if (it is CancellationException) throw it; Log.w(TAG, "CTC failed: ${it.javaClass.simpleName}") }
+                    .getOrNull()
+                if (ctcWords != null && ctcWords.isNotEmpty() && finish(mediaId, texts, synced, ctcWords, total, mode, final = false)) {
+                    Log.i(TAG, "CTC: ${ctcWords.size} words")
+                    return
+                }
+                Log.i(TAG, "CTC gave no usable result (${ctcWords?.size ?: 0} words) → Whisper")
+            }
+
+            // 2. Whisper (transcription).
+            if (!WhisperNative.available) return fail(UNAVAILABLE)
+            if (!model.isDownloaded(context)) {
+                _phase.value = Phase.DownloadingModel(0.0)
+                WhisperModels.download(context, model) { _phase.value = Phase.DownloadingModel(it) }
+            }
             val onPartial: (List<RecognizedWord>) -> Unit = { soFar ->
-                ResonaLyricsPreview.show(mediaId, AISyncPartial.lrc(texts, synced, soFar, max(duration, audioSeconds)))
+                ResonaLyricsPreview.show(mediaId, AISyncPartial.lrc(texts, synced, soFar, total))
             }
             var words = transcribe(model, audio, language, onPartial)
             // Same as the iPad: few words with the fast model → try the accurate one
@@ -376,33 +414,8 @@ class ResonaAISync(private val context: Context) {
                 }
             }
             if (words.isEmpty()) return fail(NO_WORDS)
-            last = Triple(words, texts, max(duration, audioSeconds))
-
-            if (synced.any { it.startTime != null } && mode != Mode.FULL_SYNC) {
-                _phase.value = Phase.Aligning
-                when (val outcome = TempoCalibrator.fit(LyricsAligner.anchors(synced, words))) {
-                    is TempoCalibrator.Outcome.Fitted -> {
-                        Log.i(TAG, "calibration factor=%.4f offset=%.2f inliers=%d".format(Locale.ROOT, outcome.calibration.factor, outcome.calibration.offset, outcome.calibration.anchors))
-                        val calibrated = Lrc.serialize(TempoCalibrator.apply(synced, outcome.calibration))
-                        ResonaLyricsPreview.show(mediaId, calibrated)
-                        _phase.value = Phase.Calibrated(outcome.calibration, calibrated)
-                        return
-                    }
-                    is TempoCalibrator.Outcome.TooFewAnchors -> if (mode == Mode.CALIBRATE) { _phase.value = Phase.CalibrationFailed(outcome.count); return }
-                    is TempoCalibrator.Outcome.PoorFit -> if (mode == Mode.CALIBRATE) { _phase.value = Phase.CalibrationFailed(outcome.calibration.anchors); return }
-                }
-            }
-            _phase.value = Phase.Aligning
-            val aligned = LyricsAligner.align(texts, words, max(duration, audioSeconds))
-            Log.i(TAG, "matched ${(aligned.matchedRatio * 100).toInt()} % of ${texts.size} lines' words")
-            if (aligned.matchedRatio >= 0.3) {
-                val done = Lrc.serialize(aligned.lines)
-                ResonaLyricsPreview.show(mediaId, done)
-                _phase.value = Phase.Done(aligned.matchedRatio, done)
-                return
-            }
-            ResonaLyricsPreview.clear()
-            _phase.value = Phase.LowMatch(aligned.matchedRatio, LyricsAligner.lineOccurrences(texts, words).size)
+            last = Triple(words, texts, total)
+            finish(mediaId, texts, synced, words, total, mode, final = true)
         } catch (e: CancellationException) {
             WhisperNative.nativeCancel(true)
             ResonaLyricsPreview.clear()
@@ -412,6 +425,75 @@ class ResonaAISync(private val context: Context) {
             Log.w(TAG, "AI sync failed: ${e.javaClass.simpleName}")
             fail(e.message ?: e.javaClass.simpleName)
         }
+    }
+
+    /**
+     * Calibrate synced lyrics or align all words (same aligner for CTC and Whisper).
+     * Returns false when nothing usable came out and [final] is false (the caller
+     * tries Whisper next); with [final], a poor result is shown as such.
+     */
+    private fun finish(
+        mediaId: String,
+        texts: List<String>,
+        synced: List<AlignedLine>,
+        words: List<RecognizedWord>,
+        total: Double,
+        mode: Mode,
+        final: Boolean,
+    ): Boolean {
+        if (synced.any { it.startTime != null } && mode != Mode.FULL_SYNC) {
+            _phase.value = Phase.Aligning
+            when (val outcome = TempoCalibrator.fit(LyricsAligner.anchors(synced, words))) {
+                is TempoCalibrator.Outcome.Fitted -> {
+                    Log.i(TAG, "calibration factor=%.4f offset=%.2f inliers=%d".format(Locale.ROOT, outcome.calibration.factor, outcome.calibration.offset, outcome.calibration.anchors))
+                    val calibrated = Lrc.serialize(TempoCalibrator.apply(synced, outcome.calibration))
+                    ResonaLyricsPreview.show(mediaId, calibrated)
+                    _phase.value = Phase.Calibrated(outcome.calibration, calibrated)
+                    return true
+                }
+                is TempoCalibrator.Outcome.TooFewAnchors -> if (mode == Mode.CALIBRATE) {
+                    if (!final) return false
+                    _phase.value = Phase.CalibrationFailed(outcome.count)
+                    return true
+                }
+                is TempoCalibrator.Outcome.PoorFit -> if (mode == Mode.CALIBRATE) {
+                    if (!final) return false
+                    _phase.value = Phase.CalibrationFailed(outcome.calibration.anchors)
+                    return true
+                }
+            }
+        }
+        _phase.value = Phase.Aligning
+        val aligned = LyricsAligner.align(texts, words, total)
+        Log.i(TAG, "matched ${(aligned.matchedRatio * 100).toInt()} % of ${texts.size} lines' words")
+        if (aligned.matchedRatio >= 0.3) {
+            val done = Lrc.serialize(aligned.lines)
+            ResonaLyricsPreview.show(mediaId, done)
+            _phase.value = Phase.Done(aligned.matchedRatio, done)
+            return true
+        }
+        if (!final) return false
+        ResonaLyricsPreview.clear()
+        _phase.value = Phase.LowMatch(aligned.matchedRatio, LyricsAligner.lineOccurrences(texts, words).size)
+        return true
+    }
+
+    /** CTC model (downloaded once) → letter probabilities per 20 ms → lyric words on the best path. */
+    private suspend fun alignWithCtc(audio: FloatArray, texts: List<String>): List<RecognizedWord> {
+        if (!CtcModel.isDownloaded(context)) {
+            _phase.value = Phase.DownloadingModel(0.0)
+            WhisperModels.downloadUrl(context, CtcModel.URL, CtcModel.file(context), CtcModel.APPROX_MB) { _phase.value = Phase.DownloadingModel(it) }
+        }
+        val windows = (audio.size + CtcEmissions.WINDOW - 1) / CtcEmissions.WINDOW
+        _phase.value = Phase.Transcribing(0.0, 1, windows, 0)
+        val emissions =
+            withContext(Dispatchers.Default) {
+                CtcEmissions.compute(CtcModel.file(context).path, audio, CtcModel.THREADS, nnapi = false) { done ->
+                    _phase.value = Phase.Transcribing(done.toDouble() / windows, min(done + 1, windows), windows, 0)
+                }
+            }
+        val lyricWords = texts.flatMap { it.split(Regex("\\s+")) }.filter { it.isNotBlank() }
+        return withContext(Dispatchers.Default) { CtcAligner.words(emissions, lyricWords, CtcModel.MIN_CONFIDENCE) }
     }
 
     /** "Only sync the matching lines" (remix). */
