@@ -556,4 +556,11 @@
     <string name="resona_speakers_bt_off">Bluetooth ist aus</string>
     <string name="resona_speakers_bt_on">Einschalten</string>
     <string name="resona_speakers_connect_in_system">Android lässt nur System-Apps direkt verbinden – tipp das Gerät in der Liste an.</string>
+    <string name="resona_files_title">Downloads als Dateien</string>
+    <string name="resona_files_switch">Downloads als Dateien speichern</string>
+    <string name="resona_files_switch_desc">Als .m4a mit Titel, Künstler und Cover im Resona-Ordner (Playlists als Ordner). In der Dateien-App sichtbar, nicht in der Mediathek oder anderen Musik-Apps.</string>
+    <string name="resona_files_folder">Speicherort</string>
+    <string name="resona_files_progress">%1$d von %2$d Songs gespeichert (%3$d MB)</string>
+    <string name="resona_files_notification">Downloads werden als Dateien gespeichert</string>
+    <string name="resona_files_count">%1$d von %2$d Songs</string>
 </resources>

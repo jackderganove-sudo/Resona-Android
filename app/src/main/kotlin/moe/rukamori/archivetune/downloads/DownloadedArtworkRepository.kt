@@ -161,6 +161,9 @@ class DownloadedArtworkRepository
             }
         }
 
+        /** Resona: the downloaded cover file for an artwork URL (cover tags of song files). */
+        fun localArtwork(sourceUrl: String): File? = resolveLocalFile(sourceUrl)
+
         private fun resolveLocalFile(sourceUrl: String): File? {
             val normalizedUrl = normalizeArtworkUrl(sourceUrl) ?: return null
             val fileName = snapshot().fileNameBySourceUrl[normalizedUrl] ?: return null

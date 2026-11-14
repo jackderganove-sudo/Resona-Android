@@ -770,6 +770,9 @@ class MusicService :
     @DownloadCache
     lateinit var downloadCache: Cache
 
+    @Inject
+    lateinit var resonaDownloadFiles: moe.rukamori.archivetune.resona.files.ResonaDownloadFiles
+
     lateinit var localPlayer: ExoPlayer
         private set
     lateinit var player: Player
@@ -7860,11 +7863,17 @@ class MusicService :
             ).createDataSource()
         }
         val directFactory = createResolvedUpstreamDataSourceFactory()
+        // Resona: a download saved as file plays from that file (round 12).
+        val fileFactory =
+            ResolvingDataSource.Factory(DefaultDataSource.Factory(this)) { spec ->
+                spec.key?.let { resonaDownloadFiles.uriFor(it) }?.let { spec.withUri(it) } ?: spec
+            }
 
         return DataSource.Factory {
             SchemeRoutingDataSource { dataSpec ->
                 val mediaId = dataSpec.key
                 when {
+                    mediaId != null && resonaDownloadFiles.uriFor(mediaId) != null -> fileFactory
                     dataSpec.uri.shouldBypassPlayerCache() || (mediaId != null && mediaId in cacheBypassMediaIds) -> directFactory
                     else -> {
                         if (mediaId != null) {

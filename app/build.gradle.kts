@@ -429,6 +429,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-process:2.11.0")
     implementation("androidx.compose.material3.adaptive:adaptive:1.4.0-alpha03")
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.31.1")
+    implementation("androidx.documentfile:documentfile:1.1.0")
     implementation(libs.accompanist.lyrics.ui)
     implementation(libs.accompanist.lyrics.core)
 }

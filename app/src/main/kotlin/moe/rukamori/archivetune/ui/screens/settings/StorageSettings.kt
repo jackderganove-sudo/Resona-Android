@@ -311,6 +311,9 @@ fun StorageSettings(
                 }
             }
 
+            // Resona: downloads as files (round 12).
+            moe.rukamori.archivetune.resona.files.DownloadFilesSettingsGroup()
+
             if (clearDownloads) {
                 ActionPromptDialog(
                     title = stringResource(R.string.clear_all_downloads),

@@ -157,6 +157,8 @@ object WhisperModels {
 @InstallIn(SingletonComponent::class)
 interface AISyncEntryPoint {
     fun downloadUtil(): DownloadUtil
+
+    fun downloadFiles(): moe.rukamori.archivetune.resona.files.ResonaDownloadFiles
 }
 
 /** The song's audio as 16 kHz mono PCM, from the download or playback cache (nothing is streamed again). */
@@ -167,7 +169,11 @@ object CachedSongAudio {
         val util = EntryPointAccessors.fromApplication(context.applicationContext, AISyncEntryPoint::class.java).downloadUtil()
         val file = File(context.cacheDir, "aisync-audio")
         try {
-            if (!copy(util.downloadCache, mediaId, file) && !copy(util.playerCache, mediaId, file)) throw NotCachedException()
+            val saved = EntryPointAccessors.fromApplication(context.applicationContext, AISyncEntryPoint::class.java).downloadFiles().uriFor(mediaId)
+            val fromFile = saved != null && runCatching {
+                context.contentResolver.openInputStream(saved)?.use { input -> file.outputStream().use { input.copyTo(it) } } != null
+            }.getOrDefault(false)
+            if (!fromFile && !copy(util.downloadCache, mediaId, file) && !copy(util.playerCache, mediaId, file)) throw NotCachedException()
             decode(file)
         } finally {
             file.delete()

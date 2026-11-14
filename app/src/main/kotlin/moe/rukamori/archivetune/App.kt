@@ -87,6 +87,12 @@ class App :
     lateinit var downloadedArtworkRepository: DownloadedArtworkRepository
 
     @Inject
+    lateinit var resonaDownloadFiles: moe.rukamori.archivetune.resona.files.ResonaDownloadFiles
+
+    @Inject
+    lateinit var downloadUtil: moe.rukamori.archivetune.playback.DownloadUtil
+
+    @Inject
     lateinit var playlistCoverInterceptor: PlaylistCoverInterceptor
 
     @Inject
@@ -152,6 +158,8 @@ class App :
                 dataStore.edit { it[moe.rukamori.archivetune.constants.PlayerBackgroundStyleKey] = moe.rukamori.archivetune.constants.PlayerBackgroundStyle.GRADIENT.name }
             }
         }
+        // Resona: downloads as files (round 12): follows downloads and playlists.
+        runCatching { resonaDownloadFiles.start(downloadUtil.downloads) }
         // Resona: smart downloads worker (only when switched on).
         applicationScope.launch(Dispatchers.IO) {
             runCatching { moe.rukamori.archivetune.resona.SmartDownloads.scheduleFromSettings(this@App) }
