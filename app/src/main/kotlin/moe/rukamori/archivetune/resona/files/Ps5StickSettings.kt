@@ -87,6 +87,11 @@ fun Ps5StickSettingsGroup() {
     PreferenceGroup(title = stringResource(R.string.resona_stick_title)) {
         item {
             PreferenceEntry(
+                title = { Text(stringResource(R.string.resona_stick_no_covers)) },
+            )
+        }
+        item {
+            PreferenceEntry(
                 title = { Text(stringResource(R.string.resona_stick_choose)) },
                 description = stick ?: stringResource(R.string.resona_stick_none),
                 icon = { Icon(painterResource(R.drawable.snippet_folder), contentDescription = null) },

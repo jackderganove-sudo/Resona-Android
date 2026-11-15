@@ -151,6 +151,7 @@ fun LyricsSettings(
 
     val (lyricsClick, onLyricsClickChange) = rememberPreference(LyricsClickKey, defaultValue = true)
     val (lyricsScroll, onLyricsScrollChange) = rememberPreference(LyricsScrollKey, defaultValue = true)
+    val (resonaLyricsBlur, onResonaLyricsBlurChange) = rememberPreference(moe.rukamori.archivetune.resona.ResonaLyricsBlurKey, defaultValue = true)
     val (lyricsTextSize, onLyricsTextSizeChange) = rememberPreference(LyricsTextSizeKey, defaultValue = 26f)
     val (lyricsLineSpacing, onLyricsLineSpacingChange) = rememberPreference(LyricsLineSpacingKey, defaultValue = 1.3f)
     val (lyricsMode, onLyricsModeChange) = rememberEnumPreference(LyricsModeKey, defaultValue = LyricsMode.ENHANCED)
@@ -400,6 +401,17 @@ fun LyricsSettings(
                     icon = { Icon(painterResource(R.drawable.lyrics), null) },
                     checked = lyricsScroll,
                     onCheckedChange = onLyricsScrollChange,
+                )
+            }
+
+            // Resona: lyrics blur (round 12), on by default like the iPad.
+            item {
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.resona_lyrics_blur)) },
+                    description = stringResource(R.string.resona_lyrics_blur_desc),
+                    icon = { Icon(painterResource(R.drawable.lyrics), null) },
+                    checked = resonaLyricsBlur,
+                    onCheckedChange = onResonaLyricsBlurChange,
                 )
             }
 

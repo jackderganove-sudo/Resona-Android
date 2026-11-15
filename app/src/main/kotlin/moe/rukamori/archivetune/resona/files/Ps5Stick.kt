@@ -60,7 +60,9 @@ object Ps5Stick {
     private const val KEY_PLAYLISTS = "playlists"
     private const val KEY_FLAT = "flat"
     private const val KEY_FORMAT = "format"
-    private const val KEY_COVER_TEST = "cover_test"
+    // v2: the PS5 shows no covers for USB music in any variant (test 15.11.) → off by default;
+    // a new key so the test folders go away on the next sync for everyone.
+    private const val KEY_COVER_TEST = "cover_test_v2"
     const val COVER_TEST = "Cover-Test"
     const val COVER_TEST_B = "Cover-Test b folder.jpg"
     const val COVER_TEST_C = "Cover-Test c cover.jpg"
@@ -109,7 +111,7 @@ object Ps5Stick {
     fun setFormat(context: Context, value: String) = prefs(context).edit().putString(KEY_FORMAT, value).apply()
 
     /** Extra folders with one song in several cover variants (until the PS5 test says which works). */
-    fun coverTest(context: Context): Boolean = prefs(context).getBoolean(KEY_COVER_TEST, true)
+    fun coverTest(context: Context): Boolean = prefs(context).getBoolean(KEY_COVER_TEST, false)
 
     fun setCoverTest(context: Context, value: Boolean) = prefs(context).edit().putBoolean(KEY_COVER_TEST, value).apply()
 

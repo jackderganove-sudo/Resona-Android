@@ -120,7 +120,26 @@ object LyricsDepth {
  * Measuring only (must not reach a release): variants from a file on the device,
  * e.g. "levels=1 blur=4 lib=0 hide=1". Re-read each time the lyrics open.
  */
+/**
+ * Lyrics blur on Android (round 12): the library's blur of the lines with the player content
+ * under the lyrics hidden. Measured on the Pixel with a running song (15.11.): 0–0.32 % janky
+ * in 10 variants; Emil: up to 0.5 % is fine → on by default, switch "Lyrics-Unschärfe".
+ * A measure build with lyrics-depth.txt overrides it.
+ */
+val ResonaLyricsBlurKey = androidx.datastore.preferences.core.booleanPreferencesKey("resona_lyrics_blur")
+
+object ResonaLyricsBlur {
+    /** Mirrors the setting (set by the lyrics screen). */
+    var setting by mutableStateOf(true)
+    private val supported get() = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
+
+    val blur: Boolean get() = supported && if (LyricsDepthBench.active) LyricsDepthBench.library else setting
+    val hideBelow: Boolean get() = if (LyricsDepthBench.active) LyricsDepthBench.hideBelow else supported && setting
+}
+
 object LyricsDepthBench {
+    /** A bench file was read (measure builds only): its values win over the setting. */
+    var active by mutableStateOf(false)
     var levels by mutableIntStateOf(0)
     var blurDp by mutableFloatStateOf(0f)
     var library by mutableStateOf(false)
@@ -136,6 +155,7 @@ object LyricsDepthBench {
             java.io.File(context.getExternalFilesDir(null), "lyrics-depth.txt").readText()
                 .trim().split(Regex("\\s+")).associate { it.substringBefore('=') to it.substringAfter('=') }
         }.getOrDefault(emptyMap())
+        active = values.isNotEmpty()
         levels = values["levels"]?.toIntOrNull() ?: 0
         blurDp = values["blur"]?.toFloatOrNull() ?: 0f
         library = values["lib"] == "1"

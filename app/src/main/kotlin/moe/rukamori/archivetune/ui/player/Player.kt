@@ -1592,7 +1592,7 @@ fun BottomSheetPlayer(
                             Thumbnail(
                                 canvas = artworkCanvas,
                                 sliderPositionProvider = { sliderPosition },
-                                modifier = Modifier.fillMaxSize().graphicsLayer { alpha = if (isLyricsScreenVisible && moe.rukamori.archivetune.resona.LyricsDepthBench.hideBelow) 0f else 1f },
+                                modifier = Modifier.fillMaxSize().graphicsLayer { alpha = if (isLyricsScreenVisible && moe.rukamori.archivetune.resona.ResonaLyricsBlur.hideBelow) 0f else 1f },
                                 isPlayerExpanded = state.isExpanded,
                                 applyStatusBarPadding = false,
                             )
@@ -1890,7 +1890,7 @@ fun BottomSheetPlayer(
                             Thumbnail(
                                 canvas = artworkCanvas,
                                 sliderPositionProvider = { sliderPosition },
-                                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection).graphicsLayer { alpha = if (isLyricsScreenVisible && moe.rukamori.archivetune.resona.LyricsDepthBench.hideBelow) 0f else 1f },
+                                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection).graphicsLayer { alpha = if (isLyricsScreenVisible && moe.rukamori.archivetune.resona.ResonaLyricsBlur.hideBelow) 0f else 1f },
                                 isPlayerExpanded = state.isExpanded,
                             )
                         }

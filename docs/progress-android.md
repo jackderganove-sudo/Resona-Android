@@ -513,7 +513,12 @@ Vergleich derselbe Song („changes“), iPad-Datei gegen neu geschriebene Andro
 (Opus-Quelle, umkodiert) statt 44,1 kHz/128 kbit/s, keine Edit-List/Rollgruppen (nur für den
 Encoder-Vorlauf, Player ignorieren sie meist), kleineres Cover. Die beiden wahrscheinlichen Ursachen
 von vorher (64-Bit-Offsets mit einem einzigen Chunk, zusätzliche Android-meta-Box) sind weg.
-Offen: Test an der PS5 (Emil).
+**PS5-Test (Emil, 15.11.):** Winter (Format 2) läuft auf der PS5. Cover zeigt die PS5 bei **keiner**
+Variante (a M4A `covr`, b `folder.jpg`, c `cover.jpg`, d MP3 ID3v2.3 APIC, e FLAC PICTURE) – die
+PS5 zeigt bei USB-Musik keine Cover an. Folgen: Cover-Test-Schalter standardmäßig aus (neuer
+Schlüssel, die Test-Ordner verschwinden beim nächsten Abgleich), M4A bleibt Standard, Cover werden
+weiter eingebettet (für andere Player), Hinweis im PS5-Stick-Bildschirm „Die PS5 zeigt bei
+USB-Musik keine Cover an.“
 
 <!-- device-tests-r12:start -->
 ### Gerätetests Runde 12 (15.11.2026 16:18, `scripts/device-tests-runde12.sh`)

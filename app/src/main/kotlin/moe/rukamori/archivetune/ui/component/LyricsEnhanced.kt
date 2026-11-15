@@ -484,6 +484,8 @@ fun LyricsEnhanced(
                     val benchContext = LocalContext.current
                     remember(lyricsSessionKey) { LyricsDepthBench.load(benchContext) }
                     val depthLevels = LyricsDepthBench.levels
+                    val (blurSetting, _) = moe.rukamori.archivetune.utils.rememberPreference(moe.rukamori.archivetune.resona.ResonaLyricsBlurKey, defaultValue = true)
+                    androidx.compose.runtime.SideEffect { moe.rukamori.archivetune.resona.ResonaLyricsBlur.setting = blurSetting }
 
                     CompositionLocalProvider(LocalLayoutDirection provides lyricsLayoutDirection) {
                         key(lyricsSessionKey, syncedLyrics) {
@@ -514,11 +516,11 @@ fun LyricsEnhanced(
                                 accompanimentLineTextStyle = accompanimentTextStyle,
                                 phoneticTextStyle = phoneticTextStyle,
                                 blendMode = BlendMode.SrcOver,
-                                // Resona: no line blur for now. Per line it filled the GPU cache
-                                // (66 % janky in portrait), one pass over the list was worse
-                                // (100 %); without blur the Pixel stays smooth. Line change:
-                                // one spring like the iPad (response 0.5 s, damping 0.78).
-                                useBlurEffect = LyricsDepthBench.library,
+                                // Resona: the library's line blur with the player hidden underneath
+                                // (round 12: 0–0.32 % janky on the Pixel, on by default, setting
+                                // "Lyrics-Unschärfe"). Line change: one spring like the iPad
+                                // (response 0.5 s, damping 0.78).
+                                useBlurEffect = moe.rukamori.archivetune.resona.ResonaLyricsBlur.blur,
                                 scrollAnimationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.78f, stiffness = 158f),
                                 showTranslation = showTranslations,
                                 showPhonetic = showPhonetics,
