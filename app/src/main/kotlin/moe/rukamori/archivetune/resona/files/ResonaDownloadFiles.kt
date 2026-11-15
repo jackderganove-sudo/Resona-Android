@@ -37,6 +37,9 @@ import kotlinx.coroutines.sync.withLock
 import moe.rukamori.archivetune.db.MusicDatabase
 import moe.rukamori.archivetune.di.DownloadCache
 import moe.rukamori.archivetune.downloads.DownloadedArtworkRepository
+import moe.rukamori.archivetune.ui.utils.HeaderDownloadItem
+import moe.rukamori.archivetune.ui.utils.sendAddMissingDownloads
+import moe.rukamori.archivetune.ui.utils.sendRemoveDownloads
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -234,7 +237,9 @@ class ResonaDownloadFiles
 
         private fun ensureNomedia() {
             val root = root() ?: return
+            // Leftovers of the first test build (extension added twice).
             root.findFile(".nomedia.bin")?.delete()
+            root.findFile("$MANIFEST.json")?.delete()
             if (root.findFile(".nomedia") == null) {
                 // Before any audio file, so the media scanner never lists one.
                 createChild(root, "application/octet-stream", ".nomedia")
@@ -262,6 +267,8 @@ class ResonaDownloadFiles
                     notify(0, adds)
                 }
                 val sizes = HashMap<String, Long>()
+                val exported = HashMap<String, String>()
+                val lost = ArrayList<String>()
                 for (step in steps) {
                     runCatching {
                         when (step) {
@@ -270,8 +277,13 @@ class ResonaDownloadFiles
                             is FileStep.Delete -> resolve(step.path)?.delete()
                             is FileStep.Move -> move(step.from, step.to)
                             is FileStep.Add -> {
-                                val size = add(step.songId, step.path)
-                                if (size > 0) sizes[step.songId] = size
+                                val size = repair(step.path) ?: add(step.songId, step.path)
+                                if (size > 0) {
+                                    sizes[step.songId] = size
+                                    exported[step.songId] = step.path
+                                } else if (!cacheHas(step.songId)) {
+                                    lost += step.songId
+                                }
                                 done++
                                 bytes += size
                                 _progress.value = Progress(done, adds, bytes)
@@ -287,9 +299,22 @@ class ResonaDownloadFiles
                 uris.clear()
                 saveManifest()
                 writePlaylistFiles(next)
+                // Only now, with the file in place and in the manifest: free the cache copy.
+                for ((id, path) in exported) {
+                    if (manifest.songs[id]?.path == path && resolve(path)?.let { it.exists() && it.length() > 0 } == true) {
+                        runCatching { downloadCache.removeResource(id) }
+                    }
+                }
+                // Neither file nor cache copy: download again instead of losing the song.
+                if (lost.isNotEmpty()) {
+                    Log.w(TAG, "${lost.size} downloads had neither file nor cache copy, downloading again")
+                    val items = lost.map { id -> HeaderDownloadItem(id = id, title = infos[id]?.title.orEmpty()) }
+                    sendRemoveDownloads(context, lost)
+                    sendAddMissingDownloads(context, items, emptyMap())
+                }
                 _progress.value = null
                 if (adds > 0) NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
-                Log.i(TAG, "sync: ${steps.size} steps, $done of $adds songs written, ${bytes / 1024} KiB")
+                Log.i(TAG, "sync: ${steps.size} steps, ${exported.size} of $adds songs written, ${bytes / 1024} KiB, ${lost.size} downloaded again")
             }
 
         /** "Saving downloads as files – 3 of 120" while songs are converted. */
@@ -309,6 +334,19 @@ class ResonaDownloadFiles
                     .setSilent(true)
                     .build()
             runCatching { manager.notify(NOTIFICATION_ID, notification) }
+        }
+
+        /** A file the first test build named "x.m4a.m4a": give it its name instead of converting again. */
+        private fun repair(path: String): Long? {
+            if (resolve(path) != null) return null
+            val stray = resolve("$path.m4a") ?: return null
+            if (!stray.renameTo(path.substringAfterLast('/'))) return null
+            return resolve(path)?.length()?.takeIf { it > 0 }
+        }
+
+        private fun cacheHas(key: String): Boolean {
+            val length = ContentMetadata.getContentLength(downloadCache.getContentMetadata(key))
+            return length > 0 && downloadCache.isCached(key, 0L, length)
         }
 
         /** Only files this app wrote (manifest), then the folder if it is empty. */
@@ -359,10 +397,7 @@ class ResonaDownloadFiles
                 folder.findFile(name)?.delete()
                 val target = createChild(folder, "audio/mp4", name) ?: return 0
                 context.contentResolver.openOutputStream(target.uri)?.use { out -> m4a.inputStream().use { it.copyTo(out) } }
-                val size = m4a.length()
-                // The file is the download now: free the cache copy.
-                runCatching { downloadCache.removeResource(songId) }
-                return size
+                return m4a.length()
             } finally {
                 raw.delete()
                 m4a.delete()
@@ -395,6 +430,7 @@ class ResonaDownloadFiles
         private fun writePlaylistFiles(m: ResonaManifest) {
             for ((id, folderName) in m.folders) {
                 val dir = resolve(folderName) ?: continue
+                dir.findFile("$PLAYLIST_FILE.m3u")?.delete()
                 // A song lives once: in this folder or, when another playlist has it, there.
                 val lines = m.playlists[id].orEmpty().mapNotNull { m.songs[it]?.path }
                     .map { if (it.substringBefore('/') == folderName) it.substringAfter('/') else "../$it" }
