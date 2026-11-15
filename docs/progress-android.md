@@ -565,3 +565,53 @@ logcat-Filterfehlers nicht ein – behoben; Wert aus logcat übernommen.)
 
 Songtext-Screenshots nur lokal (`build/device-tests-r12/private/`), nicht in docs/.
 <!-- device-tests-r12:end -->
+
+## Runde 12 – Downloads großer Songs scheitern, Dateien/PS5-Stick dauern Stunden
+
+Gemessen auf dem Pixel 11 Pro (WLAN, Speedtest 34 Mbit/s ≈ 4,2 MB/s), per adb von außen
+(Benachrichtigung, Ordnergröße, WLAN-Bytes) bzw. mit Zeit-Logs (`ResonaDownload`, `ResonaFiles`).
+Vorher: v1.0.15-Stand ohne Fix. Nachher: lokaler Debug-Build mit allen Fixes (wip a25b7d865),
+installiert neben der normalen App. Testfälle: DJ-Noize-Mix „Hot Right Now #54“ (60 min,
+60,1 MB) und Queen „A Night At The Opera“ (12 Songs, 43:11, darin „The Prophet's Song“ 8:21).
+
+| | Vorher | Nachher |
+|---|---|---|
+| Format des Downloads | Opus (itag 251) | AAC (itag 140) |
+| Mix: Download | **32,4 min** (18:25:52–18:58:13), 32–48 KB/s, ein Request | **31,5 s**, 1952 KB/s, 8 Blöcke à 8 MB, 0 Wiederholungen |
+| Mix: Datei schreiben | Opus → AAC neu kodiert (≈ 12 s je 3-min-Song, beim Mix ≈ 4 min geschätzt) | Umpacken 9,7 s, Kopieren 0,1 s, Schreiben 0,1 s |
+| Mix: Tipp bis fertige Datei | ≈ 36 min | **45 s** |
+| Album 12 Songs: Download | (32–48 KB/s je Song, 3 parallel → ≈ 5–6 min hochgerechnet) | 1,2–7,3 s je Song (389–2811 KB/s), alle 12 nach **13 s** |
+| Album: Dateien | ≈ 12 s Neukodierung je Song (Logcat-Zeitstempel), nacheinander | 0,2–1,1 s je Song (Umpacken) |
+| Album: Tipp bis alle Dateien | ≈ 8 min hochgerechnet | **24 s** (40,5 MB) |
+| „Downloads als Dateien“ für 201 Songs | 5 → 103 Songs in ≈ 55 min (≈ 34 s je Song, Neukodierung + gedrosselte Downloads) | nicht neu gemessen; nach obigen Werten ≈ 1–2 s je Song |
+| Fortschritt | nur Prozent, beim langen Mix lange 0 % | „33,2 von 60,1 MB · 55 % · noch ca. 13 s“ (Benachrichtigung), MB in der Download-Liste |
+| Fehler | Mix-Download brach bei Emil ab | keine Abbrüche; Fehlversuche je Block mit Position im Fehlerprotokoll |
+
+Hochgerechnet für eine Playlist mit 30–40 Songs: ≈ 1–1,5 min Download + 15–30 s Dateien.
+
+**Fund beim Nachher-Test:** Der erste Fix-Build lud den Mix in 52 s, fragte danach aber einen Block
+hinter dem Ende an; YouTube antwortet darauf nicht mit 416, sondern mit leerem Inhalt → endlose
+EOF-Wiederholungen bei 60,1 MB. Behoben: Die Gesamtlänge kommt aus `Content-Range` (bzw. der vom
+Resolver gespeicherten Länge), es wird nicht mehr über das Ende hinaus gefragt (Unit-Test
+`knownTotalFromTheResponseStopsAtTheEndWithoutProbing`).
+
+**Ursachen und Änderungen**
+- Ein HTTP-Request pro Song wird von YouTube auf ≈ Echtzeit gedrosselt (32–48 KB/s bei 4 MB/s
+  Leitung); lange Songs brachen ab und begannen von vorn. → `ChunkedDownloadDataSource`: 8-MB-
+  Range-Blöcke; ein fehlgeschlagener Block (403/410, abgelaufener Link, Verbindungsabbruch, zu kurz)
+  wird an derselben Byte-Position mit frisch aufgelöstem Link wiederholt, nie von vorn; bis 6
+  Versuche je Block, danach übernimmt der Wiederholmechanismus des DownloadManagers (setzt am
+  Cache-Stand fort). Gestreamt in den Cache, nichts komplett im Speicher.
+- Downloads waren Opus → für Dateien/Stick Software-Neukodierung nach AAC. → Neue Downloads
+  verlangen AAC (itag 140, wie das iPad); fehlt es, wählt der Resolver wie bisher. Begonnene
+  Downloads behalten ihr Format.
+- Stick: `findFile` listete für jede Datei den ganzen Ordner über den Storage-Provider (quadratisch).
+  → Ordnerinhalt einmal pro Abgleich gelesen und gecacht, 1-MB-Puffer, Manifest nur am Ende
+  (war schon so), nur geänderte Dateien (Manifest).
+- Restzeit für „Downloads als Dateien“ und PS5-Stick, MB + Prozent für Downloads; WakeLock nur,
+  solange Dateien geschrieben werden; der Stick-Abgleich läuft als Foreground-Worker (dataSync).
+- Parallel: weiterhin 3 Downloads gleichzeitig; das Schreiben der Dateien läuft, während weitere
+  Songs laden (Umpacken 0,2–1 s je Song, daher kein eigener Parallel-Konverter nötig).
+
+**Offen:** Stick-Schreiben nachher messen (Stick steckt an der PS5); Ablauf eines Links mitten im
+Download nur per Unit-Test geprüft (YouTube-Links gelten ≈ 6 h).
