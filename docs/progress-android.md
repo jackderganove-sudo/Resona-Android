@@ -514,3 +514,49 @@ Vergleich derselbe Song („changes“), iPad-Datei gegen neu geschriebene Andro
 Encoder-Vorlauf, Player ignorieren sie meist), kleineres Cover. Die beiden wahrscheinlichen Ursachen
 von vorher (64-Bit-Offsets mit einem einzigen Chunk, zusätzliche Android-meta-Box) sind weg.
 Offen: Test an der PS5 (Emil).
+
+<!-- device-tests-r12:start -->
+### Gerätetests Runde 12 (15.11.2026 16:18, `scripts/device-tests-runde12.sh`)
+
+Build: wip c2b2be1cb (Mess-Build, Version 1.0.15), Pixel 11 Pro, Android 17, am Ladegerät,
+Musiklautstärke 2/25 (Telefonlautsprecher). Testsong „Let Me Down Slowly“ (169 s, Wort-Sync,
+Canvas – derselbe wie in Runde 11), je 30 s `gfxinfo` mit laufendem Song.
+
+| Lage | Canvas | Variante | Wort-Sync | Übersetzung | Janky | Frames | 90./99. Perzentil |
+|---|---|---|---|---|---|---|---|
+| hoch | an | standard | an | an | 0.04 % | 1/2554 | 9/11 ms |
+| hoch | aus | standard | an | an | 0.04 % | 1/2565 | 9/16 ms |
+| hoch | an | blur | an | an | 0.12 % | 3/2594 | 12/18 ms |
+| hoch | aus | blur | an | an | 0.08 % | 2/2574 | 12/18 ms |
+| hoch | an | blur | aus | an | 0.32 % | 10/3129 | 12/18 ms |
+| hoch | an | blur | an | aus | 0.08 % | 2/2577 | 12/19 ms |
+| quer | an | standard | an | an | 0.04 % | 1/2600 | 9/16 ms |
+| quer | aus | standard | an | an | 0.00 % | 0/2585 | 9/11 ms |
+| quer | an | blur | an | an | 0.12 % | 3/2585 | 10/14 ms |
+| quer | aus | blur | an | an | 0.00 % | 0/2567 | 10/14 ms |
+
+Entscheidung Lyrics-Blur: Blur schlechtester Wert 0.32 % Janky → **bleibt aus** (Bedingung 0 %).
+Einordnung: Der Blur der Bibliothek mit ausgeblendetem Inhalt darunter ist nah dran (0–0,12 %,
+90. Perzentil 10–12 ms statt 9 ms; früher ohne Ausblenden 66 %), nur ohne Wort-Sync 0,32 %. Auch
+der Standardmodus hat 0,04 % (1 Frame in 30 s) – „0 %“ erreicht nur Querformat ohne Canvas.
+
+Wiedergabe nach 15 min Pause: läuft weiter (+20 s in 20 s); Fehlerzeilen im Logcat: 0
+Fehlerprotokoll: von Hand exportiert (Einstellungen → Über → „Fehlerprotokoll teilen“; die
+Einstellungslisten sind für uiautomator unsichtbar). Datei „Resona-Fehlerprotokoll.txt“ mit Kopf
+„Resona 1.0.15 · Google Pixel 11 Pro Android 17“, 8 Einträge – alle **HTTP 403, Client
+WEB_CREATOR, Stufe player, je 4 in 15 s für denselben Song** (14:55 und 15:50, also vor dem
+Pausentest; der Pausentest selbst: keine Einträge). **Ursache gefunden:** nach jedem abgelehnten
+Stream setzt `recoverFromBadStreamPlayerResponse` die Sitzung zurück und löschte dabei die Liste
+der gescheiterten Clients; außerdem enthielt deren Schlüssel den Auth-Fingerabdruck, der sich dabei
+ändert → derselbe Client wurde bei jedem der 4 Versuche wieder genommen. Behoben in wip 3057bf593
+(Sperre bleibt 10 min pro Song, unabhängig vom Fingerabdruck; nur „Erneut versuchen“ hebt sie auf;
+sind alle Clients gesperrt, eine Runde mit allen), Unit-Test `FailedStreamClientTest`.
+
+KI-Sync CTC (Kalibrieren mit Bench-Datei, Song ganz im Cache, Akku-Modus 31 °C): **9,9 s für 169 s
+(0,06 × Songlänge)**, davon Inferenz 9,8 s (8456 Frames, 4 Threads), 282 Wörter, Treffer 72 %,
+Zeilenfehler Median 0,10 s, 81 % der Zeilen innerhalb 1 s, Kalibrierung Tempo 1,0008 / Versatz
+−0,01 s / 17 Anker – wie in Runde 11 (10,2 s, 0,07 s). (Das Skript las die Zeile wegen eines
+logcat-Filterfehlers nicht ein – behoben; Wert aus logcat übernommen.)
+
+Songtext-Screenshots nur lokal (`build/device-tests-r12/private/`), nicht in docs/.
+<!-- device-tests-r12:end -->

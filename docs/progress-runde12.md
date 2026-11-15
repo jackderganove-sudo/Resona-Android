@@ -11,7 +11,7 @@ früheren Teilen der Runde: `docs/progress-android.md` (Abschnitte „Runde 12�
 | 2 | Wiedergabefehler wie iPad v0.8.19 | Release **v1.0.14** (CI grün, ntfy gesendet); auf dem Pixel nicht getestet |
 | 3 | KI-Sync iPad = Android (CTC) | nur iPad betroffen, siehe iPad-Repo |
 | 4 | CTC mit deutschen Platzhaltertexten | synthetischer Test grün; kein MMS (Entscheidung unten) |
-| 5 | Lyrics-Tiefe mit laufendem Song | nicht gemessen (kein Gerät) – bleibt aus |
+| 5 | Lyrics-Tiefe mit laufendem Song | gemessen 15.11. (10 Varianten): Blur max. 0,32 % Janky → bleibt aus |
 | 6 | Glas-Fallback unter Android 12 | CI-Job mit API-30-Emulator (nur wip): startet, kein Absturz, Glas-Fallback lesbar |
 | 7 | PS5-Stick fürs iPad | vorbereitet, hinter Schalter, nicht freigegeben |
 
@@ -166,3 +166,17 @@ Pause (Standard 15 min) und den Export des Fehlerprotokolls. Ergebnisse als Tabe
 nach `docs/screens-r12/` kommen nur Player und Teilen-Dialog. Neu in Mess-Builds dafür:
 `canvas=0`, `words=0`, `trans=0` in `lyrics-depth.txt` und eine per adb lesbare Kopie des
 exportierten Fehlerprotokolls.
+
+## Nachtrag 15.11. (Pixel verbunden)
+
+- PS5-Stick: Format 2 auf dem Stick geprüft (37/37 Dateien neu, Cover-Test vollständig, zweiter
+  Abgleich schreibt keine Songs; Manifest wird jetzt auch nicht mehr neu geschrieben). Vergleich mit
+  der iPad-Datei in `progress-android.md`. Wartet auf den PS5-Test.
+- Gerätetests mit `scripts/device-tests-runde12.sh`: Ergebnisse in `progress-android.md`
+  (Abschnitt „Gerätetests Runde 12“). Lyrics-Blur bleibt aus (0,32 % statt 0 %), Wiedergabe nach
+  15 min Pause ok, KI-Sync CTC 9,9 s für 169 s.
+- Fund im Fehlerprotokoll: derselbe abgelehnte Client (403) wurde 4× hintereinander versucht →
+  behoben (wip 3057bf593).
+- Gerätebesonderheiten Android 17 Beta: Lautstärke nur über `cmd audio`, Medientasten per adb
+  erreichen die App nicht (Telefon-Dienst hält sie), uiautomator braucht pausierte Wiedergabe und
+  sieht die Einstellungslisten nicht – im Skript berücksichtigt bzw. von Hand erledigt.
