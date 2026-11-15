@@ -12,7 +12,7 @@ früheren Teilen der Runde: `docs/progress-android.md` (Abschnitte „Runde 12�
 | 3 | KI-Sync iPad = Android (CTC) | nur iPad betroffen, siehe iPad-Repo |
 | 4 | CTC mit deutschen Platzhaltertexten | synthetischer Test grün; kein MMS (Entscheidung unten) |
 | 5 | Lyrics-Tiefe mit laufendem Song | nicht gemessen (kein Gerät) – bleibt aus |
-| 6 | Glas-Fallback unter Android 12 | CI-Job mit API-30-Emulator (nur wip): startet, kein Absturz |
+| 6 | Glas-Fallback unter Android 12 | CI-Job mit API-30-Emulator (nur wip): startet, kein Absturz, Glas-Fallback lesbar |
 | 7 | PS5-Stick fürs iPad | vorbereitet, hinter Schalter, nicht freigegeben |
 
 ## 1. PS5-Stick (v1.0.13)
@@ -91,7 +91,13 @@ Sperre und ohne Absturz; der Onboarding-Test läuft ohne Login bis zur Startseit
 alle Tabs (dort liegen Navigationsleiste und Mini-Player im Glas-Look) – „OK (1 test)“, kein
 FATAL im Logcat. Der Screenshot am Ende zeigt nur den Onboarding-Start (der Testprozess wird
 beendet); ab dem nächsten wip-Lauf macht der Job zusätzlich `home-api30.png` von der
-Startseite. HOME_SCREENSHOT
+Startseite.
+
+**Startseite auf API 30 (`home-api30.png`, Lauf vom 15.11.):** Navigationsleiste im
+Glas-Fallback – helle, fast deckende Tönung (0,94), Inhalte dahinter nur schwach zu sehen,
+Beschriftungen gut lesbar, kein Blur und keine Artefakte. Nebenfund: der Debug-Build hieß noch
+„ArchiveTune Debug“ (`app/src/debug/res/values/app_name.xml`) → „Resona Debug“. Releases
+waren nicht betroffen.
 
 ## Gerätetests, gesammelt (Pixel, sobald verbunden)
 
