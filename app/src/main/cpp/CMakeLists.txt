@@ -65,3 +65,19 @@ if (TARGET ggml-cpu)
     target_compile_options(ggml-cpu PRIVATE -O3)
 endif ()
 target_link_libraries(resona_whisper ${LOG_LIB} android ggml)
+
+# Resona: MP3 for the PS5 stick (320 kbit/s CBR) with LAME 3.100 (LGPL), its own library.
+FetchContent_Declare(lame
+    URL https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
+    URL_HASH SHA256=ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e)
+FetchContent_GetProperties(lame)
+if (NOT lame_POPULATED)
+    FetchContent_Populate(lame)
+endif ()
+file(GLOB RESONA_LAME_SOURCES ${lame_SOURCE_DIR}/libmp3lame/*.c)
+list(FILTER RESONA_LAME_SOURCES EXCLUDE REGEX ".*mpglib_interface\\.c$")
+add_library(resona_mp3 SHARED ${RESONA_LAME_SOURCES} ${CMAKE_SOURCE_DIR}/mp3_jni.cpp)
+target_include_directories(resona_mp3 PRIVATE ${lame_SOURCE_DIR}/include ${lame_SOURCE_DIR}/libmp3lame)
+target_compile_definitions(resona_mp3 PRIVATE STDC_HEADERS HAVE_STDINT_H ieee754_float32_t=float)
+target_compile_options(resona_mp3 PRIVATE -O2 -w -fvisibility=hidden)
+target_link_libraries(resona_mp3 ${LOG_LIB} m)

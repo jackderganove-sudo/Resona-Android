@@ -52,6 +52,8 @@ fun Ps5StickSettingsGroup() {
     var stick by remember { mutableStateOf(Ps5Stick.stickName(context)) }
     var selected by remember { mutableStateOf(Ps5Stick.playlists(context)) }
     var flat by remember { mutableStateOf(Ps5Stick.flat(context)) }
+    var mp3 by remember { mutableStateOf(Ps5Stick.format(context) == "mp3") }
+    var coverTest by remember { mutableStateOf(Ps5Stick.coverTest(context)) }
     var choosing by remember { mutableStateOf(false) }
     var askDrop by remember { mutableStateOf<List<String>?>(null) }
     var info by remember { mutableStateOf<String?>(null) }
@@ -107,6 +109,28 @@ fun Ps5StickSettingsGroup() {
                 onCheckedChange = {
                     flat = it
                     Ps5Stick.setFlat(context, it)
+                },
+            )
+        }
+        item {
+            SwitchPreference(
+                title = { Text(stringResource(R.string.resona_stick_mp3)) },
+                description = stringResource(R.string.resona_stick_mp3_desc),
+                checked = mp3,
+                onCheckedChange = {
+                    mp3 = it
+                    Ps5Stick.setFormat(context, if (it) "mp3" else "m4a")
+                },
+            )
+        }
+        item {
+            SwitchPreference(
+                title = { Text(stringResource(R.string.resona_stick_cover_test)) },
+                description = stringResource(R.string.resona_stick_cover_test_desc),
+                checked = coverTest,
+                onCheckedChange = {
+                    coverTest = it
+                    Ps5Stick.setCoverTest(context, it)
                 },
             )
         }

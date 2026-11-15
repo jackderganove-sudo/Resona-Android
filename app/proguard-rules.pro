@@ -155,3 +155,6 @@
 # ONNX Runtime creates these from native code (TensorInfo, OnnxTensor, …).
 -keep class ai.onnxruntime.** { *; }
 -dontwarn ai.onnxruntime.**
+
+# Resona MP3 (LAME): JNI symbols are bound to this class and its method names.
+-keep class moe.rukamori.archivetune.resona.files.Mp3Native { *; }

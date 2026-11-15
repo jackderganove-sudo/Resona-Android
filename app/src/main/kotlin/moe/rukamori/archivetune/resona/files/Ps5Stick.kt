@@ -59,6 +59,11 @@ object Ps5Stick {
     private const val KEY_TREE = "tree"
     private const val KEY_PLAYLISTS = "playlists"
     private const val KEY_FLAT = "flat"
+    private const val KEY_FORMAT = "format"
+    private const val KEY_COVER_TEST = "cover_test"
+    const val COVER_TEST = "Cover-Test"
+    const val COVER_TEST_B = "Cover-Test b folder.jpg"
+    const val COVER_TEST_C = "Cover-Test c cover.jpg"
     const val MANIFEST = ".resona-sync.json"
     const val MUSIC = "Music"
     const val CHANNEL = "resona_stick"
@@ -97,6 +102,16 @@ object Ps5Stick {
     fun flat(context: Context): Boolean = prefs(context).getBoolean(KEY_FLAT, false)
 
     fun setFlat(context: Context, value: Boolean) = prefs(context).edit().putBoolean(KEY_FLAT, value).apply()
+
+    /** "m4a" (AAC, default) or "mp3" (320 kbit/s CBR, ID3v2.3). */
+    fun format(context: Context): String = prefs(context).getString(KEY_FORMAT, "m4a") ?: "m4a"
+
+    fun setFormat(context: Context, value: String) = prefs(context).edit().putString(KEY_FORMAT, value).apply()
+
+    /** Extra folders with one song in several cover variants (until the PS5 test says which works). */
+    fun coverTest(context: Context): Boolean = prefs(context).getBoolean(KEY_COVER_TEST, true)
+
+    fun setCoverTest(context: Context, value: Boolean) = prefs(context).edit().putBoolean(KEY_COVER_TEST, value).apply()
 
     fun stickName(context: Context): String? = tree(context)?.let { DocumentFile.fromTreeUri(context, it)?.name }
 
@@ -149,7 +164,7 @@ object Ps5Stick {
             database.getSongById(id)?.let { infos[id] = SongInfo(id, it.song.title, it.artists.joinToString(", ") { a -> a.name }) }
         }
         val old = oldManifest(context)
-        val (planned, manifest) = ResonaFilePlan.plan(old, playlists, emptyList(), { infos[it] }, copiesPerPlaylist = true, flat = flat(context))
+        val (planned, manifest) = ResonaFilePlan.plan(old, playlists, emptyList(), { infos[it] }, copiesPerPlaylist = true, flat = flat(context), extension = format(context))
         // Files in an older format (MediaMuxer's, which the PS5 refused) are copied again in place.
         val touched = planned.filterIsInstance<FileStep.Add>().map { it.path }.toSet() + planned.filterIsInstance<FileStep.Move>().map { it.to }.toSet()
         val rewrite = manifest.songs.filter { (key, song) -> (old.songs[key]?.format ?: ResonaFileFormat.CURRENT) < ResonaFileFormat.CURRENT && song.path !in touched }
@@ -226,7 +241,7 @@ object Ps5Stick {
                         is FileStep.Add -> {
                             val source = files.uriFor(step.songId)
                             if (source != null) {
-                                bytes += copy(context, music, source, step.path)
+                                bytes += if (step.path.endsWith(".mp3")) copyAsMp3(context, music, source, step.path, files.tagsFor(step.songId)) else copy(context, music, source, step.path)
                                 written += step.path
                             }
                             done++
@@ -243,6 +258,7 @@ object Ps5Stick {
             throw e
         }
         saveManifest(context, music, preview.manifest, written, preview.steps)
+        runCatching { coverTestFolders(context, music, files) }.onFailure { Log.w(TAG, "cover test: ${it.javaClass.simpleName}") }
         _progress.value = Progress(done, adds, bytes, preview.bytesNeeded, Phase.DONE)
         return Phase.DONE
     }
@@ -255,6 +271,82 @@ object Ps5Stick {
         val file = music.findFile(MANIFEST) ?: music.createFile("application/json", MANIFEST) ?: return
         runCatching {
             context.contentResolver.openOutputStream(file.uri, "wt")?.use { it.write(planned.copy(songs = songs).encode().toByteArray()) }
+        }
+    }
+
+    private suspend fun copyAsMp3(context: Context, music: DocumentFile, source: Uri, path: String, tags: Mp4Tags.Tags): Long {
+        val work = java.io.File(context.cacheDir, "resona-stick").apply { mkdirs() }
+        val m4a = java.io.File(work, "source.m4a")
+        val mp3 = java.io.File(work, "song.mp3")
+        try {
+            context.contentResolver.openInputStream(source)?.use { input -> m4a.outputStream().use { input.copyTo(it) } } ?: return 0
+            StickFormats.mp3(m4a, mp3, tags)
+            return copyFile(context, music, mp3, path, "audio/mpeg")
+        } finally {
+            m4a.delete()
+            mp3.delete()
+        }
+    }
+
+    private fun copyFile(context: Context, music: DocumentFile, file: java.io.File, path: String, mime: String): Long {
+        val folder = folderFor(music, path) ?: return 0
+        val name = path.substringAfterLast('/')
+        folder.findFile(name)?.delete()
+        val target = folder.createFile(mime, name) ?: return 0
+        if (target.name != name) target.renameTo(name)
+        context.contentResolver.openOutputStream(target.uri)?.use { out -> file.inputStream().use { it.copyTo(out, 256 * 1024) } }
+        return file.length()
+    }
+
+    /**
+     * Cover test (round 12): one song in five variants, to see on the PS5 which
+     * one shows a cover. Cover-Test/: a) M4A covr, d) MP3 ID3v2.3 APIC, e) FLAC
+     * PICTURE; "Cover-Test b folder.jpg/" and "Cover-Test c cover.jpg/": M4A
+     * without an embedded cover plus the folder image. Switched off → only
+     * these files are removed.
+     */
+    private suspend fun coverTestFolders(context: Context, music: DocumentFile, files: ResonaDownloadFiles) {
+        val names = mapOf(
+            COVER_TEST to listOf("a - M4A mit Cover im Tag (covr).m4a", "d - MP3 mit Cover im Tag (ID3v2.3 APIC).mp3", "e - FLAC mit Cover im Tag (PICTURE).flac"),
+            COVER_TEST_B to listOf("b - M4A ohne Cover-Tag, Bild als folder.jpg.m4a", "folder.jpg"),
+            COVER_TEST_C to listOf("c - M4A ohne Cover-Tag, Bild als cover.jpg.m4a", "cover.jpg"),
+        )
+        if (!coverTest(context)) {
+            for ((folder, list) in names) {
+                val dir = music.findFile(folder) ?: continue
+                list.forEach { dir.findFile(it)?.delete() }
+                if (dir.listFiles().isEmpty()) dir.delete()
+            }
+            return
+        }
+        if (names.all { (folder, list) -> music.findFile(folder)?.let { dir -> list.all { dir.findFile(it) != null } } == true }) return
+        val songId = playlists(context).asSequence()
+            .mapNotNull { oldManifest(context).playlists[it]?.firstOrNull { id -> files.uriFor(id) != null } }
+            .firstOrNull() ?: return
+        val source = files.uriFor(songId) ?: return
+        val tags = files.tagsFor(songId)
+        val cover = tags.cover ?: return
+        val work = java.io.File(context.cacheDir, "resona-cover-test").apply { mkdirs() }
+        try {
+            val m4a = java.io.File(work, "source.m4a")
+            context.contentResolver.openInputStream(source)?.use { input -> m4a.outputStream().use { input.copyTo(it) } } ?: return
+            val a = java.io.File(work, "a.m4a").also { ResonaAudioConverter.toM4a(m4a, it, tags) }
+            val plain = java.io.File(work, "plain.m4a").also { StickFormats.m4aWithoutCover(m4a, it, tags) }
+            val jpg = java.io.File(work, "cover.jpg").also { it.writeBytes(cover) }
+            copyFile(context, music, a, "$COVER_TEST/${names.getValue(COVER_TEST)[0]}", "audio/mp4")
+            if (Mp3Native.available) {
+                val d = java.io.File(work, "d.mp3").also { StickFormats.mp3(m4a, it, tags) }
+                copyFile(context, music, d, "$COVER_TEST/${names.getValue(COVER_TEST)[1]}", "audio/mpeg")
+            }
+            val e = java.io.File(work, "e.flac").also { StickFormats.flac(m4a, it, tags) }
+            copyFile(context, music, e, "$COVER_TEST/${names.getValue(COVER_TEST)[2]}", "audio/flac")
+            copyFile(context, music, plain, "$COVER_TEST_B/${names.getValue(COVER_TEST_B)[0]}", "audio/mp4")
+            copyFile(context, music, jpg, "$COVER_TEST_B/folder.jpg", "image/jpeg")
+            copyFile(context, music, plain, "$COVER_TEST_C/${names.getValue(COVER_TEST_C)[0]}", "audio/mp4")
+            copyFile(context, music, jpg, "$COVER_TEST_C/cover.jpg", "image/jpeg")
+            Log.i(TAG, "cover test folders written")
+        } finally {
+            work.deleteRecursively()
         }
     }
 

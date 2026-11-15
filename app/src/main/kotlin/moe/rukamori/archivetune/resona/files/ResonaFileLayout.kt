@@ -139,6 +139,7 @@ object ResonaFilePlan {
         info: (String) -> SongInfo?,
         copiesPerPlaylist: Boolean,
         flat: Boolean = false,
+        extension: String = "m4a",
     ): Pair<List<FileStep>, ResonaManifest> {
         val steps = ArrayList<FileStep>()
         // Folder names: safe and unique, the "Songs" folder kept free.
@@ -165,7 +166,7 @@ object ResonaFilePlan {
             val song = info(songId) ?: return
             val bucket = if (flat) "" else folder
             val names = takenNames.getOrPut(bucket) { HashSet() }
-            val base = ResonaFileNames.song(number, song.artist, song.title)
+            val base = ResonaFileNames.song(number, song.artist, song.title, extension)
             val name = ResonaFileNames.unique(if (flat) ResonaFileNames.safe("$folder - $base", 200) else base, names)
             names += name
             wanted[key] = if (flat) name else "$folder/$name"
