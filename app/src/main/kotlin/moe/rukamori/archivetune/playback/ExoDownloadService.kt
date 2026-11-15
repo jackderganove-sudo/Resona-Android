@@ -54,6 +54,9 @@ class ExoDownloadService :
 
     override fun getScheduler(): Scheduler = PlatformScheduler(this, JOB_ID)
 
+    private var progressStartedAt = 0L
+    private var progressStartBytes = 0L
+
     override fun getForegroundNotification(
         downloads: MutableList<Download>,
         notMetRequirements: Int,
@@ -75,11 +78,33 @@ class ExoDownloadService :
             } else {
                 resources.getQuantityString(R.plurals.n_song, downloads.size, downloads.size)
             }
+        // Resona (round 12): MB and percent (also for one long song) and the remaining time.
+        val downloadedBytes = activeDownloads.sumOf { it.bytesDownloaded }
+        val totalBytes = activeDownloads.sumOf { d ->
+            if (d.contentLength > 0) d.contentLength else if (d.percentDownloaded > 0f) (d.bytesDownloaded * 100f / d.percentDownloaded).toLong() else 0L
+        }
+        val now = System.currentTimeMillis()
+        if (progressStartedAt == 0L || downloadedBytes < progressStartBytes) {
+            progressStartedAt = now
+            progressStartBytes = downloadedBytes
+        }
+        val sub =
+            if (totalBytes > 0) {
+                val eta = moe.rukamori.archivetune.resona.ResonaEta.remaining(progressStartedAt, downloadedBytes - progressStartBytes, totalBytes - progressStartBytes, now)
+                listOfNotNull(
+                    getString(R.string.resona_download_mb, "%.1f".format(downloadedBytes / 1048576.0), "%.1f".format(totalBytes / 1048576.0)),
+                    "${(downloadedBytes * 100 / totalBytes).toInt()} %",
+                    eta?.let { moe.rukamori.archivetune.resona.ResonaEta.text(this, it) },
+                ).joinToString(" · ")
+            } else {
+                null
+            }
         return Notification
             .Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.download)
             .setContentTitle(getString(R.string.downloading))
             .setContentText(contentText)
+            .setSubText(sub)
             .setProgress(
                 100 * activeDownloads.size,
                 totalPercentage,

@@ -134,4 +134,8 @@
     <string name="resona_stick_no_covers">The PS5 does not show covers for USB music.</string>
     <string name="resona_lyrics_blur">Lyrics blur</string>
     <string name="resona_lyrics_blur_desc">Lines away from the current one are slightly blurred, like on the iPad (Android 12+)</string>
+    <!-- Round 12: progress with remaining time -->
+    <string name="resona_eta_minutes">about %1$d min left</string>
+    <string name="resona_eta_seconds">about %1$d s left</string>
+    <string name="resona_download_mb">%1$s of %2$s MB</string>
 </resources>

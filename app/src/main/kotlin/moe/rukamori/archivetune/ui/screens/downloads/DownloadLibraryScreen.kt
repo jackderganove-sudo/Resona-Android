@@ -885,7 +885,17 @@ private fun DownloadEntry(
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             Text(
-                                text = stringResource(R.string.download_progress_percent, entry.percent),
+                                // Resona (round 12): MB as well, so a long mix visibly moves.
+                                text = stringResource(R.string.download_progress_percent, entry.percent) +
+                                    if (entry.bytesTotal > 0) {
+                                        " · " + stringResource(
+                                            R.string.resona_download_mb,
+                                            "%.1f".format(entry.bytesDownloaded / 1048576.0),
+                                            "%.1f".format(entry.bytesTotal / 1048576.0),
+                                        )
+                                    } else {
+                                        ""
+                                    },
                                 style = MaterialTheme.typography.labelMedium,
                             )
                             Text(

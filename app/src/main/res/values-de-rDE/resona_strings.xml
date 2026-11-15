@@ -607,4 +607,8 @@
     <string name="resona_stick_no_covers">Die PS5 zeigt bei USB-Musik keine Cover an.</string>
     <string name="resona_lyrics_blur">Lyrics-Unschärfe</string>
     <string name="resona_lyrics_blur_desc">Zeilen abseits der aktuellen werden leicht unscharf, wie auf dem iPad (ab Android 12)</string>
+    <!-- Round 12: progress with remaining time -->
+    <string name="resona_eta_minutes">noch ca. %1$d min</string>
+    <string name="resona_eta_seconds">noch ca. %1$d s</string>
+    <string name="resona_download_mb">%1$s von %2$s MB</string>
 </resources>

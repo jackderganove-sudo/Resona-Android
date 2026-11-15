@@ -27,6 +27,10 @@ object ResonaAudioConverter {
     const val AAC_BITRATE = 256_000
     private const val TIMEOUT_US = 10_000L
 
+    /** "remux" or "transcode" – for the timing log (round 12). */
+    @Volatile var lastPath = "-"
+        private set
+
     suspend fun toM4a(input: File, output: File, tags: Mp4Tags.Tags) {
         val extractor = MediaExtractor()
         try {
@@ -36,8 +40,10 @@ object ResonaAudioConverter {
             val format = extractor.getTrackFormat(track)
             val csd = format.getByteBuffer("csd-0")?.let { bytes(it) }
             if (format.getString(MediaFormat.KEY_MIME) == MediaFormat.MIMETYPE_AUDIO_AAC && csd != null && csd.isNotEmpty()) {
+                lastPath = "remux"
                 remux(extractor, format, csd, output, tags)
             } else {
+                lastPath = "transcode"
                 transcode(extractor, format, output, tags)
             }
         } finally {

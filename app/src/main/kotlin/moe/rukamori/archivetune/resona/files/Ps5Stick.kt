@@ -75,7 +75,8 @@ object Ps5Stick {
     private const val WORK = "resona_stick_sync"
     const val KEY_ALLOW_DROP = "allow_drop"
 
-    data class Progress(val done: Int, val total: Int, val bytes: Long, val totalBytes: Long, val phase: Phase)
+    /** [etaSeconds]: remaining time from the speed so far (round 12), null until known. */
+    data class Progress(val done: Int, val total: Int, val bytes: Long, val totalBytes: Long, val phase: Phase, val etaSeconds: Long? = null)
 
     enum class Phase { LOADING_MISSING, COPYING, DONE, CANCELLED, FAILED, NO_SPACE }
 
@@ -121,6 +122,54 @@ object Ps5Stick {
         val root = tree(context)?.let { DocumentFile.fromTreeUri(context, it) } ?: return null
         if (!root.canWrite()) return null
         return root.findFile(MUSIC)?.takeIf { it.isDirectory } ?: if (create) root.createDirectory(MUSIC) else null
+    }
+
+    /**
+     * Round 12: each folder of the stick is listed once per sync. findFile() lists the whole
+     * folder through the storage provider on every call – per file that grew quadratically
+     * (200 songs → 40 000 rows for a single sync).
+     */
+    private class StickDirs(private val music: DocumentFile) {
+        private val listings = HashMap<String, HashMap<String, DocumentFile>>()
+
+        private fun listing(folder: String): HashMap<String, DocumentFile> =
+            listings.getOrPut(folder) {
+                val dir = if (folder.isEmpty()) music else listing("")[folder]?.takeIf { it.isDirectory }
+                dir?.listFiles()?.associateByTo(HashMap()) { it.name.orEmpty() } ?: HashMap()
+            }
+
+        fun folder(name: String, create: Boolean): DocumentFile? {
+            if (name.isEmpty()) return music
+            listing("")[name]?.takeIf { it.isDirectory }?.let { return it }
+            if (!create) return null
+            return music.createDirectory(name)?.also { listing("")[name] = it; listings[name] = HashMap() }
+        }
+
+        fun find(path: String): DocumentFile? = listing(path.substringBeforeLast('/', ""))[path.substringAfterLast('/')]
+
+        fun remember(path: String, file: DocumentFile) {
+            listing(path.substringBeforeLast('/', ""))[path.substringAfterLast('/')] = file
+        }
+
+        fun forget(path: String) {
+            listing(path.substringBeforeLast('/', "")).remove(path.substringAfterLast('/'))
+        }
+
+        fun delete(path: String) {
+            find(path)?.delete()
+            forget(path)
+        }
+
+        fun renameFolder(from: String, to: String) {
+            val dir = folder(from, create = false) ?: return
+            if (dir.renameTo(to)) {
+                listing("").remove(from)
+                listing("")[to] = dir
+                listings.remove(from)?.let { listings[to] = it }
+            }
+        }
+
+        fun isEmptyFolder(name: String): Boolean = folder(name, create = false)?.let { listing(name).isEmpty() } ?: false
     }
 
     private fun resolve(base: DocumentFile, path: String): DocumentFile? {
@@ -227,27 +276,33 @@ object Ps5Stick {
         var done = 0
         var bytes = 0L
         val written = HashSet<String>()
+        val dirs = StickDirs(music)
+        val oldSongs = oldManifest(context).songs.values
+        val startedAt = System.currentTimeMillis()
         try {
             for (step in preview.steps) {
                 currentCoroutineContext().ensureActive()
                 runCatching {
                     when (step) {
-                        is FileStep.RenameFolder -> resolve(music, step.from)?.renameTo(step.to)
+                        is FileStep.RenameFolder -> dirs.renameFolder(step.from, step.to)
                         is FileStep.DeleteFolder -> {
-                            val dir = resolve(music, step.folder)
-                            oldManifest(context).songs.values.filter { it.path.substringBefore('/') == step.folder }.forEach { resolve(music, it.path)?.delete() }
-                            if (dir != null && dir.listFiles().isEmpty()) dir.delete()
+                            oldSongs.filter { it.path.substringBefore('/') == step.folder }.forEach { dirs.delete(it.path) }
+                            if (dirs.isEmptyFolder(step.folder)) dirs.folder(step.folder, create = false)?.delete()
                         }
-                        is FileStep.Delete -> resolve(music, step.path)?.delete()
-                        is FileStep.Move -> move(context, music, step.from, step.to)
+                        is FileStep.Delete -> dirs.delete(step.path)
+                        is FileStep.Move -> move(context, dirs, step.from, step.to)
                         is FileStep.Add -> {
                             val source = files.uriFor(step.songId)
                             if (source != null) {
-                                bytes += if (step.path.endsWith(".mp3")) copyAsMp3(context, music, source, step.path, files.tagsFor(step.songId)) else copy(context, music, source, step.path)
+                                val began = System.currentTimeMillis()
+                                val n = if (step.path.endsWith(".mp3")) copyAsMp3(context, dirs, source, step.path, files.tagsFor(step.songId)) else copy(context, dirs, source, step.path)
+                                bytes += n
                                 written += step.path
+                                val ms = System.currentTimeMillis() - began
+                                Log.i(TAG, "stick write %s: %.1f MB in %.1f s (%.1f MB/s)".format(java.util.Locale.ROOT, step.songId, n / 1048576.0, ms / 1000.0, n / 1048576.0 / maxOf(ms / 1000.0, 0.001)))
                             }
                             done++
-                            val p = Progress(done, adds, bytes, preview.bytesNeeded, Phase.COPYING)
+                            val p = Progress(done, adds, bytes, preview.bytesNeeded, Phase.COPYING, etaSeconds(startedAt, bytes, preview.bytesNeeded))
                             _progress.value = p
                             onProgress(p)
                         }
@@ -283,29 +338,37 @@ object Ps5Stick {
         }
     }
 
-    private suspend fun copyAsMp3(context: Context, music: DocumentFile, source: Uri, path: String, tags: Mp4Tags.Tags): Long {
+    private suspend fun copyAsMp3(context: Context, dirs: StickDirs, source: Uri, path: String, tags: Mp4Tags.Tags): Long {
         val work = java.io.File(context.cacheDir, "resona-stick").apply { mkdirs() }
         val m4a = java.io.File(work, "source.m4a")
         val mp3 = java.io.File(work, "song.mp3")
         try {
-            context.contentResolver.openInputStream(source)?.use { input -> m4a.outputStream().use { input.copyTo(it) } } ?: return 0
+            context.contentResolver.openInputStream(source)?.use { input -> m4a.outputStream().use { input.copyTo(it, COPY_BUFFER) } } ?: return 0
             StickFormats.mp3(m4a, mp3, tags)
-            return copyFile(context, music, mp3, path, "audio/mpeg")
+            return copyFile(context, dirs, mp3, path, "audio/mpeg")
         } finally {
             m4a.delete()
             mp3.delete()
         }
     }
 
-    private fun copyFile(context: Context, music: DocumentFile, file: java.io.File, path: String, mime: String): Long {
-        val folder = folderFor(music, path) ?: return 0
+    private fun copyFile(context: Context, dirs: StickDirs, file: java.io.File, path: String, mime: String): Long =
+        writeTo(context, dirs, path, mime) { out -> file.inputStream().use { it.copyTo(out, COPY_BUFFER) } }
+
+    /** New file at [path] (an old one with the name goes first), written by [write] in 1 MB blocks. */
+    private fun writeTo(context: Context, dirs: StickDirs, path: String, mime: String, write: (java.io.OutputStream) -> Long): Long {
+        val folder = dirs.folder(path.substringBeforeLast('/', ""), create = true) ?: return 0
         val name = path.substringAfterLast('/')
-        folder.findFile(name)?.delete()
+        dirs.delete(path)
         val target = folder.createFile(mime, name) ?: return 0
         if (target.name != name) target.renameTo(name)
-        context.contentResolver.openOutputStream(target.uri)?.use { out -> file.inputStream().use { it.copyTo(out, 256 * 1024) } }
-        return file.length()
+        dirs.remember(path, target)
+        return context.contentResolver.openOutputStream(target.uri)?.use { out -> java.io.BufferedOutputStream(out, COPY_BUFFER).use(write) } ?: 0
     }
+
+    private const val COPY_BUFFER = 1024 * 1024
+
+    private fun etaSeconds(startedAt: Long, done: Long, total: Long): Long? = moe.rukamori.archivetune.resona.ResonaEta.remaining(startedAt, done, total)
 
     /**
      * Cover test (round 12): one song in five variants, to see on the PS5 which
@@ -336,6 +399,7 @@ object Ps5Stick {
         val source = files.uriFor(songId) ?: return
         val tags = files.tagsFor(songId)
         val cover = tags.cover ?: return
+        val coverDirs = StickDirs(music)
         val work = java.io.File(context.cacheDir, "resona-cover-test").apply { mkdirs() }
         try {
             val m4a = java.io.File(work, "source.m4a")
@@ -343,51 +407,40 @@ object Ps5Stick {
             val a = java.io.File(work, "a.m4a").also { ResonaAudioConverter.toM4a(m4a, it, tags) }
             val plain = java.io.File(work, "plain.m4a").also { StickFormats.m4aWithoutCover(m4a, it, tags) }
             val jpg = java.io.File(work, "cover.jpg").also { it.writeBytes(cover) }
-            copyFile(context, music, a, "$COVER_TEST/${names.getValue(COVER_TEST)[0]}", "audio/mp4")
+            copyFile(context, coverDirs, a, "$COVER_TEST/${names.getValue(COVER_TEST)[0]}", "audio/mp4")
             if (Mp3Native.available) {
                 val d = java.io.File(work, "d.mp3").also { StickFormats.mp3(m4a, it, tags) }
-                copyFile(context, music, d, "$COVER_TEST/${names.getValue(COVER_TEST)[1]}", "audio/mpeg")
+                copyFile(context, coverDirs, d, "$COVER_TEST/${names.getValue(COVER_TEST)[1]}", "audio/mpeg")
             }
             val e = java.io.File(work, "e.flac").also { StickFormats.flac(m4a, it, tags) }
-            copyFile(context, music, e, "$COVER_TEST/${names.getValue(COVER_TEST)[2]}", "audio/flac")
-            copyFile(context, music, plain, "$COVER_TEST_B/${names.getValue(COVER_TEST_B)[0]}", "audio/mp4")
-            copyFile(context, music, jpg, "$COVER_TEST_B/folder.jpg", "image/jpeg")
-            copyFile(context, music, plain, "$COVER_TEST_C/${names.getValue(COVER_TEST_C)[0]}", "audio/mp4")
-            copyFile(context, music, jpg, "$COVER_TEST_C/cover.jpg", "image/jpeg")
+            copyFile(context, coverDirs, e, "$COVER_TEST/${names.getValue(COVER_TEST)[2]}", "audio/flac")
+            copyFile(context, coverDirs, plain, "$COVER_TEST_B/${names.getValue(COVER_TEST_B)[0]}", "audio/mp4")
+            copyFile(context, coverDirs, jpg, "$COVER_TEST_B/folder.jpg", "image/jpeg")
+            copyFile(context, coverDirs, plain, "$COVER_TEST_C/${names.getValue(COVER_TEST_C)[0]}", "audio/mp4")
+            copyFile(context, coverDirs, jpg, "$COVER_TEST_C/cover.jpg", "image/jpeg")
             Log.i(TAG, "cover test folders written")
         } finally {
             work.deleteRecursively()
         }
     }
 
-    private fun folderFor(music: DocumentFile, path: String): DocumentFile? {
-        if ('/' !in path) return music
-        val name = path.substringBefore('/')
-        return music.findFile(name)?.takeIf { it.isDirectory } ?: music.createDirectory(name)
-    }
-
-    private fun copy(context: Context, music: DocumentFile, source: Uri, path: String): Long {
-        val folder = folderFor(music, path) ?: return 0
-        val name = path.substringAfterLast('/')
-        folder.findFile(name)?.delete()
-        val target = folder.createFile("audio/mp4", name) ?: return 0
-        if (target.name != name) target.renameTo(name)
-        var count = 0L
-        context.contentResolver.openInputStream(source)?.use { input ->
-            context.contentResolver.openOutputStream(target.uri)?.use { out -> count = input.copyTo(out, 256 * 1024) }
+    private fun copy(context: Context, dirs: StickDirs, source: Uri, path: String): Long =
+        writeTo(context, dirs, path, "audio/mp4") { out ->
+            context.contentResolver.openInputStream(source)?.use { it.copyTo(out, COPY_BUFFER) } ?: 0L
         }
-        return count
-    }
 
-    private fun move(context: Context, music: DocumentFile, from: String, to: String) {
-        val source = resolve(music, from) ?: return
+    private fun move(context: Context, dirs: StickDirs, from: String, to: String) {
+        val source = dirs.find(from) ?: return
         val sameFolder = from.substringBeforeLast('/', "") == to.substringBeforeLast('/', "")
         if (sameFolder) {
-            source.renameTo(to.substringAfterLast('/'))
+            if (source.renameTo(to.substringAfterLast('/'))) {
+                dirs.forget(from)
+                dirs.remember(to, source)
+            }
             return
         }
-        copy(context, music, source.uri, to)
-        source.delete()
+        copy(context, dirs, source.uri, to)
+        dirs.delete(from)
     }
 
     fun enqueue(context: Context, allowDrop: Boolean = false) {
@@ -456,14 +509,17 @@ class StickSyncWorker(
 ) : CoroutineWorker(context, params) {
     override suspend fun getForegroundInfo(): ForegroundInfo = info(0, 0, 0)
 
-    private fun info(done: Int, total: Int, mb: Long): ForegroundInfo {
+    private fun info(done: Int, total: Int, mb: Long, eta: Long? = null): ForegroundInfo {
         Ps5Stick.ensureChannel(applicationContext)
         val cancel = androidx.work.WorkManager.getInstance(applicationContext).createCancelPendingIntent(id)
         val notification =
             NotificationCompat.Builder(applicationContext, Ps5Stick.CHANNEL)
                 .setSmallIcon(R.drawable.ic_download)
                 .setContentTitle(applicationContext.getString(R.string.resona_stick_syncing))
-                .setContentText(applicationContext.getString(R.string.resona_stick_progress, done, total, mb))
+                .setContentText(
+                    applicationContext.getString(R.string.resona_stick_progress, done, total, mb) +
+                        (eta?.let { " · " + moe.rukamori.archivetune.resona.ResonaEta.text(applicationContext, it) } ?: ""),
+                )
                 .setProgress(total, done, total == 0)
                 .setOngoing(true)
                 .setSilent(true)
@@ -481,7 +537,7 @@ class StickSyncWorker(
         runCatching { setForeground(info(0, 0, 0)) }
         val phase =
             Ps5Stick.run(applicationContext, inputData.getBoolean(Ps5Stick.KEY_ALLOW_DROP, false)) { p ->
-                runCatching { setForegroundAsync(info(p.done, p.total, p.bytes / (1024 * 1024))) }
+                runCatching { setForegroundAsync(info(p.done, p.total, p.bytes / (1024 * 1024), p.etaSeconds)) }
             }
         notifyResult(phase)
         return if (phase == Ps5Stick.Phase.DONE) Result.success() else Result.failure()

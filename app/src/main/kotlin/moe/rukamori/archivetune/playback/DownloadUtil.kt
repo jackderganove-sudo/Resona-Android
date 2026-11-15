@@ -175,13 +175,42 @@ class DownloadUtil
                 .setCacheWriteDataSinkFactory(null)
                 .setFlags(FLAG_IGNORE_CACHE_ON_ERROR)
 
+        /**
+         * Resona (round 12): downloads in 8 MB range blocks – one request per song was
+         * throttled to about real time (60-min mix: 32–48 KB/s on the Pixel) and long songs
+         * broke off. A failed block is retried at the same byte with a freshly resolved link.
+         */
+        private val chunkedNetworkDataSourceFactory =
+            DataSource.Factory {
+                moe.rukamori.archivetune.resona.ChunkedDownloadDataSource(
+                    upstream = invalidatingNetworkDataSourceFactory.createDataSource(),
+                    report = { key, bytes, seconds, requests, retries ->
+                        if (bytes > 0) {
+                            android.util.Log.i(
+                                "ResonaDownload",
+                                "download %s: %.1f MB in %.1f s (%.0f KB/s), %d requests, %d retries".format(
+                                    java.util.Locale.ROOT, key, bytes / 1048576.0, seconds, bytes / 1024.0 / maxOf(seconds, 0.001), requests, retries,
+                                ),
+                            )
+                        }
+                    },
+                    onRetry = { key, position, error ->
+                        val status = (error as? androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException)?.responseCode
+                        moe.rukamori.archivetune.resona.ResonaPlaybackLog.record(
+                            key ?: "?", "download", "download", status,
+                            "block at %.1f MB failed: %s".format(java.util.Locale.ROOT, position / 1048576.0, error.javaClass.simpleName),
+                        )
+                    },
+                )
+            }
+
         private val downloadUpstreamDataSourceFactory =
             DataSource.Factory {
                 CompletePlaybackCacheDataSource(
                     downloadCache = downloadCache,
                     playerCache = playerCache,
                     playbackCacheDataSourceFactory = playbackCacheDataSourceFactory,
-                    networkDataSourceFactory = invalidatingNetworkDataSourceFactory,
+                    networkDataSourceFactory = chunkedNetworkDataSourceFactory,
                     playbackCacheReuseIds = playbackCacheReuseIds,
                 )
             }
@@ -355,9 +384,11 @@ class DownloadUtil
                 metadata.get(DOWNLOAD_CONTENT_LENGTH_METADATA_KEY, -1L)
                     .takeIf { it > 0L }
                     ?: ContentMetadata.getContentLength(metadata)
+            // Only a format the cached bytes belong to counts; the AAC preference may fall back.
+            val startedFormat = existingDownloadFormat(mediaId)
             val formatChanged =
-                request.pinnedFormatId != null && resolved.formatId > 0 &&
-                    request.pinnedFormatId != resolved.formatId
+                startedFormat != null && resolved.formatId > 0 &&
+                    startedFormat != resolved.formatId
             val lengthChanged =
                 previousLength > 0L && resolved.contentLength > 0L &&
                     previousLength != resolved.contentLength
@@ -401,19 +432,12 @@ class DownloadUtil
 
         private fun createDownloadStreamRequest(mediaId: String): AudioStreamRequest {
             val lowDataModeActive = context.isLowDataModeActive()
-            val hasCachedContent = downloadCache.getCachedSpans(mediaId).isNotEmpty()
             val requiresSongMetadata = database.getSongByIdBlocking(mediaId) == null
-            val pinnedFormatId =
-                downloadCache
-                    .getContentMetadata(mediaId)
-                    .get(DOWNLOAD_FORMAT_ID_METADATA_KEY, -1L)
-                    .takeIf { it > 0L }
-                    ?.toInt()
-                    ?: if (hasCachedContent) {
-                        database.getFormatByIdBlocking(mediaId)?.itag?.takeIf { it > 0 }
-                    } else {
-                        null
-                    }
+            // Resona (round 12): a new download asks for AAC (itag 140). Files and the PS5 stick
+            // then only repack it into the M4A writer instead of decoding Opus and encoding AAC
+            // in software (~12 s per song on the Pixel). Without itag 140 the resolver falls
+            // back to its usual choice; a started download keeps its format.
+            val pinnedFormatId = existingDownloadFormat(mediaId) ?: PREFERRED_DOWNLOAD_ITAG.takeIf { !lowDataModeActive }
             return AudioStreamRequest(
                 mediaId = mediaId,
                 quality = resolveDownloadAudioQuality(lowDataModeActive),
@@ -425,6 +449,19 @@ class DownloadUtil
                 allowModules = false,
             )
         }
+
+        /** The format a download already started with (its cached bytes must match). */
+        private fun existingDownloadFormat(mediaId: String): Int? =
+            downloadCache
+                .getContentMetadata(mediaId)
+                .get(DOWNLOAD_FORMAT_ID_METADATA_KEY, -1L)
+                .takeIf { it > 0L }
+                ?.toInt()
+                ?: if (downloadCache.getCachedSpans(mediaId).isNotEmpty()) {
+                    database.getFormatByIdBlocking(mediaId)?.itag?.takeIf { it > 0 }
+                } else {
+                    null
+                }
 
         private fun updateNextDownloadPreload(downloadManager: DownloadManager) {
             val currentDownloads = downloadManager.currentDownloads
@@ -794,6 +831,8 @@ class DownloadUtil
             private const val DOWNLOAD_FORMAT_ID_METADATA_KEY = "archivetune_download_format_id"
             private const val DOWNLOAD_CONTENT_LENGTH_METADATA_KEY = "archivetune_download_content_length"
             private const val MAX_PARALLEL_DOWNLOADS = 3
+            /** AAC-LC 128 kbit/s in MP4 – what the iPad downloads too. */
+            private const val PREFERRED_DOWNLOAD_ITAG = 140
             private const val DOWNLOAD_MIN_RETRY_COUNT = 10
             private const val MAX_IDLE_DOWNLOAD_CONNECTIONS = 12
             private const val MAX_DOWNLOAD_HTTP_REQUESTS = MAX_PARALLEL_DOWNLOADS

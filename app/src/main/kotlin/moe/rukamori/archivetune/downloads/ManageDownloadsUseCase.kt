@@ -41,6 +41,9 @@ data class DownloadEntryUiModel(
     val progress: Float,
     val percent: Int,
     val speedBytesPerSecond: Long,
+    /** Resona (round 12): bytes so far and in total (0 when unknown), for "12.3 of 58.0 MB". */
+    val bytesDownloaded: Long = 0L,
+    val bytesTotal: Long = 0L,
     val paused: Boolean,
     val failed: Boolean,
     val children: List<DownloadEntryUiModel> = emptyList(),
@@ -372,6 +375,14 @@ class ManageDownloadsUseCase
                 progress = progress,
                 percent = (progress * 100f).roundToInt().coerceIn(0, 100),
                 speedBytesPerSecond = activeEntries.sumOf { speeds[it.request.id] ?: 0L },
+                bytesDownloaded = activeEntries.sumOf { it.bytesDownloaded.coerceAtLeast(0L) },
+                bytesTotal = activeEntries.sumOf { d ->
+                    when {
+                        d.contentLength > 0 -> d.contentLength
+                        d.percentDownloaded > 0f -> (d.bytesDownloaded * 100f / d.percentDownloaded).toLong()
+                        else -> 0L
+                    }
+                },
                 paused = activeEntries.isNotEmpty() && activeEntries.all { it.state.isPausedState() },
                 failed = activeEntries.any { it.state == Download.STATE_FAILED },
                 children = children,

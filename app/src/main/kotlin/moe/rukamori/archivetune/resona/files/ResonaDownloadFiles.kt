@@ -250,6 +250,15 @@ class ResonaDownloadFiles
 
         private suspend fun sync(playlists: List<WantedPlaylist>, downloaded: List<String>) =
             mutex.withLock {
+                // Round 12: keep the CPU awake only while files are written (screen may be off).
+                val wake = (context.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager)
+                    .newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "Resona:files")
+                    .apply { setReferenceCounted(false); acquire(60 * 60 * 1000L) }
+                try { syncLocked(playlists, downloaded) } finally { runCatching { wake.release() } }
+            }
+
+        private suspend fun syncLocked(playlists: List<WantedPlaylist>, downloaded: List<String>) =
+            run {
                 ensureNomedia()
                 // A file deleted outside the app is written again (when its cache copy still exists).
                 manifest = manifest.copy(songs = manifest.songs.filterValues { resolve(it.path)?.exists() == true })
@@ -261,7 +270,7 @@ class ResonaDownloadFiles
                     }
                 }
                 val (steps, next) = ResonaFilePlan.plan(manifest, playlists, downloaded, { infos[it] }, copiesPerPlaylist = false)
-                if (steps.isEmpty()) return@withLock
+                if (steps.isEmpty()) return@run
                 val adds = steps.count { it is FileStep.Add }
                 var done = 0
                 var bytes = 0L
@@ -328,15 +337,22 @@ class ResonaDownloadFiles
 
         /** "Saving downloads as files – 3 of 120" while songs are converted. */
         @android.annotation.SuppressLint("MissingPermission")
+        @Volatile private var notifyStartedAt = 0L
+
         private fun notify(done: Int, total: Int) {
             if (total < 2) return
+            if (done == 0) notifyStartedAt = System.currentTimeMillis()
+            val eta = moe.rukamori.archivetune.resona.ResonaEta.remaining(notifyStartedAt, done.toLong(), total.toLong())
             val manager = NotificationManagerCompat.from(context)
             if (!manager.areNotificationsEnabled()) return
             val notification =
                 NotificationCompat.Builder(context, moe.rukamori.archivetune.playback.ExoDownloadService.CHANNEL_ID)
                     .setSmallIcon(moe.rukamori.archivetune.R.drawable.ic_download)
                     .setContentTitle(context.getString(moe.rukamori.archivetune.R.string.resona_files_notification))
-                    .setContentText(context.getString(moe.rukamori.archivetune.R.string.resona_files_count, done, total))
+                    .setContentText(
+                        context.getString(moe.rukamori.archivetune.R.string.resona_files_count, done, total) +
+                            (eta?.let { " · " + moe.rukamori.archivetune.resona.ResonaEta.text(context, it) } ?: ""),
+                    )
                     .setProgress(total, done, false)
                     .setOnlyAlertOnce(true)
                     .setOngoing(true)
@@ -456,13 +472,25 @@ class ResonaDownloadFiles
             val raw = File(work, "$songId.src")
             val m4a = File(work, "$songId.m4a")
             try {
+                val t0 = System.nanoTime()
                 if (!copyFromCache(songId, raw)) return 0
+                val t1 = System.nanoTime()
                 ResonaAudioConverter.toM4a(raw, m4a, tagsFor(songId))
+                val t2 = System.nanoTime()
                 val folder = folder(path.substringBefore('/')) ?: return 0
                 val name = path.substringAfter('/')
                 folder.findFile(name)?.delete()
                 val target = createChild(folder, "audio/mp4", name) ?: return 0
-                context.contentResolver.openOutputStream(target.uri)?.use { out -> m4a.inputStream().use { it.copyTo(out) } }
+                context.contentResolver.openOutputStream(target.uri)?.use { out -> m4a.inputStream().use { it.copyTo(out, COPY_BUFFER) } }
+                val t3 = System.nanoTime()
+                // Numbers only (round 12 measurement): cache copy, convert (remux or transcode), write.
+                Log.i(
+                    TAG,
+                    "export %s: %.1f MB source → %.1f MB, copy %.1f s, convert %.1f s (%s), write %.1f s".format(
+                        java.util.Locale.ROOT, songId, raw.length() / 1048576.0, m4a.length() / 1048576.0,
+                        (t1 - t0) / 1e9, (t2 - t1) / 1e9, ResonaAudioConverter.lastPath, (t3 - t2) / 1e9,
+                    ),
+                )
                 return m4a.length()
             } finally {
                 raw.delete()
@@ -477,7 +505,7 @@ class ResonaDownloadFiles
             return try {
                 source.open(DataSpec.Builder().setUri(Uri.parse("resona-cache://$key")).setKey(key).setLength(C.LENGTH_UNSET.toLong()).build())
                 target.outputStream().use { out ->
-                    val buffer = ByteArray(128 * 1024)
+                    val buffer = ByteArray(COPY_BUFFER)
                     while (true) {
                         val read = source.read(buffer, 0, buffer.size)
                         if (read == C.RESULT_END_OF_INPUT) break
@@ -509,6 +537,7 @@ class ResonaDownloadFiles
 
         companion object {
             private const val TAG = "ResonaFiles"
+            private const val COPY_BUFFER = 1024 * 1024
             private const val PREFS = "resona_files"
             private const val KEY_ENABLED = "enabled"
             private const val KEY_TREE = "tree"
