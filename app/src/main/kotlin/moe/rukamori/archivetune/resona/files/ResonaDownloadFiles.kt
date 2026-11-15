@@ -117,10 +117,12 @@ class ResonaDownloadFiles
                             completedIds = ids
                             if (!enabled) return@collect
                             val byPlaylist = maps.groupBy { it.playlistId }
+                            // A folder only for playlists downloaded completely; a song that is
+                            // also in other, partly downloaded playlists goes to "Songs/".
                             val wanted =
                                 playlists.mapNotNull { p ->
-                                    val songs = byPlaylist[p.playlist.id].orEmpty().sortedBy { it.position }.map { it.songId }.filter { it in ids }
-                                    songs.takeIf { it.isNotEmpty() }?.let { WantedPlaylist(p.playlist.id, p.playlist.name, it) }
+                                    val all = byPlaylist[p.playlist.id].orEmpty().sortedBy { it.position }.map { it.songId }
+                                    all.takeIf { it.isNotEmpty() && it.all { id -> id in ids } }?.let { WantedPlaylist(p.playlist.id, p.playlist.name, it) }
                                 }
                             last = wanted to ids.toList()
                             sync(wanted, ids.toList())
