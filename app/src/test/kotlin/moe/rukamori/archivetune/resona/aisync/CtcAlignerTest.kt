@@ -88,4 +88,15 @@ class CtcAlignerTest {
         assertTrue(!CtcModel.suits(listOf("これは架空のテキストです", "ここにも架空の行があります")))
         assertTrue(!CtcModel.suits(listOf("kurz")))
     }
+
+    /** Round 12, point 4 (same test on the iPad): German placeholder lyrics, umlauts and ß folded. */
+    @Test
+    fun germanPlaceholderLyrics() {
+        val german = "Grüße aus der erfundenen Straße über müde Täler".split(' ')
+        val starts = listOf(40, 110, 160, 200, 300, 380, 440, 500)
+        val found = CtcAligner.words(emissions(starts, 700, german), german, 0.0)
+        assertEquals(german, found.map { it.text })
+        found.zip(starts).forEach { (word, start) -> assertEquals(start * CtcAligner.FRAME_SECONDS, word.start, 0.1) }
+        assertTrue(CtcModel.suits(listOf("Grüße aus der erfundenen Straße", "über müde Täler und Höhen")))
+    }
 }
