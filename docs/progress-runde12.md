@@ -124,3 +124,45 @@ waren nicht betroffen.
 - Glas-Fallback per CI-Emulator statt lokalem Emulator geprüft.
 - iPad-PS5-Stick nur im Entwicklermodus hinter „PS5 stick (preview)“, kein Hinweis im
   Release-Text, bis der Cover-Test an der PS5 gemacht ist.
+
+## EQ pro Ausgabegerät (beide Apps)
+
+- Der EQ wird je Ausgabe gemerkt: Gerätelautsprecher („Dieses Gerät“), Bluetooth-Name
+  („Soundcore Space One“, „Echo Dot“), kabelgebunden/USB, auf dem iPad auch AirPlay-Name.
+  Erkennung: iPad über die AVAudioSession-Route (`AudioOutputMonitor`), Android über
+  `AudioDeviceInfo` (`AudioOutputWatcher`), also dieselbe Quelle wie die Lautsprecher-Auswahl.
+- Wechselt die Ausgabe, schaltet der EQ um, kurzer Hinweis „EQ: <Preset> für <Gerät>“ (iPad:
+  Pille oben, Android: Toast). Kein Hinweis, wenn sich nichts ändert.
+- EQ-Bildschirm oben: „Gilt für: <Gerät>“ mit Geräte-Icon, darunter „Eigener EQ für dieses
+  Gerät“ oder „Standard-EQ – Änderungen gelten nur für dieses Gerät“, Schalter „Für alle Geräte
+  gleich“, bei eigenem EQ „Standard-EQ verwenden“.
+- Regeln (gleich auf beiden, Unit-Tests `OutputEqTests` / `OutputEqTest`):
+  - Unbekannte Geräte nutzen den Standard-EQ (beim ersten Start = der bisherige EQ, für
+    niemanden ändert sich etwas, bis er etwas umstellt).
+  - Eine Änderung im EQ gilt für das gerade aktive Gerät und wird dessen eigener EQ.
+  - „Für alle Geräte gleich“ an: alle nutzen den Standard-EQ, Änderungen ändern ihn; der
+    gerade gehörte EQ wird beim Einschalten zum Standard. Eigene EQs bleiben gespeichert
+    und gelten wieder, wenn der Schalter aus ist.
+  - „Standard-EQ verwenden“ vergisst den eigenen EQ des Geräts.
+- Entscheidungen ohne Rückfrage: Schalter „Für alle Geräte gleich“ standardmäßig **aus**
+  (das Feature ist also an, wirkt aber erst nach der ersten Änderung pro Gerät); der
+  Standard-EQ lässt sich nur bei eingeschaltetem „Für alle Geräte gleich“ ändern; Schlüssel
+  je Gerät = Art + Name (ohne Bluetooth-Adresse, braucht keine zusätzliche Berechtigung –
+  zwei Geräte mit gleichem Namen teilen sich den EQ).
+- Android: Änderungen werden über die EQ-Einstellungen erkannt (alles, was der EQ-Bildschirm
+  speichert); nach einem Umschalten werden die eigenen Schreibvorgänge 3 s lang nicht als
+  Änderung gezählt.
+- Getestet: Unit-Tests. Gerätetest mit Kopfhörer am Pixel steht aus (Emil).
+
+## Gerätetest-Skript
+
+`scripts/device-tests-runde12.sh [VIDEO_ID]` (nach dem adb-Connect, prüft einmal und wartet
+nicht): installiert den neuesten grünen wip-Build (Mess-Build), stellt die Musiklautstärke auf
+2 (danach zurück), misst die Lyrics-Tiefe mit laufendem Song (je 30 s `gfxinfo`; hoch/quer,
+Canvas an/aus, Standard vs. Blur der Bibliothek mit ausgeblendetem Inhalt, Wort-Sync und
+Übersetzung aus), misst KI-Sync (CTC) über die Bench-Datei, prüft die Wiedergabe nach langer
+Pause (Standard 15 min) und den Export des Fehlerprotokolls. Ergebnisse als Tabelle in
+`docs/progress-android.md`. Screenshots mit Songtext bleiben in `build/device-tests-r12/private/`,
+nach `docs/screens-r12/` kommen nur Player und Teilen-Dialog. Neu in Mess-Builds dafür:
+`canvas=0`, `words=0`, `trans=0` in `lyrics-depth.txt` und eine per adb lesbare Kopie des
+exportierten Fehlerprotokolls.
