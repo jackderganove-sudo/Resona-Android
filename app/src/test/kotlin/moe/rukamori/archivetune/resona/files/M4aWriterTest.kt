@@ -45,7 +45,7 @@ class M4aWriterTest {
     private val tags = Mp4Tags.Tags("Erfundener Titel", "Platzhalter Band", "Ausgedachtes Album", 4, jpeg)
 
     private fun write(frames: Int, rate: Int = 44100): Pair<ByteArray, List<Int>> {
-        val dir = createTempDir()
+        val dir = java.nio.file.Files.createTempDirectory("m4a").toFile()
         val target = File(dir, "song.m4a")
         val writer = M4aWriter(rate, 2, ResonaAudioConverterAsc.lc(rate, 2), 256_000, target)
         val sizes = (0 until frames).map { 300 + it % 50 }
