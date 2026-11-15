@@ -205,6 +205,59 @@ jobs:
             onboarding-logcat.txt
           if-no-files-found: ignore
 
+  # Round 12, point 6: the glass fallback below Android 12 (no RenderEffect:
+  # tint at 0.94 instead of blur). wip only, never blocks a release.
+  glass-fallback:
+    if: github.ref == 'refs/heads/wip'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/scripts
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: apks
+          path: out
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: instrumented
+          path: instrumented
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Start on Android 11 (API 30)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: |
+            bash .github/scripts/resona-smoke.sh
+            bash .github/scripts/resona-onboarding-test.sh
+            adb shell getprop ro.build.version.sdk > sdk.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: glass-fallback-api30
+          path: |
+            start.png
+            onboarding-end.png
+            onboarding-logcat.txt
+            sdk.txt
+          if-no-files-found: ignore
+
   release:
     # wip: build, tests and start check only (APKs as artifact for the Pixel).
     if: github.ref == 'refs/heads/main'
