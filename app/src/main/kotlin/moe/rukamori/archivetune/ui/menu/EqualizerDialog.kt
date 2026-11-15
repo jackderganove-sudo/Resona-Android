@@ -341,6 +341,12 @@ private fun EqualizerContent(
             ),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        // Resona: EQ per output device (round 12).
+        item(key = "output", contentType = "output") {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                moe.rukamori.archivetune.resona.speakers.OutputEqHeader(Modifier.widthIn(max = 840.dp))
+            }
+        }
         item(key = "hero", contentType = "hero") {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 EqualizerHero(model.enabled, Modifier.widthIn(max = 840.dp), onEnabledChange, onOpenSystemEqualizer)

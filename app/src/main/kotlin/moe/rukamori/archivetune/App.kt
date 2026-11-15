@@ -160,6 +160,8 @@ class App :
         }
         // Resona: playback error log (round 12).
         moe.rukamori.archivetune.resona.ResonaPlaybackLog.init(this)
+        // Resona: EQ per output device (round 12).
+        moe.rukamori.archivetune.resona.speakers.OutputEq.start(this)
         // Resona: downloads as files (round 12): follows downloads and playlists.
         runCatching { resonaDownloadFiles.start(downloadUtil.downloads) }
         // Resona: smart downloads worker (only when switched on).

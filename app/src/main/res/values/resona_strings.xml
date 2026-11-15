@@ -120,4 +120,14 @@
     <string name="resona_share_error_log">Share error log</string>
     <string name="resona_retry">Retry</string>
     <string name="resona_error_refused">YouTube refused the stream for every app profile we tried. This usually passes within a few hours.</string>
+    <!-- EQ per output device (round 12) -->
+    <string name="resona_eq_hint">EQ: %1$s for %2$s</string>
+    <string name="resona_eq_applies_to">Applies to: %1$s</string>
+    <string name="resona_eq_all_devices">All devices</string>
+    <string name="resona_eq_own">Own EQ for this device</string>
+    <string name="resona_eq_default_hint">Default EQ – changes apply to this device only</string>
+    <string name="resona_eq_same_for_all">Same for all devices</string>
+    <string name="resona_eq_use_default">Use default EQ</string>
+    <string name="resona_eq_off">Off</string>
+    <string name="resona_eq_custom">Custom</string>
 </resources>
