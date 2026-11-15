@@ -48,12 +48,13 @@ ANDROID=$(adb shell getprop ro.build.version.release | tr -d '\r')
 log "Device: $MODEL, Android $ANDROID"
 
 # ---------------------------------------------------------------- restore on exit
-VOL_BEFORE=$(adb shell cmd media_session volume --stream 3 --get 2>/dev/null | grep -o 'volume is [0-9]*' | grep -o '[0-9]*$')
+# `cmd media_session volume --set` has no effect on Android 17 (Bluetooth absolute volume): use the audio service.
+VOL_BEFORE=${VOL_RESTORE:-$(adb shell cmd audio get-stream-volume 3 2>/dev/null | grep -o "[0-9]*$")}
 ROT_AUTO=$(adb shell settings get system accelerometer_rotation | tr -d '\r')
 ROT_USER=$(adb shell settings get system user_rotation | tr -d '\r')
 cleanup() {
     adb shell rm -f "$FILES/lyrics-depth.txt" "$FILES/aisync-bench.txt" >/dev/null 2>&1
-    [ -n "${VOL_BEFORE:-}" ] && adb shell cmd media_session volume --stream 3 --set "$VOL_BEFORE" >/dev/null 2>&1
+    [ -n "${VOL_BEFORE:-}" ] && adb shell cmd audio set-volume 3 "$VOL_BEFORE" >/dev/null 2>&1
     adb shell settings put system user_rotation "${ROT_USER:-0}" >/dev/null 2>&1
     adb shell settings put system accelerometer_rotation "${ROT_AUTO:-1}" >/dev/null 2>&1
     log "Restored volume ($VOL_BEFORE), rotation, removed bench files"
@@ -80,18 +81,20 @@ m = re.search(r"metadata: size=\d+, description=([^,\n]+)", part)
 print(m.group(1).strip() if m else "")
 '
 }
-dump_ui() {
-    adb shell uiautomator dump /sdcard/r12-ui.xml >/dev/null 2>&1 && adb pull /sdcard/r12-ui.xml "$OUT/ui.xml" >/dev/null 2>&1
-}
-# Centre "x y" of the first node whose text or content-desc equals (else contains)
-# one of the arguments; LOWEST=1 picks the lowest match on screen.
+# UI dumps go straight from the device into python (never into a file: on the
+# lyrics screen a dump holds lyrics text). Only coordinates come out.
+# uiautomator needs an idle screen: lyrics and canvas animate, so dumps happen paused.
+# find_node NAMES…: centre "x y" of the first node whose text or content-desc equals
+# (else contains) a name; LOWEST=1 picks the lowest match.
 find_node() {
-    python3 - "$OUT/ui.xml" "${LOWEST:-0}" "$@" <<'PY'
+    adb exec-out uiautomator dump /dev/tty 2>/dev/null | python3 -c '
 import re, sys
 import xml.etree.ElementTree as ET
-path, lowest, names = sys.argv[1], sys.argv[2] == "1", [n.lower() for n in sys.argv[3:]]
+lowest, names = sys.argv[1] == "1", [n.lower() for n in sys.argv[2:]]
+raw = sys.stdin.read()
+raw = raw[: raw.rfind(">") + 1] if ">" in raw else ""
 try:
-    nodes = list(ET.parse(path).iter("node"))
+    nodes = list(ET.fromstring(raw).iter("node"))
 except Exception:
     sys.exit(1)
 def centre(n):
@@ -107,15 +110,60 @@ for exact in (True, False):
         x, y = max(hits, key=lambda p: p[1]) if lowest else hits[0]
         print(x, y); sys.exit(0)
 sys.exit(1)
-PY
+' "${LOWEST:-0}" "$@"
 }
-# Lyrics and canvas animate all the time and uiautomator waits for idle: pause around the dump.
-locate() {
-    local was; was=$(playback | cut -d' ' -f1)
+# Full player, paused: lyrics pill (text), play/pause = largest unlabelled clickable in the
+# control row above the pill, previous = the clickable left of it. Prints "pill play prev" (6 numbers).
+scan_player() {
+    adb exec-out uiautomator dump /dev/tty 2>/dev/null | python3 -c '
+import re, sys
+import xml.etree.ElementTree as ET
+raw = sys.stdin.read(); raw = raw[: raw.rfind(">") + 1] if ">" in raw else ""
+try:
+    nodes = list(ET.fromstring(raw).iter("node"))
+except Exception:
+    sys.exit(1)
+def box(n): return list(map(int, re.findall(r"\d+", n.get("bounds", "[0,0][0,0]"))))
+pill = next((box(n) for n in nodes if (n.get("text") or "") in ("Songtext", "Lyrics")), None)
+if not pill: sys.exit(1)
+clicks = [box(n) for n in nodes if n.get("clickable") == "true" and not (n.get("text") or "").strip()]
+row = [b for b in clicks if b[3] <= pill[1] and pill[1] - b[3] < 600 and (b[2] - b[0]) < 500]
+if not row: sys.exit(1)
+play = max(row, key=lambda b: (b[2] - b[0]) * (b[3] - b[1]))
+cy = (play[1] + play[3]) // 2
+left = [b for b in row if b[2] <= play[0] and b[1] <= cy <= b[3]]
+prev = max(left, key=lambda b: b[2]) if left else None
+c = lambda b: f"{(b[0] + b[2]) // 2} {(b[1] + b[3]) // 2}"
+print(c(pill), c(play), c(prev) if prev else "0 0")
+'
+}
+state() { playback | cut -d' ' -f1; }
+press_play() { [ -n "${PLAY_XY:-}" ] && adb shell input tap $PLAY_XY; sleep 2; }
+# Media keys may not reach the app (Android 17 beta: telecom holds the media button session): tap as fallback.
+ensure_paused() {
+    [ "$(state)" = 3 ] || return 0
     adb shell cmd media_session dispatch pause >/dev/null 2>&1; sleep 1
-    dump_ui; local xy; xy=$(find_node "$@")
-    [ "$was" = "3" ] && adb shell cmd media_session dispatch play >/dev/null 2>&1
-    [ -n "$xy" ] && echo "$xy"
+    [ "$(state)" = 3 ] && press_play
+    [ "$(state)" != 3 ]
+}
+ensure_playing() {
+    [ "$(state)" = 3 ] && return 0
+    adb shell cmd media_session dispatch play >/dev/null 2>&1; sleep 2
+    [ "$(state)" = 3 ] || press_play
+    [ "$(state)" = 3 ]
+}
+locate() { ensure_paused; find_node "$@"; }   # leaves playback paused
+player_controls() {  # paused, full player open → PILL / PLAY_XY / PREV_XY for this orientation
+    ensure_paused
+    local r; r=$(scan_player) || return 1
+    read -r a b c d e f <<< "$r"
+    PILL="$a $b"; PLAY_XY="$c $d"; PREV_XY="$e $f"
+    [ "$PREV_XY" = "0 0" ] && PREV_XY=""
+    log "Controls: lyrics pill $PILL, play $PLAY_XY, previous ${PREV_XY:-?}"
+}
+restart_song() {  # previous restarts the song when it has played more than 3 s
+    if [ -n "${PREV_XY:-}" ]; then adb shell input tap $PREV_XY; else adb shell cmd media_session dispatch previous >/dev/null 2>&1; fi
+    sleep 2
 }
 tap_xy() { adb shell input tap $1 $2; }
 shot() { adb exec-out screencap -p > "$1"; }
@@ -153,7 +201,8 @@ if [ "${SKIP_INSTALL:-0}" != 1 ]; then
 fi
 
 # ---------------------------------------------------------------- song + player
-adb shell cmd media_session volume --stream 3 --set "$VOLUME" >/dev/null
+adb shell cmd audio set-volume 3 "$VOLUME" >/dev/null
+log "Music volume $(adb shell cmd audio get-stream-volume 3 | grep -o '[0-9]*$') (was $VOL_BEFORE)"
 if [ -n "$SONG" ]; then
     adb shell am start -a android.intent.action.VIEW -d "https://music.youtube.com/watch?v=$SONG" "$PKG" >/dev/null
     sleep 15
@@ -161,17 +210,28 @@ else
     adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
     sleep 6
 fi
-[ "$(playback | cut -d' ' -f1)" = "3" ] || { adb shell cmd media_session dispatch play >/dev/null; sleep 5; }
-TITLE=$(title)
-log "Playing: ${TITLE:-?} (state $(playback))"
-rotate 0
-# Open the full player when only the mini player is visible.
-PILL=$(locate "Songtext" "Lyrics")
-if [ -z "$PILL" ] && [ -n "$TITLE" ]; then
-    XY=$(LOWEST=1 locate "$TITLE") && tap_xy $XY && sleep 3
-    PILL=$(locate "Songtext" "Lyrics")
+if ! ensure_paused; then
+    log "Playback could not be paused (media keys do not reach the app): pause it in Resona and start again"; exit 1
 fi
-[ -n "$PILL" ] && shot "$SHOTS/player-portrait.png"
+TITLE=$(title)
+log "Song: ${TITLE:-?} (state $(playback))"
+rotate 0
+# Full player: open it from the mini player when needed (tap on the title).
+if ! player_controls; then
+    XY=$(LOWEST=1 find_node "$TITLE") && tap_xy $XY && sleep 3
+    player_controls || { log "Full player not found"; exit 1; }
+fi
+shot "$SHOTS/player-portrait.png"   # paused player, no lyrics on screen
+# Back in the player after the lyrics (BACK) or wherever the steps left the app.
+back_to_player() {
+    for _ in 1 2 3; do
+        ensure_paused
+        player_controls && return 0
+        adb shell input keyevent KEYCODE_BACK; sleep 2
+        XY=$(LOWEST=1 find_node "$TITLE") && { tap_xy $XY; sleep 3; }
+    done
+    return 1
+}
 
 # ---------------------------------------------------------------- 2. lyrics depth
 if [ "${SKIP_DEPTH:-0}" != 1 ]; then
@@ -188,8 +248,8 @@ if [ "${SKIP_DEPTH:-0}" != 1 ]; then
     for v in "${VARIANTS[@]}"; do
         read -r rot canvas mode words trans <<< "$v"
         if [ "$rot" != "$CURRENT_ROT" ]; then
-            rotate "$rot"; CURRENT_ROT=$rot
-            PILL=$(locate "Songtext" "Lyrics")
+            ensure_paused; rotate "$rot"; CURRENT_ROT=$rot; sleep 2
+            PILL=""; player_controls || back_to_player
             [ "$rot" = 1 ] && [ -n "$PILL" ] && shot "$SHOTS/player-landscape.png"
         fi
         if [ -z "$PILL" ]; then log "Lyrics pill not found (rotation $rot) – variant skipped"; continue; fi
@@ -197,7 +257,8 @@ if [ "${SKIP_DEPTH:-0}" != 1 ]; then
         [ "$mode" = blur ] && config="lib=1 hide=1 $config"
         echo "$config" > "$OUT/lyrics-depth.txt"
         adb push "$OUT/lyrics-depth.txt" "$FILES/lyrics-depth.txt" >/dev/null
-        adb shell cmd media_session dispatch previous >/dev/null   # same song from the start
+        ensure_playing || log "could not start playback"
+        restart_song   # same song from the start
         adb logcat -c
         tap_xy $PILL; sleep 5
         applied=$(adb logcat -d -s ResonaLyricsDepth:I | grep -o 'levels=.*' | tail -1)
@@ -212,8 +273,8 @@ if [ "${SKIP_DEPTH:-0}" != 1 ]; then
         log "depth r$rot c$canvas $mode w$words t$trans: $pct % janky ($janky/$total), p90/p99 $p90/$p99 ms, player $state, applied: ${applied:-?}"
         if [ "$mode" = blur ] && python3 -c "import sys; sys.exit(0 if float('$pct') > float('$BLUR_WORST') else 1)"; then BLUR_WORST=$pct; fi
     done
-    rotate 0; CURRENT_ROT=0
-    PILL=$(locate "Songtext" "Lyrics")
+    ensure_paused; rotate 0; CURRENT_ROT=0; sleep 2
+    back_to_player
     if python3 -c "import sys; sys.exit(0 if float('$BLUR_WORST') == 0 else 1)"; then
         VERDICT="Blur in allen Varianten 0 % Janky → kann Standard werden"
     else
@@ -229,6 +290,7 @@ if [ "${SKIP_AISYNC:-0}" != 1 ]; then
     printf '%s\n' "ctc ctc=model_int8.onnx threads=4" > "$OUT/aisync-bench.txt"
     adb push "$OUT/aisync-bench.txt" "$FILES/aisync-bench.txt" >/dev/null
     adb logcat -c
+    back_to_player
     if [ -n "$PILL" ]; then tap_xy $PILL; sleep 4; fi
     MORE=$(locate "Weitere Optionen" "More options")
     if [ -n "$MORE" ]; then
@@ -256,20 +318,22 @@ if [ "${SKIP_AISYNC:-0}" != 1 ]; then
     else
         log "Lyrics menu not found – AI sync step skipped"
     fi
-    adb shell input keyevent KEYCODE_BACK; sleep 1
     adb shell rm -f "$FILES/aisync-bench.txt"
+    back_to_player
 fi
 
 # ---------------------------------------------------------------- 4. long pause + error log
 if [ "${SKIP_PAUSE:-0}" != 1 ]; then
     START_ISO=$(date -Iseconds)
-    adb shell cmd media_session dispatch play >/dev/null; sleep 5
-    adb shell cmd media_session dispatch pause >/dev/null
+    back_to_player
+    ensure_playing; sleep 5
+    ensure_paused
     log "Paused for $PAUSE_SECONDS s (long pause)"
     sleep "$PAUSE_SECONDS"
     adb logcat -c
-    adb shell cmd media_session dispatch play >/dev/null
+    ensure_playing
     read -r s1 p1 <<< "$(playback)"; sleep 20; read -r s2 p2 <<< "$(playback)"
+    ensure_paused
     adb logcat -d > "$OUT/pause-logcat.txt"
     errors=$(grep -c "PlaybackException\|HTTP 403\|Response code: 403" "$OUT/pause-logcat.txt")
     advanced=$(( (p2 - p1) / 1000 ))
