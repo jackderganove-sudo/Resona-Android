@@ -25,6 +25,8 @@ class ChunkedDownloadDataSourceTest {
     private inner class FakeServer(
         val refuseOpens: Set<Int> = emptySet(),
         val dropAfter: Map<Int, Int> = emptyMap(),
+        /** Like YouTube on the Pixel: past the end an empty body instead of 416. */
+        val emptyPastEnd: Boolean = false,
     ) {
         val ranges = ArrayList<Pair<Long, Long>>()
         private var pos = 0L
@@ -35,7 +37,11 @@ class ChunkedDownloadDataSourceTest {
         fun open(position: Long, length: Long): Long {
             val n = opens++
             if (n in refuseOpens) throw Forbidden()
-            if (position >= content.size) throw PastEnd()
+            if (position >= content.size) {
+                if (!emptyPastEnd) throw PastEnd()
+                left = 0
+                return length // claims the bytes, sends none
+            }
             ranges += position to length
             pos = position
             left = if (length < 0) content.size - pos else minOf(length, content.size - pos)
@@ -58,8 +64,8 @@ class ChunkedDownloadDataSourceTest {
         }
     }
 
-    private fun reader(server: FakeServer, maxAttempts: Int = 6, onRetry: (Long, IOException) -> Unit = { _, _ -> }) =
-        ChunkedReader(server::open, server::read, {}, chunkSize = 1_000_000, maxAttempts = maxAttempts, sleep = {}, isPastEnd = { it is PastEnd }, onRetry = onRetry)
+    private fun reader(server: FakeServer, maxAttempts: Int = 6, total: Long = -1, onRetry: (Long, IOException) -> Unit = { _, _ -> }) =
+        ChunkedReader(server::open, server::read, {}, chunkSize = 1_000_000, maxAttempts = maxAttempts, sleep = {}, isPastEnd = { it is PastEnd }, onRetry = onRetry, discoverTotal = { total })
 
     private fun readAll(r: ChunkedReader, start: Long = 0, length: Long = -1): ByteArray {
         r.open(start, length)
@@ -94,7 +100,7 @@ class ChunkedDownloadDataSourceTest {
     fun expiredLinkIsRetriedAtTheSamePosition() {
         val server = FakeServer(refuseOpens = setOf(1))
         val positions = ArrayList<Long>()
-        assertArrayEquals(content, readAll(reader(server) { pos, _ -> positions += pos }))
+        assertArrayEquals(content, readAll(reader(server, onRetry = { pos, _ -> positions += pos })))
         assertEquals(listOf(1_000_000L), positions)
     }
 
@@ -125,5 +131,24 @@ class ChunkedDownloadDataSourceTest {
         readAll(r)
         assertEquals(3, r.requests - 1) // three ranges plus the 416 probe at the end
         assertTrue(r.finished)
+    }
+
+    @Test
+    fun knownTotalFromTheResponseStopsAtTheEndWithoutProbing() {
+        // Seen on the Pixel: 60.1 MB loaded, then the probe past the end got an empty body (EOF) forever.
+        val server = FakeServer(emptyPastEnd = true)
+        val retries = ArrayList<Long>()
+        val r = reader(server, total = content.size.toLong(), onRetry = { pos, _ -> retries += pos })
+        assertEquals(content.size.toLong(), r.open(0, -1))
+        r.close()
+        assertArrayEquals(content, readAll(reader(FakeServer(emptyPastEnd = true), total = content.size.toLong(), onRetry = { pos, _ -> retries += pos })))
+        assertTrue("no retries at the end", retries.isEmpty())
+    }
+
+    @Test
+    fun totalFromContentRangeHeader() {
+        assertEquals(63_031_296L, totalFromHeaders(mapOf("content-range" to listOf("bytes 0-8388607/63031296"))))
+        assertEquals(null, totalFromHeaders(mapOf("Content-Range" to listOf("bytes 0-8388607/*"))))
+        assertEquals(null, totalFromHeaders(emptyMap()))
     }
 }

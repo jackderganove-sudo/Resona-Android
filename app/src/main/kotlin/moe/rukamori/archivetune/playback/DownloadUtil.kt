@@ -201,6 +201,9 @@ class DownloadUtil
                             "block at %.1f MB failed: %s".format(java.util.Locale.ROOT, position / 1048576.0, error.javaClass.simpleName),
                         )
                     },
+                    contentLength = { key ->
+                        downloadCache.getContentMetadata(key).get(DOWNLOAD_CONTENT_LENGTH_METADATA_KEY, -1L).takeIf { it > 0 }
+                    },
                 )
             }
 

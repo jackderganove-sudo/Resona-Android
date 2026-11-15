@@ -37,6 +37,12 @@ class ChunkedReader(
     private val isPastEnd: (IOException) -> Boolean = { false },
     /** Every failed block: byte position and cause (for the error log). */
     private val onRetry: (Long, IOException) -> Unit = { _, _ -> },
+    /**
+     * Total content length after a block opened (Content-Range "bytes a-b/total"), or -1.
+     * Without it the end is found by asking one block past it – which YouTube answers with
+     * an empty body instead of 416 (seen on the Pixel: 60.1 MB loaded, then EOF forever).
+     */
+    private val discoverTotal: () -> Long = { UNSET },
 ) {
     var position = 0L
         private set
@@ -77,7 +83,12 @@ class ChunkedReader(
                 requests++
                 val available = openRange(position, length)
                 opened = true
+                if (end == UNSET) {
+                    val total = discoverTotal()
+                    if (total > 0) end = total
+                }
                 requested = if (available != UNSET) minOf(available, length) else length
+                if (end != UNSET) requested = minOf(requested, end - position)
                 readInBlock = 0
                 return
             } catch (e: IOException) {
@@ -168,6 +179,8 @@ class ChunkedDownloadDataSource(
     chunkSize: Long = ChunkedReader.DEFAULT_CHUNK_SIZE,
     private val report: (key: String?, bytes: Long, seconds: Double, requests: Int, retries: Int) -> Unit = { _, _, _, _, _ -> },
     onRetry: (key: String?, position: Long, IOException) -> Unit = { _, _, _ -> },
+    /** Known content length of a media id (the resolver stores it), fallback for the end. */
+    private val contentLength: (String) -> Long? = { null },
 ) : DataSource {
     private var base: DataSpec? = null
     private var startedAt = 0L
@@ -181,6 +194,11 @@ class ChunkedDownloadDataSource(
             chunkSize = chunkSize,
             isPastEnd = { it is HttpDataSource.InvalidResponseCodeException && it.responseCode == 416 },
             onRetry = { position, e -> onRetry(base?.key, position, e) },
+            discoverTotal = {
+                totalFromHeaders(upstream.responseHeaders)
+                    ?: base?.key?.let(contentLength)?.takeIf { it > 0 }
+                    ?: ChunkedReader.UNSET
+            },
         )
 
     override fun addTransferListener(transferListener: TransferListener) = upstream.addTransferListener(transferListener)
@@ -205,3 +223,12 @@ class ChunkedDownloadDataSource(
         reader.close()
     }
 }
+
+/** "bytes 0-8388607/63031296" → 63031296 (case-insensitive header name). */
+internal fun totalFromHeaders(headers: Map<String, List<String>>): Long? =
+    headers.entries.firstOrNull { it.key.equals("Content-Range", ignoreCase = true) }
+        ?.value?.firstOrNull()
+        ?.substringAfterLast('/', "")
+        ?.trim()
+        ?.toLongOrNull()
+        ?.takeIf { it > 0 }
