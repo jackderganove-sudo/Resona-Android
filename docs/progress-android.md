@@ -335,7 +335,30 @@ bekommt für den Decoder eine eigene Thread-Zahl (1), der Encoder bis zu 4 (Patc
   Teilweise geladene Songs werden jetzt nicht mehr synchronisiert („nicht im Cache“).
 - **CTC-Forced-Alignment (wav2vec2, ONNX):** eingebaut (Viterbi mit synthetischen Tests,
   gleicher Aligner), der erste Lauf stürzte im Release ab (R8 entfernte Klassen von ONNX
-  Runtime, behoben). Messung steht aus.
+  Runtime, behoben). Messung siehe unten.
+
+### Zweite Messreihe (decoder-Patch drin, gleicher Song, Akku, 36 °C)
+
+| Variante | Laufzeit | × Song | Wörter | Treffer | Zeilenfehler | ≤ 1 s | Kalibrierung |
+|---|---|---|---|---|---|---|---|
+| Whisper, Encoder 4 / Decoder 1 Thread | 11,2 s | 0,07 | 476 | 52 % | 2,22 s | 32 % | keine |
+| Whisper, Encoder 2 / Decoder 1 | 13,8 s | 0,08 | 476 | 52 % | 2,22 s | 32 % | keine |
+| Whisper, Encoder 1 / Decoder 1 | 18,9 s | 0,11 | 476 | 52 % | 2,22 s | 32 % | keine |
+| Whisper, Encoder 6 / Decoder 1 | 12,5 s | 0,07 | 476 | 52 % | 2,22 s | 32 % | keine |
+| Whisper, Fenster entlang der Lyrics-Zeilen | 17,2 s | 0,10 | 471 | 72 % | 1,19 s | 44 % | 1,0144 / −0,20 s / 9 |
+| Whisper + VAD (Silero) | 70,4 s | 0,42 | 265 | 59 % | 1,63 s | 37 % | 0,9872 / +1,08 s / 14 |
+| **CTC wav2vec2 int8, CPU 4 Threads** | **10,2 s** | **0,06** | 281 | 72 % | **0,07 s** | **79 %** | **0,9979 / +0,07 s / 16** |
+| CTC über NNAPI | 12,7 s | 0,08 | 275 | 70 % | 0,08 s | 91 % | 0,9980 / +0,03 s / 21 |
+| Whisper E4/D1 am Ende (Drift) | 22,3 s | 0,13 | 476 | 52 % | 2,22 s | 32 % | keine |
+
+„Zeilenfehler“ misst den Abstand zu den Zeiten des Anbieters (die einzige Referenz), nicht
+zur echten Gesangszeit. Entscheidung: **CTC ist Standard**, wenn der Songtext bekannt und in
+lateinischer Schrift ist (≥ 80 % der Buchstaben kennt das Modell, Umlaute werden zu a/o/u);
+Modell 95 MB, einmal geladen. Liefert CTC keine Kalibrierung bzw. weniger als 30 % Treffer,
+läuft Whisper (base, Encoder ≤ 4 Threads, Decoder 1 Thread). Whisper bleibt außerdem für
+„Lyrics aus Audio“. VAD ist auf Musik langsamer und schlechter – nicht übernommen. NNAPI ist
+etwas genauer (91 % ≤ 1 s), aber langsamer und auf anderen Geräten unsicher – CPU bleibt.
+Nicht gemessen: deutsche Songs (das Modell ist englisch), andere Geräte.
 - **Fortschritt und Teilergebnisse:** Der Dialog zeigt „Abschnitt x von y · n Wörter“; das
   Ergebnis bis dahin erscheint live im Songtext (nur Vorschau, gespeichert wird erst mit
   „Speichern“).
