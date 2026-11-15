@@ -268,9 +268,16 @@ object Ps5Stick {
         val adds = steps.filterIsInstance<FileStep.Add>().map { it.path }.toSet()
         val songs = planned.songs.filterValues { it.path !in adds || it.path in written }
             .mapValues { (_, song) -> if (song.path in written) song.copy(format = ResonaFileFormat.CURRENT) else song }
-        val file = music.findFile(MANIFEST) ?: music.createFile("application/json", MANIFEST) ?: return
+        val text = planned.copy(songs = songs).encode()
+        val existing = music.findFile(MANIFEST)
+        // A sync without changes writes nothing on the stick, not even the manifest.
+        if (existing != null) {
+            val old = runCatching { context.contentResolver.openInputStream(existing.uri)?.use { it.readBytes().decodeToString() } }.getOrNull()
+            if (old == text) return
+        }
+        val file = existing ?: music.createFile("application/json", MANIFEST) ?: return
         runCatching {
-            context.contentResolver.openOutputStream(file.uri, "wt")?.use { it.write(planned.copy(songs = songs).encode().toByteArray()) }
+            context.contentResolver.openOutputStream(file.uri, "wt")?.use { it.write(text.toByteArray()) }
         }
     }
 
