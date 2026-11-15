@@ -246,6 +246,7 @@ jobs:
             bash .github/scripts/resona-smoke.sh
             bash .github/scripts/resona-onboarding-test.sh
             adb shell getprop ro.build.version.sdk > sdk.txt
+            adb shell monkey -p dev.jackderganove.resona.debug -c android.intent.category.LAUNCHER 1; sleep 20; adb exec-out screencap -p > home-api30.png
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -255,6 +256,7 @@ jobs:
             start.png
             onboarding-end.png
             onboarding-logcat.txt
+            home-api30.png
             sdk.txt
           if-no-files-found: ignore
 
