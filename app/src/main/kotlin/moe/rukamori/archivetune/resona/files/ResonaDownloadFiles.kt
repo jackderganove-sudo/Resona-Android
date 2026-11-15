@@ -278,41 +278,76 @@ class ResonaDownloadFiles
                     _progress.value = Progress(0, adds, 0)
                     notify(0, adds)
                 }
-                val sizes = HashMap<String, Long>()
-                val exported = HashMap<String, String>()
-                val lost = ArrayList<String>()
-                for (step in steps) {
+                val sizes = java.util.concurrent.ConcurrentHashMap<String, Long>()
+                val exported = java.util.concurrent.ConcurrentHashMap<String, String>()
+                val lost = java.util.Collections.synchronizedList(ArrayList<String>())
+                // Folders, moves and deletions first (in order), then the new songs.
+                for (step in steps.filterNot { it is FileStep.Add }) {
                     runCatching {
                         when (step) {
                             is FileStep.RenameFolder -> resolve(step.from)?.renameTo(step.to)
                             is FileStep.DeleteFolder -> deleteOurFiles(step.folder)
                             is FileStep.Delete -> resolve(step.path)?.delete()
                             is FileStep.Move -> move(step.from, step.to)
-                            is FileStep.Add -> {
-                                val size = repair(step.path) ?: add(step.songId, step.path)
-                                if (size > 0) {
-                                    sizes[step.songId] = size
-                                    exported[step.songId] = step.path
-                                } else if (!cacheHas(step.songId)) {
-                                    lost += step.songId
-                                }
-                                done++
-                                bytes += size
-                                _progress.value = Progress(done, adds, bytes)
-                                notify(done, adds)
-                            }
+                            is FileStep.Add -> Unit
                         }
                     }.onFailure { Log.w(TAG, "step ${step.javaClass.simpleName} failed: ${it.javaClass.simpleName}") }
                 }
-                // Songs whose file could not be written stay out of the manifest (next sync tries again).
-                val written = next.songs.filter { (id, song) -> id in sizes || id in manifest.songs || resolve(song.path)?.exists() == true }
-                    .mapValues { (id, song) ->
-                        when {
-                            id in sizes -> song.copy(size = sizes.getValue(id), format = ResonaFileFormat.CURRENT)
-                            // Moved or kept: the plan rebuilt the entry, keep the known format.
-                            else -> song.copy(format = manifest.songs[id]?.format ?: song.format)
+                // Round 12: songs are written EXPORT_PARALLEL at a time (Opus songs still need
+                // an encode; each encoder is single-threaded), and the manifest is saved every
+                // CHECKPOINT_SONGS songs – before, it was saved only at the very end, so an
+                // interrupted run (app closed, process killed) started all 200 songs again.
+                val progressLock = kotlinx.coroutines.sync.Mutex()
+                var sinceCheckpoint = 0
+                var checkpointAt = System.currentTimeMillis()
+                fun manifestSoFar(): ResonaManifest =
+                    next.copy(
+                        songs = next.songs.filter { (id, song) -> sizes.containsKey(id) || id in manifest.songs || resolve(song.path)?.exists() == true }
+                            .mapValues { (id, song) ->
+                                when {
+                                    sizes.containsKey(id) -> song.copy(size = sizes.getValue(id), format = ResonaFileFormat.CURRENT)
+                                    else -> song.copy(format = manifest.songs[id]?.format ?: song.format)
+                                }
+                            },
+                    )
+                val semaphore = kotlinx.coroutines.sync.Semaphore(EXPORT_PARALLEL)
+                kotlinx.coroutines.coroutineScope {
+                    for (step in steps.filterIsInstance<FileStep.Add>()) {
+                        launch(Dispatchers.IO) {
+                            semaphore.acquire()
+                            try {
+                                val size = runCatching { repair(step.path) ?: add(step.songId, step.path) }
+                                    .onFailure { if (it is kotlinx.coroutines.CancellationException) throw it; Log.w(TAG, "add failed: ${it.javaClass.simpleName}") }
+                                    .getOrDefault(0L)
+                                progressLock.withLock {
+                                    if (size > 0) {
+                                        sizes[step.songId] = size
+                                        exported[step.songId] = step.path
+                                    } else if (!cacheHas(step.songId)) {
+                                        lost += step.songId
+                                    }
+                                    done++
+                                    bytes += size
+                                    _progress.value = Progress(done, adds, bytes)
+                                    notify(done, adds)
+                                    sinceCheckpoint++
+                                    if (sinceCheckpoint >= CHECKPOINT_SONGS || System.currentTimeMillis() - checkpointAt > CHECKPOINT_MS) {
+                                        sinceCheckpoint = 0
+                                        checkpointAt = System.currentTimeMillis()
+                                        val partial = manifestSoFar()
+                                        // Keep entries the plan already had (moved/kept) and add the written ones.
+                                        manifest = partial.copy(songs = manifest.songs + partial.songs)
+                                        runCatching { saveManifest() }
+                                    }
+                                }
+                            } finally {
+                                semaphore.release()
+                            }
                         }
                     }
+                }
+                // Songs whose file could not be written stay out of the manifest (next sync tries again).
+                val written = manifestSoFar().songs
                 manifest = next.copy(songs = written)
                 uris.clear()
                 saveManifest()
@@ -475,7 +510,7 @@ class ResonaDownloadFiles
                 val t0 = System.nanoTime()
                 if (!copyFromCache(songId, raw)) return 0
                 val t1 = System.nanoTime()
-                ResonaAudioConverter.toM4a(raw, m4a, tagsFor(songId))
+                val how = ResonaAudioConverter.toM4a(raw, m4a, tagsFor(songId))
                 val t2 = System.nanoTime()
                 val folder = folder(path.substringBefore('/')) ?: return 0
                 val name = path.substringAfter('/')
@@ -488,7 +523,7 @@ class ResonaDownloadFiles
                     TAG,
                     "export %s: %.1f MB source → %.1f MB, copy %.1f s, convert %.1f s (%s), write %.1f s".format(
                         java.util.Locale.ROOT, songId, raw.length() / 1048576.0, m4a.length() / 1048576.0,
-                        (t1 - t0) / 1e9, (t2 - t1) / 1e9, ResonaAudioConverter.lastPath, (t3 - t2) / 1e9,
+                        (t1 - t0) / 1e9, (t2 - t1) / 1e9, how, (t3 - t2) / 1e9,
                     ),
                 )
                 return m4a.length()
@@ -538,6 +573,9 @@ class ResonaDownloadFiles
         companion object {
             private const val TAG = "ResonaFiles"
             private const val COPY_BUFFER = 1024 * 1024
+            private const val EXPORT_PARALLEL = 3
+            private const val CHECKPOINT_SONGS = 10
+            private const val CHECKPOINT_MS = 30_000L
             private const val PREFS = "resona_files"
             private const val KEY_ENABLED = "enabled"
             private const val KEY_TREE = "tree"
