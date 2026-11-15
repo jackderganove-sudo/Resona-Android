@@ -364,3 +364,80 @@ Nicht gemessen: deutsche Songs (das Modell ist englisch), andere Geräte.
   „Speichern“).
 - iPad-Vergleich: Das iPad nutzt WhisperKit `openai_whisper-base` auf der Neural Engine; ein
   Messwert für denselben Song liegt noch nicht vor.
+
+## Runde 12 – Lautsprecher, Downloads als Dateien, PS5-Stick (Release v1.0.12)
+
+### Lautsprecher-Auswahl
+Knopf in der unteren Player-Leiste zwischen Sleep-Timer und Songtext (wie auf dem iPad);
+bei externer Ausgabe Pille mit Icon + Name, im Mini-Player Icon + Name. Sheet im Glas-Look:
+aktuelle Ausgabe, „Dieses Gerät“, gekoppelte Bluetooth-Audiogeräte (Verbunden / In Reichweite
+/ Gekoppelt), „Ausgabe wählen“ (System-Ausgabeauswahl), „In der Nähe suchen“ (Bluetooth-Suche,
+nur Audio-Geräte), Antippen koppelt (`createBond`) und verbindet. Die Bluetooth-Erlaubnis wird
+beim ersten Öffnen mit kurzer Erklärung erfragt; ohne sie geht alles außer Liste und Suche.
+Direkt verbinden (`BluetoothA2dp.connect`) ist seit Android 13 System-Apps vorbehalten – dann
+öffnet Resona die System-Ausgabeauswahl, wo ein Tipp verbindet. Shizuku (auf dem Pixel
+installiert) wurde geprüft: Es gibt keinen Shell-Befehl zum Verbinden; der Weg über interne
+Bluetooth-Schnittstellen ist nicht eingebaut.
+Auf dem Pixel geprüft (ohne Lautsprecher): Sheet, „Bluetooth ist aus / Einschalten“,
+System-Ausgabeauswahl öffnet sich. **Nicht geprüft:** Suche, Koppeln, Verbinden mit einem
+echten Lautsprecher/Echo Dot.
+
+### Downloads als Dateien
+- Fertige Downloads werden zu .m4a: AAC-Quellen werden nur umverpackt (keine Verluste,
+  YouTube liefert AAC mit 128 kbit/s), Opus/WebM wird mit MediaCodec zu AAC-LC 256 kbit/s.
+  Tags: Titel, Künstler, Album, Tracknummer (wenn bekannt), Cover.
+- Ordner: komplett heruntergeladene Playlists als `<Playlist>/NN - Künstler - Titel.m4a` mit
+  `playlist.m3u8`, alle anderen Songs in `Songs/`. Jeder Song liegt nur einmal (in einer
+  weiteren Playlist steht er in deren m3u8 als `../…`).
+- Speicherort: `Android/media/dev.jackderganove.resona/Resona` (in der Dateien-App unter
+  Android → media sichtbar). `Music/Resona` geht nicht: Android lässt Apps dort nur
+  Audiodateien anlegen, keine `.nomedia`. Wer `Music/Resona` will, wählt den Ordner unter
+  „Speicherort“ (Ordnerauswahl des Systems, dort ist `.nomedia` erlaubt).
+- Nicht in der Mediathek: `.nomedia` vor der ersten Datei. Geprüft mit
+  `content query --uri content://media/external/audio/media --where "_data LIKE '%Resona%'"`
+  → „No result found“.
+- Manifest `.resona-manifest.json` (Song-ID ↔ Datei); nur Dateien aus dem Manifest werden
+  verschoben oder gelöscht. Download löschen → Datei weg; aus Playlist entfernen / Playlist
+  umbenennen → Datei bzw. Ordner folgt (Unit-Tests für den Plan).
+- Wiedergabe aus der Datei (auf dem Pixel belegt: AAC-Decoder mit 48 kHz statt Opus-Stream),
+  die Cache-Kopie wird erst gelöscht, wenn die Datei geschrieben und im Manifest ist; fehlen
+  Datei und Cache, wird der Song neu geladen. KI-Sync liest die Datei.
+- Einstellungen → Speicher → „Downloads als Dateien“: Schalter (Standard an), Speicherort,
+  Fortschritt; bestehende Downloads werden beim ersten Start übernommen (Benachrichtigung
+  „x von y Songs“).
+- „Nur Downloads“: Chip in Playlists (lokal und online) und in der Suche; eingeschaltet
+  zeigen Listen nur heruntergeladene Songs und die Suche sucht in der Bibliothek (offline).
+  Download-Symbol an jedem Song gab es schon.
+- Beim Test gefunden und behoben: Der erste Build hängte Endungen doppelt an
+  (`.nomedia.bin`, `….m4a.m4a`) und löschte die Cache-Kopie zu früh – der Testsong fiel
+  dadurch auf Streaming zurück. Ein Song in mehreren, nur teilweise geladenen Playlists landete
+  im Ordner der ersten.
+
+### PS5-Stick
+- Einstellungen → Speicher → „PS5-Stick“: Stick wählen (Ordnerauswahl, Berechtigung bleibt),
+  Playlists wählen, „Flache Struktur“, „Jetzt synchronisieren“ (Fortschritt, Abbrechen).
+- `Music/<Playlist>/<Nr> - <Künstler> - <Titel>.m4a`, Namen FAT32-sicher (verbotene Zeichen,
+  Länge, gleiche Namen bekommen „(2)“), Manifest `Music/.resona-sync.json` im selben Format.
+  Fehlende Songs werden vorher geladen und umgewandelt; Platzprüfung; abgewählte Playlists
+  werden nur nach Rückfrage entfernt; fremde Dateien werden nie angefasst; keine `.nomedia`.
+- Steckt der bekannte Stick, kommt „PS5-Stick synchronisieren?“ mit Knopf.
+- **Auf dem Pixel getestet** (USB-Stick FAT32, Playlist „Winter“, 37 Songs): 36 fehlende Songs
+  geladen und umgewandelt, danach 37 Dateien (189 MB) in `Music/Winter/` plus Manifest, Hinweis
+  zum sicheren Entfernen. Zweiter Abgleich ohne Änderung: 10 s, keine Datei neu geschrieben
+  (Änderungszeiten gleich). Vorher wurden auf Wunsch die 58 alten MP3s in `Music/` und 6
+  Fragmente in `LOST.DIR` gelöscht.
+- **Offen:** Test auf der PS5 (zeigt sie Unterordner als Playlists/Alben? sonst „Flache
+  Struktur“); Benachrichtigung beim Anstecken nicht getestet (Stick steckte schon).
+
+### Lyrics-Tiefe
+Mit laufendem Song nicht messbar, ohne Ton zu spielen: Ist der Musik-Stream stumm, legt
+Android 17 die Ausgabe in Standby und die Player-Uhr steht. Im Stand (Songtext offen, Song
+pausiert, 25 s, hochkant, mit Canvas): ohne Blur 0,09 %, ohne Blur + Inhalt darunter
+ausgeblendet 0,00 %, Blur der Bibliothek 0,09 %, mit Ausblenden 0,05 %, eigener Shader (eine
+Blur-Stufe) 35 %, zwei Stufen 83 % Janky. Die Shader-Varianten sind damit raus; der Blur der
+Bibliothek mit ausgeblendetem Inhalt darunter muss noch mit laufendem Song gemessen werden
+(früher: 66 % Janky ohne Ausblenden). Bis dahin bleibt der Standardmodus ohne Zeilen-Blur.
+
+### Mess-Schalter
+`aisync-bench.txt` und `lyrics-depth.txt` wirken nur in wip-Builds (`BuildConfig.RESONA_MEASURE`,
+gesetzt nur für den Branch wip); Releases ignorieren sie.
