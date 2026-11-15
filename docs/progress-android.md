@@ -473,3 +473,44 @@ baseline ≤ 600×600 (`covr` Typ 13). AAC wird weiter nur umverpackt, Opus zu A
 Die Manifest-Einträge tragen `format`; ältere Dateien werden beim nächsten Abgleich aus sich
 selbst neu geschrieben (kein Download) und auf dem Stick ersetzt. Unit-Test
 `M4aWriterTest` prüft die Eigenschaften der iPad-Datei.
+
+### Gerätetest Formatversion 2 (15.11., Pixel 11 Pro, v1.0.14, Stick 8A91-18FF)
+
+Befund an der PS5 vorher: iPad-Datei (`Music/XXXTENTACION - changes [2yoIPB8sowA].m4a`) läuft mit
+Titel und Künstler, Ordner Winter (Android, Format 0) „Etwas ist schiefgelaufen“.
+
+- Erster Abgleich: alle 37 Winter-Dateien neu geschrieben (aus sich selbst, ≈ 6 s), Manifest-
+  Einträge `format` 0 → **2** (37/37; das Feld `version` des Manifests selbst bleibt 1 – das ist
+  die Version des Manifest-Aufbaus, nicht des Dateiformats). Alle 37 Dateien per adb geprüft:
+  `ftyp · moov · mdat`, Marke `M4A `, kein `moof`, `stco` statt `co64`, `covr` vorhanden.
+- Cover-Test angelegt: `Music/Cover-Test/` (a M4A mit `covr`, d MP3 ID3v2.3 APIC, e FLAC
+  PICTURE), `Music/Cover-Test b folder.jpg/` (M4A ohne Cover + `folder.jpg`),
+  `Music/Cover-Test c cover.jpg/` (M4A ohne Cover + `cover.jpg`).
+- Zweiter Abgleich: keine Song- oder Cover-Test-Datei geschrieben (Größen und Zeiten gleich),
+  aber das Manifest wurde mit gleichem Inhalt neu geschrieben → behoben (wip a9e434ae3:
+  unverändertes Manifest wird nicht mehr geschrieben).
+
+Vergleich derselbe Song („changes“), iPad-Datei gegen neu geschriebene Android-Datei:
+
+| | iPad (läuft auf der PS5) | Android Format 2 (neu) | Android Format 0 (alt) |
+|---|---|---|---|
+| ftyp | `M4A `, minor 512, `M4A isom iso2` | **gleich** | `mp42`, minor 0, `isom mp42` |
+| Box-Folge | ftyp · free · mdat · moov | ftyp · moov · mdat | ftyp · free · mdat · moov |
+| mvhd-Zeitbasis | 44100 | 1000 | 10000 |
+| moov-Ebene | mvhd, trak, udta | mvhd, trak, udta | mvhd, **meta (Android)**, trak, udta |
+| Edit-List | `edts/elst` (Encoder-Vorlauf) | – | – |
+| hdlr | `soun` (langer Name) | `soun` „SoundHandler“ | `soun` |
+| Audio | AAC-LC, 44,1 kHz, Stereo, 128 kbit/s (ASC `1210…`) | AAC-LC, 48 kHz, Stereo, 256 kbit/s (ASC `1190`) | wie neu |
+| esds Objekttyp | 0x40 | 0x40 | – |
+| stts | 2 Einträge | 1 | 1 |
+| Chunks | `stco`, 2 Chunks (2821 + 2430 Frames) | `stco`, 125 Chunks (≈ 1 s, 46 Frames) | **`co64`, 1 Chunk (5716 Frames)** |
+| Rollgruppen | `sgpd`/`sbgp` | – | – |
+| Tags (udta/meta/ilst) | `©nam`, `©ART`, `©too`, `covr` | `©nam`, `©ART`, `aART`, `©alb`, `covr` | wie neu, plus Android-meta in moov |
+| Cover | JPEG baseline 1200×1200 (340 KB), Typ 13 | JPEG baseline 600×600 (78 KB), Typ 13 | JPEG 1080×1080 (197 KB) |
+| Tracknummer `trkn` | – | – (Song ohne Album-Tracknummer) | – |
+
+Übrig gebliebene Unterschiede zur iPad-Datei: moov vorn statt hinten (so gewollt), 48 kHz/256 kbit/s
+(Opus-Quelle, umkodiert) statt 44,1 kHz/128 kbit/s, keine Edit-List/Rollgruppen (nur für den
+Encoder-Vorlauf, Player ignorieren sie meist), kleineres Cover. Die beiden wahrscheinlichen Ursachen
+von vorher (64-Bit-Offsets mit einem einzigen Chunk, zusätzliche Android-meta-Box) sind weg.
+Offen: Test an der PS5 (Emil).
