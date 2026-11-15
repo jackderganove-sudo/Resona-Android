@@ -185,7 +185,7 @@ fun LyricsEnhanced(
         }
 
     val isSynced = preparedLyrics?.syncType != null && preparedLyrics.syncType != LyricsSyncType.PLAIN
-    val isWordSyncedFormat = preparedLyrics?.syncType == LyricsSyncType.WORD
+    val isWordSyncedFormat = preparedLyrics?.syncType == LyricsSyncType.WORD && !moe.rukamori.archivetune.resona.LyricsDepthBench.noWords
 
     val lyricsEntries: List<LyricsEntry> =
         remember(preparedLyrics) {
@@ -944,7 +944,7 @@ private fun buildSyncedLyrics(
         if (entry.text.isBlank() && entry.words.isNullOrEmpty()) return@forEachIndexed
 
         if (isWordSynced && entry.words != null) {
-            val translation = providedTranslationTextForEntry(entry)
+            val translation = providedTranslationTextForEntry(entry).takeUnless { moe.rukamori.archivetune.resona.LyricsDepthBench.noTranslation }
             val mainWords = entry.words!!.filter { !it.isBackground }
             val bgWords = entry.words!!.filter { it.isBackground }
             val alignment =
@@ -1036,7 +1036,7 @@ private fun buildLineSyncedLrcLine(
     start: Int,
     end: Int,
 ): ISyncedLine {
-    val translation = providedTranslationTextForEntry(entry)
+    val translation = providedTranslationTextForEntry(entry).takeUnless { moe.rukamori.archivetune.resona.LyricsDepthBench.noTranslation }
     val normalizedRomanizedText = romanizedText?.trim()?.takeIf { it.isNotEmpty() }
 
     if (normalizedRomanizedText == null) {

@@ -109,7 +109,12 @@ object ResonaPlaybackLog {
         val system = "${Build.MANUFACTURER} ${Build.MODEL} Android ${Build.VERSION.RELEASE}"
         val folder = File(context.cacheDir, "error-log").apply { mkdirs() }
         val out = File(folder, "Resona-Fehlerprotokoll.txt")
-        out.writeText(exportText(appVersion, system))
+        val text = exportText(appVersion, system)
+        out.writeText(text)
+        // wip builds only: a copy the device test script can pull (scripts/device-tests-runde12.sh).
+        if (moe.rukamori.archivetune.BuildConfig.RESONA_MEASURE) {
+            runCatching { context.getExternalFilesDir(null)?.let { File(it, out.name).writeText(text) } }
+        }
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.FileProvider", out)
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"

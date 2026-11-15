@@ -168,8 +168,8 @@ fun ResonaGradientBackground(
     val powerSave = remember(isPlaying) { context.powerSave() }
     val moving = isPlaying && mode != ResonaGradientMode.STATIC && !powerSave
 
-    val timeline by produceState<CanvasColorTimeline.Timeline?>(null, mediaId, mode, powerSave) {
-        value = if (mode == ResonaGradientMode.CANVAS && !powerSave && mediaId != null) CanvasColorTimeline.forMedia(mediaId) else null
+    val timeline by produceState<CanvasColorTimeline.Timeline?>(null, mediaId, mode, powerSave, LyricsDepthBench.noCanvas) {
+        value = if (mode == ResonaGradientMode.CANVAS && !powerSave && mediaId != null && !LyricsDepthBench.noCanvas) CanvasColorTimeline.forMedia(mediaId) else null
     }
     val coverFour = remember(coverColors) {
         val base = coverColors.ifEmpty { listOf(Color(0xFF2B3A55)) }

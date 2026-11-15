@@ -125,6 +125,10 @@ object LyricsDepthBench {
     var blurDp by mutableFloatStateOf(0f)
     var library by mutableStateOf(false)
     var hideBelow by mutableStateOf(false)
+    /** Round 12 device tests: "canvas=0" cover colours instead of the canvas, "words=0" line sync only, "trans=0" no translation. */
+    var noCanvas by mutableStateOf(false)
+    var noWords by mutableStateOf(false)
+    var noTranslation by mutableStateOf(false)
 
     fun load(context: android.content.Context) {
         if (!moe.rukamori.archivetune.BuildConfig.RESONA_MEASURE) return
@@ -136,7 +140,10 @@ object LyricsDepthBench {
         blurDp = values["blur"]?.toFloatOrNull() ?: 0f
         library = values["lib"] == "1"
         hideBelow = values["hide"] == "1"
-        android.util.Log.i("ResonaLyricsDepth", "levels=$levels blur=$blurDp lib=$library hide=$hideBelow")
+        noCanvas = values["canvas"] == "0"
+        noWords = values["words"] == "0"
+        noTranslation = values["trans"] == "0"
+        android.util.Log.i("ResonaLyricsDepth", "levels=$levels blur=$blurDp lib=$library hide=$hideBelow canvas=${!noCanvas} words=${!noWords} trans=${!noTranslation}")
     }
 }
 
