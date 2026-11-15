@@ -441,3 +441,35 @@ Bibliothek mit ausgeblendetem Inhalt darunter muss noch mit laufendem Song gemes
 ### Mess-Schalter
 `aisync-bench.txt` und `lyrics-depth.txt` wirken nur in wip-Builds (`BuildConfig.RESONA_MEASURE`,
 gesetzt nur für den Branch wip); Releases ignorieren sie.
+
+## Runde 12 – PS5 spielt die Stick-Dateien nicht ab
+
+Befund (Test an der PS5): Ordner und Songs erscheinen, Abspielen meldet „Etwas ist
+schiefgelaufen“; eine iPad-Datei im selben Ordner läuft. Kein Cover, auch nicht beim iPad.
+Ein Musikplayer auf dem Handy zeigte den Dateinamen als Titel.
+
+### Vergleich (gleicher Song, ffprobe + Box-Dump)
+
+| | iPad (ffmpeg, läuft) | Android v1.0.12 (MediaMuxer, läuft nicht) |
+|---|---|---|
+| ftyp | `M4A `, minor 512, `M4A isom iso2` | `mp42`, minor 0, `isom mp42` |
+| Box-Folge | ftyp · free · mdat · moov | ftyp · free (3192 B) · mdat · moov |
+| Chunk-Offsets | `stco` 32-bit, 2 Chunks (2821 + 2430 Frames) | **`co64` 64-bit, 1 Chunk mit allen 5716 Frames** |
+| zusätzlich in moov | – | **`meta` (QuickTime-Keys, `com.android.version=17`), creation_time** |
+| Audio | AAC-LC, 44,1 kHz, Stereo, 128 kbit/s (umverpackt) | AAC-LC, 48 kHz, Stereo, 256 kbit/s (aus Opus kodiert) |
+| Edit-List / Rollgruppen | `elst`, `sgpd`/`sbgp` | – |
+| Tags | `©nam`, `©ART`, `©too` in udta/meta/ilst | `©nam`, `©ART`, `aART`, `©alb` in udta/meta/ilst **und** Android-meta in moov |
+| Cover | JPEG baseline 1200×1200, `covr` Typ 13 | JPEG baseline 1080×1080, `covr` Typ 13 |
+
+Fragmente (moof) hatte keine der Dateien; moov liegt bei beiden am Ende. Wahrscheinliche
+Ursachen: 64-Bit-Offsets mit einem einzigen Chunk und die zusätzliche Android-meta-Box (ein
+Player, der sie zuerst liest, findet dort keinen Titel → Dateiname).
+
+### Neu (Formatversion 2)
+Eigener MP4-Schreiber (`M4aWriter`) statt MediaMuxer: `ftyp` `M4A ` (wie iPad), moov **vor**
+mdat, keine Fragmente, `stco` 32-bit, etwa ein Chunk pro Sekunde, eine AAC-LC-Spur, Tags nur
+in udta/meta/ilst (Titel, Künstler, Album-Künstler, Album, Tracknummer), Cover als JPEG
+baseline ≤ 600×600 (`covr` Typ 13). AAC wird weiter nur umverpackt, Opus zu AAC-LC 256 kbit/s.
+Die Manifest-Einträge tragen `format`; ältere Dateien werden beim nächsten Abgleich aus sich
+selbst neu geschrieben (kein Download) und auf dem Stick ersetzt. Unit-Test
+`M4aWriterTest` prüft die Eigenschaften der iPad-Datei.
