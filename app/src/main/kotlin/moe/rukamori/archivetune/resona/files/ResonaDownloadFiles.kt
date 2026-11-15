@@ -253,6 +253,7 @@ class ResonaDownloadFiles
                 ensureNomedia()
                 // A file deleted outside the app is written again (when its cache copy still exists).
                 manifest = manifest.copy(songs = manifest.songs.filterValues { resolve(it.path)?.exists() == true })
+                upgradeFormats()
                 val infos = HashMap<String, SongInfo>()
                 for (id in downloaded) {
                     database.getSongById(id)?.let { s ->
@@ -296,7 +297,13 @@ class ResonaDownloadFiles
                 }
                 // Songs whose file could not be written stay out of the manifest (next sync tries again).
                 val written = next.songs.filter { (id, song) -> id in sizes || id in manifest.songs || resolve(song.path)?.exists() == true }
-                    .mapValues { (id, song) -> sizes[id]?.let { song.copy(size = it) } ?: song }
+                    .mapValues { (id, song) ->
+                        when {
+                            id in sizes -> song.copy(size = sizes.getValue(id), format = ResonaFileFormat.CURRENT)
+                            // Moved or kept: the plan rebuilt the entry, keep the known format.
+                            else -> song.copy(format = manifest.songs[id]?.format ?: song.format)
+                        }
+                    }
                 manifest = next.copy(songs = written)
                 uris.clear()
                 saveManifest()
@@ -337,6 +344,75 @@ class ResonaDownloadFiles
                     .build()
             runCatching { manager.notify(NOTIFICATION_ID, notification) }
         }
+
+        /** Title, artist, album, track number and a JPEG cover (≤ 600 px) – as the iPad writes them. */
+        suspend fun tagsFor(songId: String): Mp4Tags.Tags {
+            val song = database.getSongById(songId)
+            val url = song?.song?.thumbnailUrl
+            val source = url?.let { artwork.localArtwork(it) }?.takeIf { it.length() in 1..5_000_000 }?.readBytes()
+                ?: url?.let { fetchCover(it) }
+            return Mp4Tags.Tags(
+                title = song?.song?.title ?: songId,
+                artist = song?.artists?.joinToString(", ") { it.name }.orEmpty(),
+                album = song?.song?.albumName,
+                track = song?.song?.trackNumber,
+                cover = CoverArt.jpeg(source),
+            )
+        }
+
+        private fun fetchCover(url: String): ByteArray? =
+            runCatching {
+                val connection = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
+                    connectTimeout = 10_000
+                    readTimeout = 15_000
+                }
+                try {
+                    if (connection.responseCode in 200..299) connection.inputStream.use { it.readBytes() } else null
+                } finally {
+                    connection.disconnect()
+                }
+            }.getOrNull()
+
+        /**
+         * Files written in an older format (the PS5 refused MediaMuxer's) are written
+         * again from themselves: AAC frames copied, tags and cover new. No download.
+         */
+        private suspend fun upgradeFormats() {
+            val old = manifest.songs.filterValues { it.format < ResonaFileFormat.CURRENT }
+            if (old.isEmpty()) return
+            val work = File(context.cacheDir, "resona-files").apply { mkdirs() }
+            var done = 0
+            val updated = HashMap(manifest.songs)
+            for ((id, song) in old) {
+                val file = resolve(song.path) ?: continue
+                val source = File(work, "$id.old")
+                val fresh = File(work, "$id.m4a")
+                try {
+                    context.contentResolver.openInputStream(file.uri)?.use { input -> source.outputStream().use { input.copyTo(it) } } ?: continue
+                    ResonaAudioConverter.toM4a(source, fresh, tagsFor(id))
+                    context.contentResolver.openOutputStream(file.uri, "wt")?.use { out -> fresh.inputStream().use { it.copyTo(out) } } ?: continue
+                    updated[id] = song.copy(format = ResonaFileFormat.CURRENT, size = fresh.length())
+                    done++
+                    _progress.value = Progress(done, old.size, 0)
+                    notify(done, old.size)
+                } catch (e: Exception) {
+                    if (e is kotlinx.coroutines.CancellationException) throw e
+                    Log.w(TAG, "format upgrade failed: ${e.javaClass.simpleName}")
+                } finally {
+                    source.delete()
+                    fresh.delete()
+                }
+            }
+            manifest = manifest.copy(songs = updated)
+            uris.clear()
+            saveManifest()
+            _progress.value = null
+            if (old.size > 1) NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
+            Log.i(TAG, "format upgrade: $done of ${old.size} files written again")
+        }
+
+        /** Before files are copied elsewhere (the stick): bring old files to the current format. */
+        suspend fun upgradeNow() = mutex.withLock { upgradeFormats() }
 
         /** A file the first test build named "x.m4a.m4a": give it its name instead of converting again. */
         private fun repair(path: String): Long? {
@@ -381,19 +457,7 @@ class ResonaDownloadFiles
             val m4a = File(work, "$songId.m4a")
             try {
                 if (!copyFromCache(songId, raw)) return 0
-                ResonaAudioConverter.toM4a(raw, m4a)
-                val song = database.getSongById(songId)
-                val cover = song?.song?.thumbnailUrl?.let { artwork.localArtwork(it) }?.takeIf { it.length() in 1..2_000_000 }?.readBytes()
-                Mp4Tags.write(
-                    m4a,
-                    Mp4Tags.Tags(
-                        title = song?.song?.title ?: songId,
-                        artist = song?.artists?.joinToString(", ") { it.name }.orEmpty(),
-                        album = song?.song?.albumName,
-                        track = song?.song?.trackNumber,
-                        cover = cover,
-                    ),
-                )
+                ResonaAudioConverter.toM4a(raw, m4a, tagsFor(songId))
                 val folder = folder(path.substringBefore('/')) ?: return 0
                 val name = path.substringAfter('/')
                 folder.findFile(name)?.delete()

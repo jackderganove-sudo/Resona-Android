@@ -148,7 +148,13 @@ object Ps5Stick {
         playlists.flatMap { it.songIds }.distinct().forEach { id ->
             database.getSongById(id)?.let { infos[id] = SongInfo(id, it.song.title, it.artists.joinToString(", ") { a -> a.name }) }
         }
-        val (steps, manifest) = ResonaFilePlan.plan(oldManifest(context), playlists, emptyList(), { infos[it] }, copiesPerPlaylist = true, flat = flat(context))
+        val old = oldManifest(context)
+        val (planned, manifest) = ResonaFilePlan.plan(old, playlists, emptyList(), { infos[it] }, copiesPerPlaylist = true, flat = flat(context))
+        // Files in an older format (MediaMuxer's, which the PS5 refused) are copied again in place.
+        val touched = planned.filterIsInstance<FileStep.Add>().map { it.path }.toSet() + planned.filterIsInstance<FileStep.Move>().map { it.to }.toSet()
+        val rewrite = manifest.songs.filter { (key, song) -> (old.songs[key]?.format ?: ResonaFileFormat.CURRENT) < ResonaFileFormat.CURRENT && song.path !in touched }
+            .map { (key, song) -> FileStep.Add(key.substringAfter('/'), song.path) }
+        val steps = planned + rewrite
         val adds = steps.filterIsInstance<FileStep.Add>()
         val missing = adds.map { it.songId }.distinct().filter { files.uriFor(it) == null }
         val bytes = adds.sumOf { add -> files.uriFor(add.songId)?.let { DocumentFile.fromSingleUri(context, it)?.length() } ?: AVERAGE_SONG_BYTES }
@@ -161,6 +167,8 @@ object Ps5Stick {
     suspend fun run(context: Context, allowDrop: Boolean, onProgress: (Progress) -> Unit = {}): Phase {
         val deps = EntryPointAccessors.fromApplication(context.applicationContext, StickEntryPoint::class.java)
         val files = deps.downloadFiles()
+        // The source files first in the current format (old ones are written again).
+        runCatching { files.upgradeNow() }
         var preview = preview(context) ?: return Phase.FAILED
         if (preview.missing.isNotEmpty()) {
             val all = deps.downloadUtil().downloads.value
@@ -243,6 +251,7 @@ object Ps5Stick {
     private fun saveManifest(context: Context, music: DocumentFile, planned: ResonaManifest, written: Set<String>, steps: List<FileStep>) {
         val adds = steps.filterIsInstance<FileStep.Add>().map { it.path }.toSet()
         val songs = planned.songs.filterValues { it.path !in adds || it.path in written }
+            .mapValues { (_, song) -> if (song.path in written) song.copy(format = ResonaFileFormat.CURRENT) else song }
         val file = music.findFile(MANIFEST) ?: music.createFile("application/json", MANIFEST) ?: return
         runCatching {
             context.contentResolver.openOutputStream(file.uri, "wt")?.use { it.write(planned.copy(songs = songs).encode().toByteArray()) }

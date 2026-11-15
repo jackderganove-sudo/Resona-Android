@@ -70,7 +70,17 @@ data class ManifestSong(
     val size: Long = 0,
     val title: String = "",
     val artist: String = "",
+    /** File format version ([ResonaFileFormat.CURRENT]); older files are written again. */
+    val format: Int = 0,
 )
+
+object ResonaFileFormat {
+    /**
+     * 1 = MediaMuxer .m4a (brand mp42, one 64-bit chunk, Android meta box – the PS5
+     * refused it); 2 = [M4aWriter] like the iPad, JPEG cover ≤ 600 px.
+     */
+    const val CURRENT = 2
+}
 
 /** Manifest kept next to the files (".resona-manifest.json"; on the stick Music/.resona-sync.json). */
 @Serializable

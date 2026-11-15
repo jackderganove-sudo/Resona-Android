@@ -76,15 +76,22 @@ object Mp4Tags {
         return out
     }
 
-    /** moov with its old udta (if any) replaced by one holding our meta/ilst. */
+    /** moov with its old udta and Android's moov-level "meta" (if any) replaced by our udta. */
     private fun withUdta(moov: ByteArray, ilst: ByteArray): ByteArray {
-        val kids = children(moov, 8, moov.size.toLong()).filter { it.type != "udta" }
+        val kids = children(moov, 8, moov.size.toLong()).filter { it.type != "udta" && it.type != "meta" }
         val body = ByteArrayOutputStream()
         kids.forEach { body.write(moov, it.start.toInt(), it.size.toInt()) }
+        body.write(udtaFor(ilst))
+        return box("moov", body.toByteArray())
+    }
+
+    /** moov/udta/meta(hdlr "mdir")/ilst – where iTunes, ffmpeg and the iPad put the tags. */
+    fun udta(tags: Tags): ByteArray = udtaFor(ilst(tags))
+
+    private fun udtaFor(ilst: ByteArray): ByteArray {
         val hdlr = box("hdlr", ByteArray(4) + ByteArray(4) + "mdir".toByteArray() + "appl".toByteArray() + ByteArray(8) + byteArrayOf(0))
         val meta = box("meta", ByteArray(4) + hdlr + ilst)
-        body.write(box("udta", meta))
-        return box("moov", body.toByteArray())
+        return box("udta", meta)
     }
 
     private fun ilst(tags: Tags): ByteArray {
