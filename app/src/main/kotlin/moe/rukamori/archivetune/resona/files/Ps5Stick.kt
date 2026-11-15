@@ -320,8 +320,9 @@ object Ps5Stick {
             return
         }
         if (names.all { (folder, list) -> music.findFile(folder)?.let { dir -> list.all { dir.findFile(it) != null } } == true }) return
+        val stickManifest = oldManifest(context)
         val songId = playlists(context).asSequence()
-            .mapNotNull { oldManifest(context).playlists[it]?.firstOrNull { id -> files.uriFor(id) != null } }
+            .mapNotNull { stickManifest.playlists[it]?.firstOrNull { id -> files.uriFor(id) != null } }
             .firstOrNull() ?: return
         val source = files.uriFor(songId) ?: return
         val tags = files.tagsFor(songId)
