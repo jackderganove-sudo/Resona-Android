@@ -3768,6 +3768,24 @@ class MusicService :
         this is ArrayIndexOutOfBoundsException &&
             stackTrace.any { it.className.startsWith("androidx.media3.extractor") }
 
+    /**
+     * Resona: "Retry" in the error box – every client again for this song (failures
+     * and cached stream URLs forgotten), then play.
+     */
+    fun retryAfterPlaybackError() {
+        val mediaId = player.currentMediaItem?.mediaId
+        if (mediaId != null) {
+            playbackStreamRecoveryTracker.reset(mediaId)
+            YTPlayerUtils.clearFailedStreamClients(mediaId)
+            YTPlayerUtils.invalidateCachedStreamUrls(mediaId)
+            resolveAudioStream.invalidate(mediaId)
+            resolveAudioStream.invalidateSession()
+            moe.rukamori.archivetune.resona.ResonaPlaybackLog.record(mediaId, "-", "player", null, "retry by the user")
+        }
+        player.prepare()
+        player.play()
+    }
+
     private fun retryPlaybackAfterStreamFailure(
         mediaId: String,
         isFullyDownloadedMedia: Boolean,
@@ -3787,6 +3805,13 @@ class MusicService :
             YTPlayerUtils.markStreamClientFailed(mediaId, requestProfile.clientKey, responseException.responseCode)
         }
 
+        moe.rukamori.archivetune.resona.ResonaPlaybackLog.record(
+            mediaId,
+            requestProfile.variantLabel,
+            "player",
+            responseException.responseCode,
+            if (failedExpiredUrl) "stream URL expired" else "stream refused",
+        )
         if (!playbackStreamRecoveryTracker.registerRetryAttempt(mediaId)) {
             return false
         }

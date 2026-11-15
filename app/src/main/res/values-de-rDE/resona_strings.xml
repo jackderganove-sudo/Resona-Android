@@ -590,4 +590,7 @@
     <string name="resona_stick_mp3_desc">320 kbit/s CBR mit ID3v2.3-Tags und Cover – falls die PS5 die M4A-Dateien nicht abspielt. Umschalten schreibt alle Songs auf dem Stick neu.</string>
     <string name="resona_stick_cover_test">Cover-Test-Ordner</string>
     <string name="resona_stick_cover_test_desc">Legt einen Song in fünf Cover-Varianten nach Music/Cover-Test… (a M4A, b folder.jpg, c cover.jpg, d MP3, e FLAC). Ausschalten entfernt sie beim nächsten Abgleich.</string>
+    <string name="resona_share_error_log">Fehlerprotokoll teilen</string>
+    <string name="resona_retry">Erneut versuchen</string>
+    <string name="resona_error_refused">YouTube hat den Stream für alle ausprobierten App-Profile abgelehnt. Das legt sich meist nach ein paar Stunden.</string>
 </resources>

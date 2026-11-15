@@ -960,15 +960,26 @@ private fun AboutProjectInformationSection(
             title = stringResource(R.string.about_contributor_translation),
             iconResId = R.drawable.translate,
             index = 0,
-            itemCount = 2,
+            itemCount = 3,
             onClick = onOpenTranslationContributors,
         )
         AboutActionListItem(
             title = stringResource(R.string.about_license),
             iconResId = R.drawable.info,
             index = 1,
-            itemCount = 2,
+            itemCount = 3,
             onClick = onOpenDependencyLicenses,
+        )
+        // Resona: playback error log (round 12, same as the iPad).
+        val context = androidx.compose.ui.platform.LocalContext.current
+        AboutActionListItem(
+            title = stringResource(R.string.resona_share_error_log),
+            iconResId = R.drawable.info,
+            index = 2,
+            itemCount = 3,
+            onClick = {
+                moe.rukamori.archivetune.resona.ResonaPlaybackLog.share(context, moe.rukamori.archivetune.BuildConfig.VERSION_NAME)
+            },
         )
     }
 }

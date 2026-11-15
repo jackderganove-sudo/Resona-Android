@@ -533,6 +533,11 @@ object YTPlayerUtils {
             System.currentTimeMillis() + FAILED_CLIENT_BACKOFF_MS
     }
 
+    /** "Retry" after an error: every client again for this song. */
+    fun clearFailedStreamClients(videoId: String) {
+        failedStreamClientsUntil.keys.removeIf { it.contains(videoId) }
+    }
+
     fun markPreferredClientFailed(
         videoId: String,
         client: PlayerStreamClient,
@@ -1067,6 +1072,7 @@ object YTPlayerUtils {
                                 if (failure is CancellationException) throw failure
                                 failedPlayerClients += describeClient(client)
                                 playerRequestFailures += failure
+                                moe.rukamori.archivetune.resona.ResonaPlaybackLog.record(videoId, describeClient(client), "resolve", null, failure.toString())
                                 Timber.tag(logTag).w(
                                     failure,
                                     "Stream player request failed for %s via %s",
@@ -1166,6 +1172,7 @@ object YTPlayerUtils {
                     } else {
                         Timber.tag(logTag).w(statusMessage)
                     }
+                    moe.rukamori.archivetune.resona.ResonaPlaybackLog.record(videoId, describeClient(client), "resolve", null, "${playabilityStatus.status}: ${reason.orEmpty()}")
                     if (isLoginRecovery) {
                         gateFailure =
                             PlaybackGateFailure(
@@ -1188,7 +1195,10 @@ object YTPlayerUtils {
                     isMetered,
                 )
 
-            if (candidates.isEmpty()) continue
+            if (candidates.isEmpty()) {
+                moe.rukamori.archivetune.resona.ResonaPlaybackLog.record(videoId, describeClient(client), "resolve", null, "no audio formats")
+                continue
+            }
 
             var selectedFormat: PlayerResponse.StreamingData.Format? = null
             var selectedUrl: String? = null
@@ -1232,6 +1242,7 @@ object YTPlayerUtils {
             }
 
             if (selectedFormat == null || selectedUrl == null) {
+                moe.rukamori.archivetune.resona.ResonaPlaybackLog.record(videoId, describeClient(client), "resolve", null, "no playable stream among ${candidates.size} formats")
                 Timber.tag(logTag).w(
                     "No playable stream candidate resolved for %s at quality %s after checking %d formats",
                     describeClient(client),
@@ -1251,6 +1262,7 @@ object YTPlayerUtils {
                 )
 
             Timber.tag(logTag).i("Format found: ${format.mimeType}, bitrate: ${format.bitrate}")
+            moe.rukamori.archivetune.resona.ResonaPlaybackLog.record(videoId, describeClient(client), "success", null, "itag ${format.itag} ${format.mimeType}")
             Timber.tag(logTag).v("Stream expires in: $streamExpiresInSeconds seconds")
             break
         }

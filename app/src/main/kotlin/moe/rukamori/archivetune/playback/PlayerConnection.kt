@@ -300,6 +300,11 @@ class PlayerConnection(
         }
     }
 
+    /** Resona: retry after a playback error with every client again. */
+    fun retryAfterPlaybackError() {
+        service.retryAfterPlaybackError()
+    }
+
     fun dismissPlaybackError() {
         dismissedPlaybackError = error.value ?: player.playerError
         error.value = null

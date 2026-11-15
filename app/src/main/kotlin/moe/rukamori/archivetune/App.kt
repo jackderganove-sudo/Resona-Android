@@ -158,6 +158,8 @@ class App :
                 dataStore.edit { it[moe.rukamori.archivetune.constants.PlayerBackgroundStyleKey] = moe.rukamori.archivetune.constants.PlayerBackgroundStyle.GRADIENT.name }
             }
         }
+        // Resona: playback error log (round 12).
+        moe.rukamori.archivetune.resona.ResonaPlaybackLog.init(this)
         // Resona: downloads as files (round 12): follows downloads and playlists.
         runCatching { resonaDownloadFiles.start(downloadUtil.downloads) }
         // Resona: smart downloads worker (only when switched on).

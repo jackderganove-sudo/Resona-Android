@@ -327,8 +327,7 @@ fun BottomSheetPlayer(
     val retryPlayback =
         remember(playerConnection) {
             {
-                playerConnection.player.prepare()
-                playerConnection.player.play()
+                playerConnection.retryAfterPlaybackError()
             }
         }
     val dismissPlaybackError =

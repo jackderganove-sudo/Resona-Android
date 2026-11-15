@@ -76,7 +76,7 @@ fun PlaybackErrorDialog(
     val fallbackTimeout = stringResource(R.string.error_timeout)
     val fallbackNoStream = stringResource(R.string.error_no_stream)
     val fallbackMalformedStream = stringResource(R.string.error_malformed_stream)
-    val retryText = stringResource(R.string.retry)
+    val retryText = stringResource(R.string.resona_retry)
     val closeText = stringResource(R.string.close)
     val copyText = stringResource(R.string.copy)
     val copiedText = stringResource(R.string.copied)
@@ -123,7 +123,8 @@ fun PlaybackErrorDialog(
             }
 
             PlaybackErrorKind.NoStream -> {
-                fallbackNoStream
+                // Resona: same wording as the iPad for a stream YouTube refused.
+                if (httpCode == 403) stringResource(R.string.resona_error_refused) else fallbackNoStream
             }
 
             PlaybackErrorKind.MalformedStream -> {
