@@ -59,6 +59,13 @@ jobs:
         with:
           cache-cleanup: on-success
 
+      # Native code (whisper.cpp & co.) for four ABIs: cached between runs.
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: native-${{ runner.os }}
+          max-size: 2G
+
       - name: Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -78,14 +85,51 @@ jobs:
           LASTFM_SECRET: ${{ secrets.LASTFM_SECRET }}
           # Measuring switches exist only in wip builds; a release never has them.
           RESONA_MEASURE: ${{ github.ref_name == 'wip' && '1' || '0' }}
+          RESONA_CCACHE: '1'
+          CCACHE_COMPILERCHECK: content
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_NOHASHDIR: 'true'
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon assembleGmsMobileArm64Release assembleGmsMobileUniversalRelease > build.log 2>&1 || {
+          # arm64 first (the Pixel), universal (all ABIs, the emulator test) after the early upload below.
+          ./gradlew assembleGmsMobileArm64Release > build.log 2>&1 || {
             grep -E "^e: |error:|What went wrong" -A3 build.log | head -80
             tail -40 build.log
             exit 1
           }
           grep -E "BUILD SUCCESSFUL" build.log
+          mkdir -p early
+          apk=$(find app/build/outputs/apk -path "*gmsMobile*Arm64*release*" -name "*.apk" | head -1)
+          [ -z "$apk" ] && apk=$(find app/build/outputs/apk -iname "*arm64*release*.apk" | head -1)
+          cp "$apk" early/app-gms-mobile-arm64-release.apk
+
+      # The Pixel's APK about 15–20 min before the universal one is done (device tests on wip).
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk-arm64
+          path: early/*.apk
+          retention-days: 3
+
+      - name: Build universal APK
+        env:
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          RESONA_VERSION_NAME: ${{ steps.version.outputs.name }}
+          RESONA_VERSION_CODE: ${{ steps.version.outputs.code }}
+          LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+          LASTFM_SECRET: ${{ secrets.LASTFM_SECRET }}
+          RESONA_MEASURE: ${{ github.ref_name == 'wip' && '1' || '0' }}
+          RESONA_CCACHE: '1'
+          CCACHE_COMPILERCHECK: content
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_NOHASHDIR: 'true'
+        run: |
+          ccache -s | head -5 || true
+          ./gradlew assembleGmsMobileUniversalRelease >> build.log 2>&1 || {
+            grep -E "^e: |error:|What went wrong" -A3 build.log | tail -80
+            exit 1
+          }
 
       - name: Update policy unit tests
         env:

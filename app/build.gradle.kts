@@ -73,6 +73,15 @@ android {
     compileSdkMinor = 2
 
     defaultConfig {
+        // CI: ccache for whisper.cpp/LAME/ONNX glue – the native part is rebuilt for every ABI
+        // on every run otherwise (release builds took ~37 min).
+        if (System.getenv("RESONA_CCACHE") == "1") {
+            externalNativeBuild {
+                cmake {
+                    arguments += listOf("-DCMAKE_C_COMPILER_LAUNCHER=ccache", "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache")
+                }
+            }
+        }
     // Resona: own application id (installs next to ArchiveTune); the code
     // namespace stays moe.rukamori.archivetune so upstream merges stay easy.
     applicationId = "dev.jackderganove.resona"
