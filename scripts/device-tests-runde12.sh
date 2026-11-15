@@ -35,7 +35,7 @@ VOLUME=${VOLUME:-2}
 SONG=${1:-}
 FILES=/sdcard/Android/data/$PKG/files
 mkdir -p "$OUT" "$PRIV" "$SHOTS"
-: > "$OUT/results.md"
+[ "${KEEP_RESULTS:-0}" = 1 ] || : > "$OUT/results.md"   # KEEP_RESULTS=1: add to an earlier run
 
 log() { echo "[$(date +%H:%M:%S)] $*" | tee -a "$OUT/run.log"; }
 row() { echo "$*" >> "$OUT/results.md"; }
@@ -210,6 +210,8 @@ else
     adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
     sleep 6
 fi
+# After an update the app shows "Neu in Resona" first.
+XY=$(find_node "Verstanden" "Got it") && { tap_xy $XY; sleep 2; log "Closed the what's-new dialog"; }
 if ! ensure_paused; then
     log "Playback could not be paused (media keys do not reach the app): pause it in Resona and start again"; exit 1
 fi
@@ -295,7 +297,10 @@ if [ "${SKIP_AISYNC:-0}" != 1 ]; then
     MORE=$(locate "Weitere Optionen" "More options")
     if [ -n "$MORE" ]; then
         tap_xy $MORE; sleep 2
-        CAL=$(locate "Mit KI kalibrieren" "Calibrate with AI")
+        # Lyrics menu → "Mit KI synchronisieren" opens the dialog; there "Mit KI kalibrieren"
+        # (already synced) or "Starten". Never "Speichern": the bench saves nothing anyway.
+        SYNC=$(locate "Mit KI synchronisieren" "Sync with AI") && { tap_xy $SYNC; sleep 2; }
+        CAL=$(locate "Mit KI kalibrieren" "Calibrate with AI" "Starten" "Start")
         if [ -n "$CAL" ]; then
             tap_xy $CAL
             log "AI sync bench started (CTC); waiting up to 240 s for BENCH done"
@@ -304,7 +309,7 @@ if [ "${SKIP_AISYNC:-0}" != 1 ]; then
                 adb logcat -d -s ResonaAISync:I | grep -q "not cached\|NOT_CACHED" && break
                 sleep 5
             done
-            adb logcat -d -s ResonaAISync:I ResonaAISync:W > "$OUT/aisync.log"
+            adb logcat -d -s ResonaAISync:I > "$OUT/aisync.log"   # one filter: a second "TAG:W" would override ":I"
             # Numbers only (the bench never logs text).
             line=$(grep -o 'BENCH ctc.*' "$OUT/aisync.log" | tail -1)
             row ""

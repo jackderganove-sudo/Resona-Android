@@ -167,7 +167,10 @@ object YTPlayerUtils {
     fun clearPlaybackAuthCaches() {
         streamUrlCache.clear()
         playbackDataCache.clear()
-        failedStreamClientsUntil.clear()
+        // Resona (round 12, found on the Pixel): failed clients are NOT forgotten here.
+        // This runs after every refused stream (recoverFromBadStreamPlayerResponse), so the
+        // client that just got HTTP 403 was picked again – four times in a row. Only "Retry"
+        // (clearFailedStreamClients) or the 10-minute timeout clear a client.
         lastSuccessfulClientKey = null
     }
 
@@ -547,7 +550,7 @@ object YTPlayerUtils {
         markStreamClientFailed(videoId, client.name, httpStatusCode, authFingerprint)
     }
 
-    private fun isStreamClientTemporarilyBlocked(
+    internal fun isStreamClientTemporarilyBlocked(
         videoId: String,
         clientKey: String?,
         authFingerprint: String,
@@ -569,7 +572,9 @@ object YTPlayerUtils {
         videoId: String,
         clientKey: String,
         authFingerprint: String,
-    ): String = "$authFingerprint:$videoId:${normalizeStreamClientKey(clientKey)}"
+    // Not tied to the auth fingerprint: refreshing the session after a refused stream changes
+    // it, and the refused client would count as untried again.
+    ): String = "$videoId:${normalizeStreamClientKey(clientKey)}"
 
     internal fun resolvePreferredPlaybackClient(
         preferredStreamClient: PlayerStreamClient,
@@ -1006,6 +1011,10 @@ object YTPlayerUtils {
                     Timber.tag(logTag).w("Temporarily blocked stream client for $videoId: ${describeClient(client)}")
                 }
                 blocked
+            }.ifEmpty {
+                // Every client failed for this song within 10 minutes: one more round with all.
+                Timber.tag(logTag).w("All stream clients temporarily blocked for $videoId – trying all again")
+                buildStreamClientOrder(preferredStreamClient, authState)
             }
 
         val botDetectedClients = mutableSetOf<String>()
