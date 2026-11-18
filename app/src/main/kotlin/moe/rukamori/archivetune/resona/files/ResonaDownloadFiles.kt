@@ -402,8 +402,17 @@ class ResonaDownloadFiles
         }
 
         /** Also the foreground worker's notification (same id, so progress updates replace it). */
-        fun notification(done: Int, total: Int, eta: Long? = null): android.app.Notification =
-                NotificationCompat.Builder(context, moe.rukamori.archivetune.playback.ExoDownloadService.CHANNEL_ID)
+        fun notification(done: Int, total: Int, eta: Long? = null): android.app.Notification {
+            // Media3 creates the download channel only when the download service starts; on a
+            // fresh install the export runs first and startForeground with a missing channel
+            // crashes the app ("Bad notification for startForeground", CI emulator).
+            NotificationManagerCompat.from(context).createNotificationChannel(
+                androidx.core.app.NotificationChannelCompat
+                    .Builder(moe.rukamori.archivetune.playback.ExoDownloadService.CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_LOW)
+                    .setName(context.getString(moe.rukamori.archivetune.R.string.downloading))
+                    .build(),
+            )
+            return NotificationCompat.Builder(context, moe.rukamori.archivetune.playback.ExoDownloadService.CHANNEL_ID)
                     .setSmallIcon(moe.rukamori.archivetune.R.drawable.ic_download)
                     .setContentTitle(context.getString(moe.rukamori.archivetune.R.string.resona_files_notification))
                     .setContentText(
@@ -415,6 +424,7 @@ class ResonaDownloadFiles
                     .setOngoing(true)
                     .setSilent(true)
                     .build()
+        }
 
         /** Title, artist, album, track number and a JPEG cover (≤ 600 px) – as the iPad writes them. */
         suspend fun tagsFor(songId: String): Mp4Tags.Tags {
