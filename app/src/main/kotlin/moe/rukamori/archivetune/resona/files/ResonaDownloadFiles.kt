@@ -125,9 +125,26 @@ class ResonaDownloadFiles
                                     all.takeIf { it.isNotEmpty() && it.all { id -> id in ids } }?.let { WantedPlaylist(p.playlist.id, p.playlist.name, it) }
                                 }
                             last = wanted to ids.toList()
-                            sync(wanted, ids.toList())
+                            generation++
+                            // Round 12: written in a foreground worker – as a plain background job
+                            // Android moved it to the slow cores once the screen went off
+                            // (measured on the Pixel: 22 s → 50 s per song).
+                            FilesExportWorker.enqueue(context)
                         }
                 }
+        }
+
+        @Volatile private var generation = 0
+
+        /** The worker: sync with the newest downloads/playlists until nothing new came in meanwhile. */
+        suspend fun runQueued() {
+            while (true) {
+                val seen = generation
+                val (playlists, ids) = last ?: return
+                if (!enabled) return
+                sync(playlists, ids)
+                if (generation == seen) return
+            }
         }
 
         @Volatile private var last: Pair<List<WantedPlaylist>, List<String>>? = null
@@ -138,7 +155,8 @@ class ResonaDownloadFiles
             if (!enabled) return
             scope.launch {
                 loadManifest()
-                sync(playlists, ids)
+                generation++
+                FilesExportWorker.enqueue(context)
             }
         }
 
@@ -380,7 +398,11 @@ class ResonaDownloadFiles
             val eta = moe.rukamori.archivetune.resona.ResonaEta.remaining(notifyStartedAt, done.toLong(), total.toLong())
             val manager = NotificationManagerCompat.from(context)
             if (!manager.areNotificationsEnabled()) return
-            val notification =
+            runCatching { manager.notify(NOTIFICATION_ID, notification(done, total, eta)) }
+        }
+
+        /** Also the foreground worker's notification (same id, so progress updates replace it). */
+        fun notification(done: Int, total: Int, eta: Long? = null): android.app.Notification =
                 NotificationCompat.Builder(context, moe.rukamori.archivetune.playback.ExoDownloadService.CHANNEL_ID)
                     .setSmallIcon(moe.rukamori.archivetune.R.drawable.ic_download)
                     .setContentTitle(context.getString(moe.rukamori.archivetune.R.string.resona_files_notification))
@@ -388,13 +410,11 @@ class ResonaDownloadFiles
                         context.getString(moe.rukamori.archivetune.R.string.resona_files_count, done, total) +
                             (eta?.let { " · " + moe.rukamori.archivetune.resona.ResonaEta.text(context, it) } ?: ""),
                     )
-                    .setProgress(total, done, false)
+                    .setProgress(total, done, total == 0)
                     .setOnlyAlertOnce(true)
                     .setOngoing(true)
                     .setSilent(true)
                     .build()
-            runCatching { manager.notify(NOTIFICATION_ID, notification) }
-        }
 
         /** Title, artist, album, track number and a JPEG cover (≤ 600 px) – as the iPad writes them. */
         suspend fun tagsFor(songId: String): Mp4Tags.Tags {
@@ -582,6 +602,47 @@ class ResonaDownloadFiles
             private const val KEY_DEFAULT = "default_root"
             const val MANIFEST = ".resona-manifest.json"
             const val PLAYLIST_FILE = "playlist.m3u8"
-            private const val NOTIFICATION_ID = 0x5E50
+            const val NOTIFICATION_ID = 0x5E50
         }
     }
+
+/**
+ * "Downloads as files" as a foreground worker (dataSync): full CPU while the screen is off,
+ * the notification shows progress and the remaining time. Repeated requests are appended,
+ * so a sync started while one runs is not lost.
+ */
+class FilesExportWorker(
+    context: Context,
+    params: androidx.work.WorkerParameters,
+) : androidx.work.CoroutineWorker(context, params) {
+    private val files get() =
+        dagger.hilt.android.EntryPointAccessors.fromApplication(applicationContext, StickEntryPoint::class.java).downloadFiles()
+
+    private fun info(): androidx.work.ForegroundInfo {
+        val notification = files.notification(0, 0)
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            androidx.work.ForegroundInfo(ResonaDownloadFiles.NOTIFICATION_ID, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            androidx.work.ForegroundInfo(ResonaDownloadFiles.NOTIFICATION_ID, notification)
+        }
+    }
+
+    override suspend fun getForegroundInfo(): androidx.work.ForegroundInfo = info()
+
+    override suspend fun doWork(): Result {
+        // Not allowed from the background on some versions: then it runs as before.
+        runCatching { setForeground(info()) }
+        files.runQueued()
+        return Result.success()
+    }
+
+    companion object {
+        private const val WORK = "resona-files-export"
+
+        fun enqueue(context: Context) {
+            val request = androidx.work.OneTimeWorkRequestBuilder<FilesExportWorker>().build()
+            androidx.work.WorkManager.getInstance(context)
+                .enqueueUniqueWork(WORK, androidx.work.ExistingWorkPolicy.APPEND_OR_REPLACE, request)
+        }
+    }
+}
