@@ -357,7 +357,7 @@ class ResolveAudioStreamUseCase
                 }
             }
             return try {
-                resolveWithAuth(request, priority)
+                resolveWithFallback(request, priority)
             } catch (failure: Exception) {
                 if (failure is CancellationException) throw failure
                 val rejectedLogin = failure is YTPlayerUtils.InvalidPlaybackLoginContextException ||
@@ -365,7 +365,7 @@ class ResolveAudioStreamUseCase
                     failure.httpStatus in setOf(401, 403)
                 if (!request.authState.hasLoginCookie || !rejectedLogin) throw failure
                 try {
-                    resolveWithAuth(request.copy(authState = PlaybackAuthState.EMPTY), priority)
+                    resolveWithFallback(request.copy(authState = PlaybackAuthState.EMPTY), priority)
                 } catch (anonymousFailure: Exception) {
                     if (anonymousFailure is CancellationException) throw anonymousFailure
                     if (anonymousFailure is YTPlayerUtils.LoginRequiredForPlaybackException ||
@@ -378,6 +378,67 @@ class ResolveAudioStreamUseCase
                     throw anonymousFailure
                 }
             }
+        }
+
+        /**
+         * Resona: without a YouTube login the youtubei runtime only asks the MWEB client, which
+         * since 18.11.2026 returns no direct audio format (Pixel, signed out: "No direct audio
+         * format" for every song until the app was restarted). Other clients still return direct
+         * URLs without a PO token, so the app's own multi-client resolver takes over (iOS first;
+         * on the Pixel iOS had no format and visionOS played, resolved in 2.3 s).
+         */
+        private suspend fun resolveWithFallback(
+            request: AudioStreamRequest,
+            priority: StreamResolutionPriority,
+        ): ResolvedAudioStream =
+            try {
+                resolveWithAuth(request, priority)
+            } catch (failure: Exception) {
+                if (failure is CancellationException) throw failure
+                if (request.authState.hasLoginCookie || !failure.needsAnotherClient()) throw failure
+                resolveWithNativeClients(request, failure)
+            }
+
+        private fun Exception.needsAnotherClient(): Boolean =
+            this is YoutubeiException && kind in ANONYMOUS_FALLBACK_KINDS
+
+        private suspend fun resolveWithNativeClients(
+            request: AudioStreamRequest,
+            youtubeiFailure: Exception,
+        ): ResolvedAudioStream {
+            Timber.tag(TAG).i("youtubei: %s without login for %s, trying the app's own clients (iOS first)", youtubeiFailure.message, request.mediaId)
+            val data =
+                YTPlayerUtils.playerResponseForPlayback(
+                    videoId = request.mediaId,
+                    playlistId = request.playlistId,
+                    audioQuality = request.quality,
+                    connectivityManager = context.getSystemService(android.net.ConnectivityManager::class.java),
+                    preferredStreamClient = moe.rukamori.archivetune.constants.PlayerStreamClient.IOS,
+                    networkMetered = request.networkMetered,
+                ).getOrElse { nativeFailure ->
+                    if (nativeFailure is CancellationException) throw nativeFailure
+                    youtubeiFailure.addSuppressed(nativeFailure)
+                    throw youtubeiFailure
+                }
+            val format = data.format
+            return ResolvedAudioStream(
+                url = data.streamUrl,
+                requestHeaders = emptyMap(),
+                formatId = format.itag,
+                mimeType = format.mimeType.substringBefore(';').trim(),
+                codecs = Regex("codecs=\"([^\"]+)\"").find(format.mimeType)?.groupValues?.get(1).orEmpty(),
+                bitrate = format.averageBitrate ?: format.bitrate,
+                sampleRate = format.audioSampleRate,
+                contentLength = format.contentLength ?: 0L,
+                expiresAtMs = System.currentTimeMillis() + data.streamExpiresInSeconds * 1000L,
+                authFingerprint = request.authState.streamCacheFingerprint,
+                source = StreamSource.YOUTUBEI,
+                title = data.videoDetails?.title,
+                durationSeconds = data.videoDetails?.lengthSeconds?.toIntOrNull(),
+                loudnessDb = format.loudnessDb ?: data.audioConfig?.loudnessDb,
+                perceptualLoudnessDb = data.audioConfig?.perceptualLoudnessDb,
+                playbackTrackingUrl = data.playbackTracking?.videostatsPlaybackUrl?.baseUrl,
+            )
         }
 
         private suspend fun resolveWithAuth(
@@ -470,5 +531,7 @@ class ResolveAudioStreamUseCase
             const val TAG = "AudioStreamResolver"
             const val STREAM_EXPIRY_SAFETY_MS = 60_000L
             const val MAX_CACHE_ENTRIES = 256
+            val ANONYMOUS_FALLBACK_KINDS =
+                setOf(YoutubeiFailureKind.NO_FORMAT, YoutubeiFailureKind.LOGIN_REQUIRED, YoutubeiFailureKind.PO_TOKEN)
         }
     }

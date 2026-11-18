@@ -634,6 +634,12 @@ Datei; danach wieder entfernt (nur Resona-Dateien), Winter blieb, Auswahl zurüc
   Logzeilen (`MediaCodec::reclaim … Released by resource manager`). Jetzt bereitet der Player bei
   `ERROR_CODE_DECODING_RESOURCES_RECLAIMED` still an derselben Stelle neu vor (höchstens alle 5 s);
   im Test lief der Ton ohne Dialog weiter (21 s → 30 s).
-- **Befund ohne YouTube-Login:** Im frisch eingerichteten Debug-Build (nicht angemeldet) liefert
-  der Resolver für jeden Song „No direct audio format“ (nur Worker Primary, player-response 200).
-  Die angemeldete App spielt (`signedIn=true`). Resolver unverändert → betrifft auch v1.0.16; offen.
+- **Ohne YouTube-Login „No direct audio format“:** Im frisch eingerichteten Debug-Build (nicht
+  angemeldet) lieferte der youtubei-Resolver (ohne Login nur Client MWEB) 8-mal in Folge kein
+  direktes Format, bis zum Neustart der App; danach spielten 4 Songs über MWEB (einer erst nach
+  HTTP 403 + Neuversuch). Am PC ohne Login (youtubei.js 18.0.0): MWEB/WEB „The page needs to be
+  reloaded“, TV/ANDROID_VR „LOGIN_REQUIRED“, iOS direkte URLs für itag 139/140 (1 MB Range → 200).
+  → Neu: Scheitert youtubei ohne Login mit NO_FORMAT/LOGIN_REQUIRED/PO_TOKEN, übernimmt der
+  App-eigene Mehr-Client-Resolver (`YTPlayerUtils.playerResponseForPlayback`, iOS zuerst). Auf dem
+  Pixel erzwungen getestet: iOS ohne Format, visionOS lieferte eine direkte URL, Song spielte,
+  Auflösung 2,3 s. Downloads über diesen Weg können Opus sein (das AAC-Pinning gilt nur für youtubei).
