@@ -583,7 +583,9 @@ installiert neben der normalen App. Testfälle: DJ-Noize-Mix „Hot Right Now #5
 | Album 12 Songs: Download | (32–48 KB/s je Song, 3 parallel → ≈ 5–6 min hochgerechnet) | 1,2–7,3 s je Song (389–2811 KB/s), alle 12 nach **13 s** |
 | Album: Dateien | ≈ 12 s Neukodierung je Song (Logcat-Zeitstempel), nacheinander | 0,2–1,1 s je Song (Umpacken) |
 | Album: Tipp bis alle Dateien | ≈ 8 min hochgerechnet | **24 s** (40,5 MB) |
-| „Downloads als Dateien“ für 201 Songs | 5 → 103 Songs in ≈ 55 min (≈ 34 s je Song, Neukodierung + gedrosselte Downloads) | nicht neu gemessen; nach obigen Werten ≈ 1–2 s je Song |
+| „Downloads als Dateien“ für 201 Songs | 5 → 103 Songs in ≈ 55 min (≈ 34 s je Song, Neukodierung + gedrosselte Downloads); ein Abbruch begann wieder bei 0 (103/201 → 15/202) | alte Opus-Downloads: 3 parallel, je 22–26 s Neukodierung → **≈ 8 s je Song**; AAC-Downloads < 1 s je Song; Zwischenstand alle 10 Songs / 30 s, Abbruch macht dort weiter |
+| … bei ausgeschaltetem Bildschirm | – | als normaler Hintergrundjob 22 s → 50 s je Neukodierung (Android legt ihn auf die langsamen Kerne) → läuft jetzt als Vordergrund-Worker (dataSync) mit Benachrichtigung |
+| PS5-Stick: 51 Songs (Phonk+++, 173 MB) | nicht messbar: der Abgleich wartete stundenlang hinter „Downloads als Dateien“ | **17 s** von „Jetzt synchronisieren“ bis „Fertig“ (18.11. 13:07:23–13:07:40), 0,0–2,9 s je Datei (Median 0,1 s), ≈ 10 MB/s |
 | Fortschritt | nur Prozent, beim langen Mix lange 0 % | „33,2 von 60,1 MB · 55 % · noch ca. 13 s“ (Benachrichtigung), MB in der Download-Liste |
 | Fehler | Mix-Download brach bei Emil ab | keine Abbrüche; Fehlversuche je Block mit Position im Fehlerprotokoll |
 
@@ -613,5 +615,9 @@ Resolver gespeicherten Länge), es wird nicht mehr über das Ende hinaus gefragt
 - Parallel: weiterhin 3 Downloads gleichzeitig; das Schreiben der Dateien läuft, während weitere
   Songs laden (Umpacken 0,2–1 s je Song, daher kein eigener Parallel-Konverter nötig).
 
-**Offen:** Stick-Schreiben nachher messen (Stick steckt an der PS5); Ablauf eines Links mitten im
-Download nur per Unit-Test geprüft (YouTube-Links gelten ≈ 6 h).
+Stick nachher gemessen am 18.11. (v1.0.16-Stand, Debug-Build, Stick 8A91-18FF, FAT32): Playlist
+Phonk+++ testweise gewählt, 51 Dateien neu auf den Stick, Log `ResonaStick: stick write …` je
+Datei; danach wieder entfernt (nur Resona-Dateien), Winter blieb, Auswahl zurück auf Gaming.
+
+**Offen:** Ablauf eines Links mitten im Download nur per Unit-Test geprüft (YouTube-Links gelten
+≈ 6 h); alte Opus-Downloads könnten statt neu kodiert als AAC neu geladen werden (nicht umgesetzt).
