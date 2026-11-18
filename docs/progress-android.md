@@ -621,3 +621,19 @@ Datei; danach wieder entfernt (nur Resona-Dateien), Winter blieb, Auswahl zurüc
 
 **Offen:** Ablauf eines Links mitten im Download nur per Unit-Test geprüft (YouTube-Links gelten
 ≈ 6 h); alte Opus-Downloads könnten statt neu kodiert als AAC neu geladen werden (nicht umgesetzt).
+
+### Nachträge 18.11. (vor v1.0.17)
+- **Absturz beim ersten Start (CI-Emulator):** Der Export als Vordergrund-Worker nutzte den
+  Download-Benachrichtigungskanal, den Media3 erst beim Start des Download-Dienstes anlegt. Bei
+  frischer Installation → `Bad notification for startForeground`. Auf dem Pixel nicht aufgefallen
+  (Kanal existierte). Behoben: Kanal wird vor der Benachrichtigung angelegt.
+- **„Decoder failed: c2.android.aac.decoder“, Code 4006 (Emil, v1.0.16):** Resona pausiert im
+  Hintergrund → Android friert den Prozess ein (13:15:13) und holt sich den AAC-Decoder zurück;
+  beim Zurückkehren (13:15:22) Fehlerdialog. Kein Fehler im Song. Nachgestellt mit dem Debug-Build
+  (selbst erzeugter Sinuston als AAC-m4a, pausiert, `am freeze`/`am unfreeze`): gleiche
+  Logzeilen (`MediaCodec::reclaim … Released by resource manager`). Jetzt bereitet der Player bei
+  `ERROR_CODE_DECODING_RESOURCES_RECLAIMED` still an derselben Stelle neu vor (höchstens alle 5 s);
+  im Test lief der Ton ohne Dialog weiter (21 s → 30 s).
+- **Befund ohne YouTube-Login:** Im frisch eingerichteten Debug-Build (nicht angemeldet) liefert
+  der Resolver für jeden Song „No direct audio format“ (nur Worker Primary, player-response 200).
+  Die angemeldete App spielt (`signedIn=true`). Resolver unverändert → betrifft auch v1.0.16; offen.

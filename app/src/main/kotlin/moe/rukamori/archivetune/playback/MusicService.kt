@@ -527,6 +527,7 @@ class MusicService :
     private var lastLoginRecoveryPrompt: Pair<String, Long>? = null
     private val playbackStreamRecoveryTracker = PlaybackStreamRecoveryTracker()
     private var playbackErrorRecoveryJob: Job? = null
+    private var lastDecoderReclaimRetryAt = 0L
     private var nextHistorySessionToken = 0L
     private var currentHistorySessionToken = 0L
     private var currentHistoryMediaId: String? = null
@@ -7691,6 +7692,18 @@ class MusicService :
     override fun onPlayerError(error: PlaybackException) {
         super.onPlayerError(error)
         val snapshot = capturePlaybackRecoverySnapshot() ?: return
+        // Resona: Android takes the decoder away from a frozen background app (paused, ~10 s in
+        // the background; seen on the Pixel 18.11.: "freezing … MediaCodec::reclaim
+        // c2.android.aac.decoder", error 4006 when coming back). Nothing is wrong with the song:
+        // prepare again at the same position and state instead of showing an error.
+        if (error.errorCode == PlaybackException.ERROR_CODE_DECODING_RESOURCES_RECLAIMED) {
+            val now = android.os.SystemClock.elapsedRealtime()
+            if (now - lastDecoderReclaimRetryAt > DECODER_RECLAIM_RETRY_GAP_MS) {
+                lastDecoderReclaimRetryAt = now
+                Timber.tag("MusicService").i("Decoder reclaimed by the system, preparing %s again", snapshot.mediaId)
+                if (preparePlaybackFromSnapshot(snapshot)) return
+            }
+        }
         playbackErrorRecoveryJob?.cancel()
         playbackErrorRecoveryJob = scope.launch {
             handlePlaybackError(error, snapshot)
@@ -9049,6 +9062,7 @@ class MusicService :
         private const val PLAYBACK_FORMAT_ID_METADATA_KEY = "archivetune_playback_format_id"
         const val CHUNK_LENGTH = 8 * 1024 * 1024L
         val RETRYABLE_STREAM_RESPONSE_CODES = setOf(403, 404, 410, 416)
+        private const val DECODER_RECLAIM_RETRY_GAP_MS = 5_000L
         const val PERSISTENT_QUEUE_FILE = "persistent_queue.data"
         const val PERSISTENT_AUTOMIX_FILE = "persistent_automix.data"
         const val PERSISTENT_PLAYER_STATE_FILE = "persistent_player_state.data"
