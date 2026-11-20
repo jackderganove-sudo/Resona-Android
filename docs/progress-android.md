@@ -586,6 +586,7 @@ installiert neben der normalen App. Testfälle: DJ-Noize-Mix „Hot Right Now #5
 | „Downloads als Dateien“ für 201 Songs | 5 → 103 Songs in ≈ 55 min (≈ 34 s je Song, Neukodierung + gedrosselte Downloads); ein Abbruch begann wieder bei 0 (103/201 → 15/202) | alte Opus-Downloads: 3 parallel, je 22–26 s Neukodierung → **≈ 8 s je Song**; AAC-Downloads < 1 s je Song; Zwischenstand alle 10 Songs / 30 s, Abbruch macht dort weiter |
 | … bei ausgeschaltetem Bildschirm | – | als normaler Hintergrundjob 22 s → 50 s je Neukodierung (Android legt ihn auf die langsamen Kerne) → läuft jetzt als Vordergrund-Worker (dataSync) mit Benachrichtigung |
 | PS5-Stick: 51 Songs (Phonk+++, 173 MB) | nicht messbar: der Abgleich wartete stundenlang hinter „Downloads als Dateien“ | **17 s** von „Jetzt synchronisieren“ bis „Fertig“ (18.11. 13:07:23–13:07:40), 0,0–2,9 s je Datei (Median 0,1 s), ≈ 10 MB/s |
+| PS5-Stick mit v1.0.17: 320 Songs (Travel, peak songs +++ phonk, peak songs+++; 1551 MB) | – | **5:28 min** (20.11. 15:03:34–15:09:02), ≈ 4,7 MB/s, je Datei Median 0,7 s, max. 7,0 s |
 | Fortschritt | nur Prozent, beim langen Mix lange 0 % | „33,2 von 60,1 MB · 55 % · noch ca. 13 s“ (Benachrichtigung), MB in der Download-Liste |
 | Fehler | Mix-Download brach bei Emil ab | keine Abbrüche; Fehlversuche je Block mit Position im Fehlerprotokoll |
 
